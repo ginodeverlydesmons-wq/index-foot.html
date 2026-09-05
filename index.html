@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mon club foot</title>
+<meta name="theme-color" content="#14213D">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --fond:#EEF1F5; --surface:#FFFFFF; --encre:#14213D; --encre-2:#4B5566;
+  --ligne:#D5DBE3; --accent:#F26522; --accent-2:#C64E10; --ok:#1E7F4F; --alerte:#B45309;
+  --r:6px; --display:'Barlow Condensed',Impact,'Arial Narrow',sans-serif;
+  --texte:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--encre);font:16px/1.45 var(--texte)}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:.01em;margin:0}
+h1{font-size:2.4rem;line-height:1} h2{font-size:1.5rem} h3{font-size:1.2rem;color:var(--encre-2);text-transform:uppercase;letter-spacing:.03em}
+a{color:var(--accent-2)}
+.cache{display:none!important}
+header{background:var(--encre);color:#fff;padding:14px 16px 0;position:relative}
+header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--accent)}
+header .club{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;max-width:1040px;margin:0 auto;flex-wrap:wrap}
+header h1{color:#fff;text-transform:uppercase;display:flex;align-items:center;gap:12px}
+header h1 img{height:52px;width:52px;object-fit:contain;background:#fff;border-radius:8px;padding:3px}
+header .qui{font-size:.9rem;color:#C9D0DB;padding-bottom:6px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header .qui button{background:none;border:0;color:#fff;text-decoration:underline;cursor:pointer;padding:0}
+.cloche{position:relative;background:none;border:0;color:#fff;font-size:1.3rem;cursor:pointer;text-decoration:none!important}
+.cloche .badge{position:absolute;top:-6px;right:-8px;background:var(--accent);color:#fff;border-radius:999px;font-size:.7rem;padding:1px 6px;font-weight:600}
+nav.onglets{max-width:1040px;margin:10px auto 0;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.onglets button{background:transparent;border:0;border-bottom:3px solid transparent;color:#C9D0DB;padding:10px 12px;cursor:pointer;font-family:var(--display);font-size:1.1rem;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+nav.onglets button[aria-selected=true]{color:#fff;border-bottom-color:#fff;margin-bottom:-3px}
+main{max-width:1040px;margin:0 auto;padding:18px 16px 70px}
+.barre{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.cadre{min-height:100vh;display:grid;place-items:center;padding:20px}
+.carte{background:var(--surface);border:1px solid var(--ligne);border-radius:var(--r);padding:26px;width:100%;max-width:440px}
+.carte h1{color:var(--encre);text-transform:uppercase;margin-bottom:4px}
+.carte p.sous{color:var(--encre-2);margin:0 0 18px}
+label{display:block;font-weight:500;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--ligne);border-radius:var(--r);background:#fff}
+textarea{min-height:90px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.ligne{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.ligne{grid-template-columns:1fr}}
+.btn{display:inline-block;padding:9px 16px;border-radius:var(--r);border:1px solid var(--encre);background:var(--encre);color:#fff;cursor:pointer;font-weight:600;text-decoration:none}
+.btn.principal{background:var(--accent);border-color:var(--accent)} .btn.principal:hover{background:var(--accent-2);border-color:var(--accent-2)}
+.btn.second{background:#fff;color:var(--encre)} .btn.petit{padding:5px 10px;font-size:.9rem}
+.btn.ok{background:var(--ok);border-color:var(--ok)} .btn.non{background:#7A1E1E;border-color:#7A1E1E}
+.btn:disabled{opacity:.55;cursor:wait}
+.actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.msg{margin-top:12px;padding:10px 12px;border-radius:var(--r);border:1px solid var(--ligne);background:#F8FAFC;font-size:.95rem}
+.msg.erreur{border-color:#F3B7A0;background:#FFF3EE;color:#8B2E0B} .msg.ok{border-color:#B7E0C8;background:#EEF9F2;color:#125A38}
+.msg:empty{display:none}
+.vide{padding:24px;text-align:center;color:var(--encre-2);border:1px dashed var(--ligne);border-radius:var(--r);background:#fff}
+.tableau{overflow-x:auto;background:var(--surface);border:1px solid var(--ligne);border-radius:var(--r);margin-bottom:12px}
+table{width:100%;border-collapse:collapse;min-width:520px}
+th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--ligne);vertical-align:middle}
+th{font-family:var(--display);font-size:1.05rem;text-transform:uppercase;letter-spacing:.03em;color:var(--encre-2);font-weight:600}
+tr:last-child td{border-bottom:0} td.act{white-space:nowrap;text-align:right}
+.puce{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.85rem;font-weight:500;border:1px solid var(--ligne);background:#fff}
+.puce.demandee{color:var(--alerte);border-color:#F1D3A8;background:#FFF8EC}
+.puce.payee,.puce.nul{color:#1D4ED8;border-color:#BFD3FB;background:#EEF4FF}
+.puce.validee,.puce.present,.puce.victoire,.puce.recuperee{color:var(--ok);border-color:#B7E0C8;background:#EEF9F2}
+.puce.refusee,.puce.absent,.puce.defaite,.puce.annulee{color:#7A1E1E;border-color:#F3B7B7;background:#FFF0F0}
+.puce.nouvelle{color:var(--alerte);border-color:#F1D3A8;background:#FFF8EC}
+.cat{font-family:var(--display);font-weight:700;font-size:1.1rem;color:var(--accent-2)}
+.code{font-family:var(--display);font-size:1.3rem;letter-spacing:.15em;background:#FFF8EC;border:1px dashed #F1D3A8;padding:2px 8px;border-radius:var(--r)}
+.evt{background:var(--surface);border:1px solid var(--ligne);border-left:5px solid var(--encre);border-radius:var(--r);padding:12px 14px;margin-bottom:10px}
+.evt.match{border-left-color:var(--accent)} .evt.extra{border-left-color:#1D4ED8}
+.evt .tete{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.evt .quand{font-family:var(--display);font-size:1.25rem}
+.evt .detail{color:var(--encre-2);font-size:.95rem;margin-top:2px}
+.evt .bloc{margin-top:10px;padding-top:10px;border-top:1px solid var(--ligne)}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi div{background:#fff;border:1px solid var(--ligne);border-radius:var(--r);padding:12px}
+.kpi b{display:block;font-family:var(--display);font-size:2rem;line-height:1}
+.kpi span{color:var(--encre-2);font-size:.9rem}
+.annonce{background:#fff;border:1px solid var(--ligne);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.annonce h3{color:var(--encre);text-transform:none;letter-spacing:0;font-size:1.25rem}
+.annonce .meta{color:var(--encre-2);font-size:.85rem;margin-bottom:6px}
+.annonce p{margin:0;white-space:pre-wrap}
+.pres{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
+dialog{border:0;border-radius:var(--r);padding:0;width:min(540px,94vw);max-height:92vh;overflow:auto}
+dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog h2{margin-bottom:4px}
+.compteur{color:var(--encre-2);font-size:.95rem}
+#bandeau-install{position:fixed;bottom:0;left:0;right:0;background:var(--encre);color:#fff;padding:10px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;z-index:5}
+</style>
+</head>
+<body>
+
+<div id="ecran-config" class="cadre cache"><div class="carte"><h1>Site pas encore branché</h1><p>Renseigne <code>SUPABASE_URL</code> et <code>SUPABASE_ANON_KEY</code> au début du bloc &lt;script&gt; de ce fichier.</p></div></div>
+
+<div id="ecran-login" class="cadre cache"><div class="carte">
+  <h1>Mon club foot</h1><p class="sous">Connexion par un lien envoyé sur ton email. Pas de mot de passe.</p>
+  <form id="form-email">
+    <label for="email">Ton email</label><input id="email" type="email" autocomplete="email" required placeholder="prenom@exemple.fr">
+    <div class="actions"><button class="btn principal" type="submit">Recevoir mon lien</button></div><div class="msg" id="msg-email"></div>
+  </form>
+  <div id="bloc-lien" class="cache">
+    <p>Un mail vient de partir vers <b id="email-rappel"></b>. Ouvre-le et clique sur le lien <b>Log In</b> : l'appli s'ouvrira déjà connectée.</p>
+    <p class="compteur">Rien reçu au bout d'une minute ? Regarde dans les spams.</p>
+    <div class="actions"><button class="btn second" type="button" id="btn-autre-email">Changer d'email</button></div>
+  </div>
+</div></div>
+
+<div id="ecran-club" class="cadre cache"><div class="carte">
+  <h1>Bienvenue</h1><p class="sous" id="club-sous"></p>
+  <div id="liste-clubs"></div>
+  <form id="form-code">
+    <label for="code-famille">Je suis joueur ou parent : mon code famille</label>
+    <input id="code-famille" placeholder="Ex. A3F9K2" maxlength="8" style="text-transform:uppercase">
+    <div class="actions"><button class="btn principal" type="submit">Rejoindre mon club</button></div><div class="msg" id="msg-code"></div>
+  </form>
+  <form id="form-club" style="margin-top:22px;border-top:1px solid var(--ligne);padding-top:8px">
+    <label for="nom-club">Je gère un club : créer le club</label><input id="nom-club" placeholder="Ex. Étoile Sportive de Tresson Football">
+    <div class="actions"><button class="btn second" type="submit">Créer le club</button><button class="btn second" type="button" data-deconnexion>Se déconnecter</button></div>
+    <div class="msg" id="msg-club"></div>
+  </form>
+</div></div>
+
+<div id="app" class="cache">
+  <header>
+    <div class="club">
+      <h1><img id="logo-club" class="cache" alt=""><span id="titre-club">Club</span></h1>
+      <div class="qui"><span id="qui-email"></span>
+        <button class="cloche" type="button" data-notifs title="Notifications">🔔<span class="badge cache" id="notif-badge"></span></button>
+        <button type="button" data-reglages class="staff-seul">Réglages</button>
+        <button type="button" data-changer-club>Changer de club</button>
+        <button type="button" data-deconnexion>Déconnexion</button></div>
+    </div>
+    <nav class="onglets" role="tablist" id="nav"></nav>
+  </header>
+  <main>
+    <section class="onglet cache" id="onglet-foyer">
+      <div class="barre"><h2>Mon foyer</h2></div><div id="zone-foyer"></div>
+    </section>
+    <section class="onglet cache" id="onglet-familles">
+      <div class="barre"><h2>Familles et joueurs <span class="compteur" id="cpt-familles"></span></h2><button class="btn principal" type="button" data-ouvrir="famille">Ajouter une famille</button></div>
+      <div id="zone-familles"></div>
+    </section>
+    <section class="onglet cache" id="onglet-licences">
+      <div class="barre"><h2>Licences <span class="compteur" id="cpt-licences"></span></h2><select id="saison" style="width:auto"></select></div>
+      <div id="zone-licences"></div>
+    </section>
+    <section class="onglet cache" id="onglet-equipes">
+      <div class="barre"><h2>Équipes <span class="compteur" id="cpt-equipes"></span></h2><button class="btn principal" type="button" data-ouvrir="equipe">Ajouter une équipe</button></div>
+      <div id="zone-equipes"></div>
+    </section>
+    <section class="onglet cache" id="onglet-agenda">
+      <div class="barre"><h2>Agenda <span class="compteur" id="cpt-agenda"></span></h2>
+        <div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="match">Ajouter un match</button> <button class="btn second" type="button" data-ouvrir="entrainement">Ajouter un entraînement</button></div></div>
+      <div id="zone-agenda"></div>
+    </section>
+    <section class="onglet cache" id="onglet-infos">
+      <div class="barre"><h2>Infos du club</h2><button class="btn principal staff-seul" type="button" data-ouvrir="annonce">Publier une info</button></div>
+      <div id="zone-infos"></div>
+    </section>
+    <section class="onglet cache" id="onglet-boutique">
+      <div class="barre"><h2>Boutique</h2><button class="btn principal staff-seul" type="button" data-ouvrir="article">Ajouter un article</button></div>
+      <div id="zone-boutique"></div>
+    </section>
+    <section class="onglet cache" id="onglet-stats">
+      <div class="barre"><h2>Tableau de bord</h2><select id="saison-stats" style="width:auto"></select></div>
+      <div id="zone-stats"></div>
+    </section>
+    <section class="onglet cache" id="onglet-acces">
+      <div class="barre"><h2>Accès au club</h2></div>
+      <p>Les <b>parents et joueurs</b> se connectent avec leur email puis entrent le <b>code famille</b> (visible dans l'onglet Familles). Pour ajouter quelqu'un au <b>bureau ou coach</b> : il se connecte une fois, puis tu l'ajoutes ici.</p>
+      <form id="form-invite" class="ligne" style="align-items:end;max-width:640px">
+        <div><label for="invite-email">Email</label><input id="invite-email" type="email" required></div>
+        <div><label for="invite-role">Rôle</label><select id="invite-role"><option value="bureau">Bureau</option><option value="admin">Admin</option><option value="coach">Coach</option></select></div>
+        <div><button class="btn principal" type="submit">Donner l'accès</button></div>
+      </form><div class="msg" id="msg-invite"></div><div id="zone-acces" style="margin-top:14px"></div>
+    </section>
+  </main>
+</div>
+<div id="bandeau-install" class="cache"><span>📱 Installe l'appli sur ton téléphone</span><button class="btn principal petit" id="btn-install">Installer</button><button class="btn second petit" id="btn-install-non">Plus tard</button></div>
+
+<!-- ═══════ Fenêtres ═══════ -->
+<dialog id="dlg-notifs"><form method="dialog"><h2>Notifications</h2><div id="zone-notifs"></div>
+  <div class="actions"><button class="btn second" type="button" id="btn-autoriser-notifs">Activer les rappels sur cet appareil</button><button class="btn principal" value="ok">Fermer</button></div></form></dialog>
+
+<dialog id="dlg-reglages"><form method="dialog" id="form-reglages"><h2>Réglages du club</h2>
+  <label for="r-nom">Nom du club</label><input id="r-nom" required>
+  <label for="r-lien">Lien de paiement Stripe (cotisation)</label><input id="r-lien" type="url" placeholder="https://buy.stripe.com/…">
+  <p class="compteur">Stripe → Payment Links → New → produit « Licence » → copie le lien.</p>
+  <label for="r-logo">Logo du club (PNG ou JPG, 2 Mo max)</label><input id="r-logo" type="file" accept="image/png,image/jpeg,image/webp">
+  <p class="compteur" id="r-logo-info"></p>
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-reglages"></div></form></dialog>
+
+<dialog id="dlg-famille"><form method="dialog" id="form-famille"><h2 id="dlg-famille-titre">Nouvelle famille</h2><input type="hidden" id="f-id">
+  <label for="f-nom">Nom de famille</label><input id="f-nom" required>
+  <div class="ligne"><div><label for="f-email">Email</label><input id="f-email" type="email"></div><div><label for="f-tel">Téléphone</label><input id="f-tel" type="tel"></div></div>
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-famille"></div></form></dialog>
+
+<dialog id="dlg-personne"><form method="dialog" id="form-personne"><h2 id="dlg-personne-titre">Nouveau joueur</h2><input type="hidden" id="p-id"><input type="hidden" id="p-famille">
+  <div class="ligne"><div><label for="p-prenom">Prénom</label><input id="p-prenom" required></div><div><label for="p-nom">Nom</label><input id="p-nom" required></div></div>
+  <div class="ligne"><div><label for="p-naissance">Date de naissance</label><input id="p-naissance" type="date"></div>
+    <div><label for="p-sexe">Sexe</label><select id="p-sexe"><option value="">—</option><option value="F">Fille / femme</option><option value="M">Garçon / homme</option></select></div></div>
+  <div class="ligne"><div><label for="p-licence">N° de licence FFF (si connu)</label><input id="p-licence"></div><div><label for="p-maillot">Numéro de maillot</label><input id="p-maillot" type="number" min="0" max="99"></div></div>
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-personne"></div></form></dialog>
+
+<dialog id="dlg-licence"><form method="dialog" id="form-licence"><h2>Licence <span id="l-qui"></span></h2><input type="hidden" id="l-personne">
+  <p class="compteur">Saison <b id="l-saison"></b> — catégorie proposée d'après la date de naissance.</p>
+  <div class="ligne"><div><label for="l-cat">Catégorie</label><select id="l-cat"></select></div><div><label for="l-montant">Montant (€)</label><input id="l-montant" type="number" step="0.01" min="0"></div></div>
+  <div class="actions"><button class="btn principal" value="ok">Demander la licence</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-licence"></div></form></dialog>
+
+<dialog id="dlg-equipe"><form method="dialog" id="form-equipe"><h2>Nouvelle équipe</h2>
+  <label for="e-nom">Nom de l'équipe</label><input id="e-nom" required placeholder="Ex. U13 A">
+  <div class="ligne"><div><label for="e-cat">Catégorie</label><select id="e-cat"></select></div><div><label for="e-saison">Saison</label><input id="e-saison" required></div></div>
+  <div class="actions"><button class="btn principal" value="ok">Créer l'équipe</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-equipe"></div></form></dialog>
+
+<dialog id="dlg-match"><form method="dialog" id="form-match"><h2 id="dlg-match-titre">Nouveau match</h2><input type="hidden" id="m-id">
+  <label for="m-equipe">Équipe</label><select id="m-equipe" required></select>
+  <div class="ligne"><div><label for="m-date">Date</label><input id="m-date" type="date" required></div><div><label for="m-heure">Heure</label><input id="m-heure" type="time"></div></div>
+  <div class="ligne"><div><label for="m-adversaire">Adversaire</label><input id="m-adversaire" required></div><div><label for="m-lieu-type">Domicile / extérieur</label><select id="m-lieu-type"><option value="true">Domicile</option><option value="false">Extérieur</option></select></div></div>
+  <label for="m-lieu">Lieu (stade, adresse)</label><input id="m-lieu" placeholder="Ex. Stade municipal, rue du Stade, 72440 Tresson">
+  <div class="ligne"><div><label for="m-nous">Buts pour nous</label><input id="m-nous" type="number" min="0" placeholder="— si pas joué"></div><div><label for="m-eux">Buts pour eux</label><input id="m-eux" type="number" min="0"></div></div>
+  <label for="m-lavage">Qui lave les maillots</label><select id="m-lavage"><option value="">—</option></select>
+  <label for="m-comm">Commentaire</label><input id="m-comm" placeholder="Buteurs, remarques…">
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-match"></div></form></dialog>
+
+<dialog id="dlg-entrainement"><form method="dialog" id="form-entrainement"><h2 id="dlg-entr-titre">Nouvel entraînement</h2><input type="hidden" id="t-id">
+  <label for="t-equipe">Équipe</label><select id="t-equipe" required></select>
+  <div class="ligne"><div><label for="t-date">Date</label><input id="t-date" type="date" required></div><div><label for="t-extra">Type</label><select id="t-extra"><option value="false">Séance habituelle</option><option value="true">Séance en plus</option></select></div></div>
+  <div class="ligne"><div><label for="t-debut">Début</label><input id="t-debut" type="time"></div><div><label for="t-fin">Fin</label><input id="t-fin" type="time"></div></div>
+  <label for="t-lieu">Lieu</label><input id="t-lieu">
+  <label for="t-note">Note</label><input id="t-note" placeholder="Ex. Prévoir les crampons moulés">
+  <label for="t-repeter">Répéter chaque semaine</label><select id="t-repeter"><option value="1">Une seule fois</option><option value="4">4 semaines</option><option value="8">8 semaines</option><option value="12">12 semaines</option></select>
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-entrainement"></div></form></dialog>
+
+<dialog id="dlg-annonce"><form method="dialog" id="form-annonce"><h2>Publier une info</h2>
+  <label for="a-titre">Titre</label><input id="a-titre" required placeholder="Ex. Tournoi de Pâques : inscriptions">
+  <label for="a-equipe">Pour</label><select id="a-equipe"><option value="">Tout le club</option></select>
+  <label for="a-texte">Message</label><textarea id="a-texte" required></textarea>
+  <div class="actions"><button class="btn principal" value="ok">Publier</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-annonce"></div></form></dialog>
+
+<dialog id="dlg-article"><form method="dialog" id="form-article"><h2>Article de la boutique</h2><input type="hidden" id="ar-id">
+  <label for="ar-nom">Nom</label><input id="ar-nom" required placeholder="Ex. T-shirt du club">
+  <div class="ligne"><div><label for="ar-prix">Prix (€)</label><input id="ar-prix" type="number" step="0.01" min="0" required></div><div><label for="ar-tailles">Tailles (séparées par des virgules)</label><input id="ar-tailles" placeholder="8 ans, 10 ans, S, M, L"></div></div>
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-article"></div></form></dialog>
+
+<dialog id="dlg-commande"><form method="dialog" id="form-commande"><h2>Commander <span id="c-nom"></span></h2><input type="hidden" id="c-article">
+  <label for="c-famille" id="lbl-c-famille">Famille</label><select id="c-famille"></select>
+  <div class="ligne"><div><label for="c-taille">Taille</label><select id="c-taille"></select></div><div><label for="c-qte">Quantité</label><input id="c-qte" type="number" min="1" value="1"></div></div>
+  <div class="actions"><button class="btn principal" value="ok">Commander</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-commande"></div></form></dialog>
+
+<dialog id="dlg-covoit"><form method="dialog" id="form-covoit"><h2>Covoiturage</h2><input type="hidden" id="cv-match">
+  <p class="compteur" id="cv-info"></p>
+  <label for="cv-places">Places disponibles dans ma voiture (en plus de mes enfants)</label><input id="cv-places" type="number" min="0" max="8" value="0">
+  <label for="cv-note">Note</label><input id="cv-note" placeholder="Ex. Départ 13h de la salle des fêtes">
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-covoit"></div></form></dialog>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   RÉGLAGES — Project URL et clé publishable de ton projet Supabase
+   ═══════════════════════════════════════════════════════════════════════════ */
+const SUPABASE_URL      = 'https://uhufrcyltdwrpqonoudf.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_bCLiyROD6ag9UtxLoqClsg_XQLPDwl1';
+
+/* ─── Catégories FFF ─── */
+const CATEGORIES = ['U6','U7','U8','U9','U10','U11','U12','U13','U14','U15','U16','U17','U18','U19','Seniors','Vétérans'];
+function saisonCourante(d = new Date()){ const a = d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1; return `${a}-${a+1}`; }
+function categorieProposee(dn, sexe, saison){
+  if(!dn) return ''; const u = parseInt(saison.slice(0,4),10) + 1 - new Date(dn).getFullYear();
+  if(u <= 6) return 'U6'; if(u <= 19) return 'U' + u; if(u >= 35) return 'Vétérans'; return 'Seniors';
+}
+
+/* ─── Utilitaires ─── */
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function msg(id, t, type=''){ const el = $(id); el.textContent = t || ''; el.className = 'msg ' + type; }
+function montrer(id){ ['#ecran-config','#ecran-login','#ecran-club','#app'].forEach(s => $(s).classList.toggle('cache', s !== id)); }
+function dateFr(d){ return d ? new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short' }) : ''; }
+function aujourdhui(){ return new Date().toISOString().slice(0,10); }
+function erreurLisible(e){
+  const t = (e && (e.message || e.error_description || e)) + '';
+  if(/rate limit/i.test(t)) return 'Trop de mails demandés d\'un coup. Attends un peu et réessaie.';
+  if(/expired|invalid/i.test(t)) return 'Lien expiré ou déjà utilisé. Demandes-en un nouveau.';
+  if(/row-level security/i.test(t)) return 'La base a refusé cette action (droits insuffisants).';
+  if(/Code inconnu/i.test(t)) return 'Code famille inconnu. Vérifie-le auprès du club.';
+  if(/does not exist|relation/i.test(t)) return 'La base n\'est pas à jour : lance le script 04_tout.sql dans Supabase.';
+  return t;
+}
+const nomP = p => p ? `${p.prenom} ${p.nom}` : '?';
+
+/* ─── État ─── */
+let sb, session = null, club = null, clubs = [], role = 'parent';
+let familles = [], personnes = [], equipes = [], licences = [], membres = [], matchs = [], entrainements = [], presences = [], covoits = [], annonces = [], articles = [], commandes = [], mesFamillesIds = [];
+const staff = () => ['admin','bureau','coach'].includes(role);
+const mesPersonnes = () => staff() ? personnes : personnes.filter(p => mesFamillesIds.includes(p.famille_id));
+const saisonSel = () => $('#saison').value || saisonCourante();
+
+/* ─── Démarrage ─── */
+async function demarrer(){
+  if(!SUPABASE_URL.startsWith('https://') || SUPABASE_ANON_KEY.length < 20 || SUPABASE_ANON_KEY.startsWith('COLLE')){ montrer('#ecran-config'); return; }
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const { data } = await sb.auth.getSession(); session = data.session;
+  sb.auth.onAuthStateChange((ev, s) => { session = s; if(!s){ montrer('#ecran-login'); return; }
+    if(ev === 'SIGNED_IN' && !club){ history.replaceState(null, '', location.pathname); chargerClubs(); } });
+  if(!session){ montrer('#ecran-login'); return; }
+  await chargerClubs();
+}
+
+/* ─── Connexion ─── */
+$('#form-email').addEventListener('submit', async ev => {
+  ev.preventDefault(); const email = $('#email').value.trim().toLowerCase();
+  const btn = ev.target.querySelector('button'); btn.disabled = true; msg('#msg-email','');
+  const { error } = await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:true, emailRedirectTo: location.origin + location.pathname } });
+  btn.disabled = false; if(error){ msg('#msg-email', erreurLisible(error), 'erreur'); return; }
+  $('#email-rappel').textContent = email; $('#form-email').classList.add('cache'); $('#bloc-lien').classList.remove('cache');
+});
+$('#btn-autre-email').addEventListener('click', () => { $('#bloc-lien').classList.add('cache'); $('#form-email').classList.remove('cache'); });
+$$('[data-deconnexion]').forEach(b => b.addEventListener('click', async () => { await sb.auth.signOut(); club = null; montrer('#ecran-login'); }));
+$$('[data-changer-club]').forEach(b => b.addEventListener('click', () => { club = null; afficherChoixClub(); }));
+
+/* ─── Clubs et rôle ─── */
+async function chargerClubs(){
+  const [c, m] = await Promise.all([ sb.from('clubs').select('id, nom, ville, lien_paiement, logo_url').order('nom'), sb.from('membres_club').select('club_id, role').eq('user_id', session.user.id) ]);
+  if(c.error){ montrer('#ecran-club'); msg('#msg-club', erreurLisible(c.error), 'erreur'); return; }
+  clubs = (c.data || []).map(x => ({ ...x, role: (m.data || []).find(y => y.club_id === x.id)?.role || 'parent' }));
+  const memo = localStorage.getItem('club_id');
+  const auto = clubs.length === 1 ? clubs[0] : clubs.find(x => x.id === memo);
+  if(auto) ouvrirClub(auto); else afficherChoixClub();
+}
+function afficherChoixClub(){
+  montrer('#ecran-club');
+  $('#club-sous').textContent = clubs.length ? 'Choisis le club à ouvrir.' : 'Entre le code famille donné par ton club, ou crée un club si tu le gères.';
+  $('#liste-clubs').innerHTML = clubs.map(c => `<button class="btn second" type="button" style="display:block;width:100%;margin:6px 0;text-align:left" data-club="${c.id}">${c.logo_url ? `<img src="${esc(c.logo_url)}" alt="" style="height:28px;vertical-align:middle;margin-right:8px">` : ''}${esc(c.nom)} <span class="compteur">— ${esc(c.role)}</span></button>`).join('');
+  $$('#liste-clubs [data-club]').forEach(b => b.addEventListener('click', () => ouvrirClub(clubs.find(c => c.id === b.dataset.club))));
+}
+$('#form-code').addEventListener('submit', async ev => {
+  ev.preventDefault(); msg('#msg-code',''); const code = $('#code-famille').value.trim(); if(!code) return;
+  const { data, error } = await sb.rpc('rejoindre_famille', { p_code: code });
+  if(error){ msg('#msg-code', erreurLisible(error), 'erreur'); return; }
+  localStorage.setItem('club_id', data); await chargerClubs();
+});
+$('#form-club').addEventListener('submit', async ev => {
+  ev.preventDefault(); const nom = $('#nom-club').value.trim(); if(!nom) return; msg('#msg-club','');
+  const { data, error } = await sb.rpc('creer_club', { p_nom: nom, p_sport: 'foot' });
+  if(error){ msg('#msg-club', erreurLisible(error), 'erreur'); return; }
+  $('#nom-club').value = ''; localStorage.setItem('club_id', data); await chargerClubs();
+});
+async function ouvrirClub(c){
+  club = c; role = c.role; localStorage.setItem('club_id', c.id);
+  $('#titre-club').textContent = c.nom; document.title = c.nom; afficherLogo();
+  $('#qui-email').textContent = `${session.user.email} · ${role}`;
+  const s = saisonCourante(), opts = [s, `${+s.slice(0,4)-1}-${+s.slice(0,4)}`, `${+s.slice(0,4)+1}-${+s.slice(0,4)+2}`];
+  ['#saison','#saison-stats'].forEach(id => $(id).innerHTML = opts.map(x => `<option ${x===s?'selected':''}>${x}</option>`).join(''));
+  $$('.staff-seul').forEach(el => el.classList.toggle('cache', !staff()));
+  const onglets = staff() ? [['familles','Familles'],['licences','Licences'],['equipes','Équipes'],['agenda','Agenda'],['infos','Infos'],['boutique','Boutique'],['stats','Stats'],['acces','Accès']]
+                          : [['foyer','Mon foyer'],['agenda','Agenda'],['infos','Infos'],['boutique','Boutique']];
+  $('#nav').innerHTML = onglets.map(([k,l],i) => `<button role="tab" aria-selected="${i===0}" data-onglet="${k}">${l}</button>`).join('');
+  $$('#nav [data-onglet]').forEach(b => b.addEventListener('click', () => allerOnglet(b.dataset.onglet)));
+  allerOnglet(onglets[0][0]); montrer('#app'); await toutRecharger();
+}
+function allerOnglet(k){
+  $$('#nav [data-onglet]').forEach(x => x.setAttribute('aria-selected', x.dataset.onglet === k));
+  $$('section.onglet').forEach(s => s.classList.toggle('cache', s.id !== 'onglet-' + k));
+}
+
+/* ─── Chargement ─── */
+async function toutRecharger(){
+  const q = (t, o='') => sb.from(t).select('*').eq('club_id', club.id).order(o || 'cree_le');
+  const r = await Promise.all([ q('familles','nom'), q('personnes','nom'), q('equipes','nom'), q('licences'), sb.from('membres_club').select('user_id, role').eq('club_id', club.id),
+    q('matchs','date_match'), q('entrainements','date_seance'), q('presences','maj_le'), q('covoiturages'), q('annonces'), q('articles','nom'), q('commandes'),
+    sb.from('acces_famille').select('famille_id').eq('user_id', session.user.id) ]);
+  const fatal = r.slice(0,4).find(x => x.error); if(fatal){ alert('Chargement impossible : ' + erreurLisible(fatal.error)); return; }
+  [familles, personnes, equipes, licences] = r.slice(0,4).map(x => x.data || []); membres = r[4].data || [];
+  [matchs, entrainements, presences, covoits, annonces, articles, commandes] = r.slice(5,12).map(x => x.data || []);
+  mesFamillesIds = (r[12].data || []).map(x => x.famille_id);
+  const manque = r.slice(5).find(x => x.error); if(manque) $('#zone-agenda').innerHTML = `<div class="vide">${erreurLisible(manque.error)}</div>`;
+  rendreTout();
+}
+function rendreTout(){ rendreFoyer(); rendreFamilles(); rendreLicences(); rendreEquipes(); rendreAgenda(); rendreInfos(); rendreBoutique(); rendreStats(); rendreAcces(); rendreNotifs(); }
+$('#saison').addEventListener('change', rendreTout); $('#saison-stats').addEventListener('change', rendreStats);
+
+/* ─── Clics délégués ─── */
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('button'); if(!b) return; const d = b.dataset;
+  if(d.ouvrir === 'famille') ouvrirFamille();
+  if(d.modifierFamille) ouvrirFamille(familles.find(f => f.id === d.modifierFamille));
+  if(d.supprimerFamille) supprimer('familles', d.supprimerFamille, 'Supprimer cette famille et tous ses joueurs ?');
+  if(d.ouvrir === 'personne') ouvrirPersonne(null, d.famille);
+  if(d.modifierPersonne) ouvrirPersonne(personnes.find(p => p.id === d.modifierPersonne));
+  if(d.supprimerPersonne) supprimer('personnes', d.supprimerPersonne, 'Supprimer ce joueur et ses licences ?');
+  if(d.licencier) ouvrirLicence(personnes.find(p => p.id === d.licencier));
+  if(d.statut) changerStatut(d.statut, d.licence);
+  if(d.supprimerLicence) supprimer('licences', d.supprimerLicence, 'Supprimer cette licence ?');
+  if(d.ouvrir === 'equipe') ouvrirEquipe();
+  if(d.supprimerEquipe) supprimer('equipes', d.supprimerEquipe, 'Supprimer cette équipe ?');
+  if(d.ouvrir === 'match') ouvrirMatch();
+  if(d.modifierMatch) ouvrirMatch(matchs.find(x => x.id === d.modifierMatch));
+  if(d.supprimerMatch) supprimer('matchs', d.supprimerMatch, 'Supprimer ce match ?');
+  if(d.ouvrir === 'entrainement') ouvrirEntrainement();
+  if(d.modifierEntr) ouvrirEntrainement(entrainements.find(x => x.id === d.modifierEntr));
+  if(d.supprimerEntr) supprimer('entrainements', d.supprimerEntr, 'Supprimer cet entraînement ?');
+  if(d.presence) presence(d.presence, d.type, d.ref, d.personne);
+  if(d.covoit) ouvrirCovoit(d.covoit);
+  if(d.supprimerCovoit) supprimer('covoiturages', d.supprimerCovoit, 'Retirer ta proposition de covoiturage ?');
+  if(d.ouvrir === 'annonce') ouvrirAnnonce();
+  if(d.supprimerAnnonce) supprimer('annonces', d.supprimerAnnonce, 'Supprimer cette info ?');
+  if(d.ouvrir === 'article') ouvrirArticle();
+  if(d.modifierArticle) ouvrirArticle(articles.find(a => a.id === d.modifierArticle));
+  if(d.supprimerArticle) supprimer('articles', d.supprimerArticle, 'Supprimer cet article ?');
+  if(d.commander) ouvrirCommande(articles.find(a => a.id === d.commander));
+  if(d.statutCmd) majCommande(d.statutCmd, d.commande);
+  if(d.supprimerCommande) supprimer('commandes', d.supprimerCommande, 'Annuler cette commande ?');
+  if(d.notifs !== undefined) $('#dlg-notifs').showModal();
+  if(d.reglages !== undefined){ $('#r-nom').value = club.nom; $('#r-lien').value = club.lien_paiement || ''; msg('#msg-reglages',''); $('#dlg-reglages').showModal(); }
+});
+async function supprimer(table, id, q){ if(!confirm(q)) return; const { error } = await sb.from(table).delete().eq('id', id); if(error){ alert(erreurLisible(error)); return; } await toutRecharger(); }
+function soumettre(formId, fn){ $(formId).addEventListener('submit', async ev => { if(ev.submitter?.value !== 'ok') return; ev.preventDefault(); await fn(ev); }); }
+
+/* ─── Réglages ─── */
+soumettre('#form-reglages', async () => {
+  const lien = $('#r-lien').value.trim();
+  if(lien && !/^https:\/\/(buy\.stripe\.com|checkout\.stripe\.com|www\.helloasso\.com)\//.test(lien)){ msg('#msg-reglages', 'Le lien doit commencer par https://buy.stripe.com/', 'erreur'); return; }
+  const maj = { nom: $('#r-nom').value.trim(), lien_paiement: lien || null };
+  const fichier = $('#r-logo').files[0];
+  if(fichier){
+    if(fichier.size > 2*1024*1024){ msg('#msg-reglages', 'Le logo dépasse 2 Mo.', 'erreur'); return; }
+    const ext = fichier.type === 'image/png' ? 'png' : fichier.type === 'image/webp' ? 'webp' : 'jpg', chemin = `${club.id}/logo.${ext}`;
+    const up = await sb.storage.from('logos').upload(chemin, fichier, { upsert: true, contentType: fichier.type });
+    if(up.error){ msg('#msg-reglages', 'Logo refusé : ' + erreurLisible(up.error) + ' (le script 05_logo.sql est-il passé ?)', 'erreur'); return; }
+    maj.logo_url = sb.storage.from('logos').getPublicUrl(chemin).data.publicUrl + '?v=' + Date.now();
+  }
+  const { error } = await sb.from('clubs').update(maj).eq('id', club.id);
+  if(error){ msg('#msg-reglages', erreurLisible(error), 'erreur'); return; }
+  Object.assign(club, maj); $('#titre-club').textContent = club.nom; afficherLogo(); $('#r-logo').value = ''; $('#dlg-reglages').close(); await toutRecharger();
+});
+function afficherLogo(){
+  const img = $('#logo-club'); img.classList.toggle('cache', !club.logo_url); if(club.logo_url) img.src = club.logo_url;
+  $('#r-logo-info').textContent = club.logo_url ? 'Un logo est déjà en place ; choisis un fichier pour le remplacer.' : 'Aucun logo pour l\'instant.';
+  const fav = document.querySelector('link[rel=icon]'); if(fav) fav.href = club.logo_url || 'icon-192.png';
+}
+function lienPaiement(l, email){
+  if(!club.lien_paiement) return '';
+  return `<a class="btn second petit" target="_blank" rel="noopener" href="${esc(club.lien_paiement)}?client_reference_id=${encodeURIComponent('lic_' + l.id)}${email ? '&prefilled_email=' + encodeURIComponent(email) : ''}">Payer en ligne</a>`;
+}
+
+/* ─── Familles / joueurs ─── */
+function carteJoueur(p, f){
+  const saison = saisonSel(), lic = licences.find(l => l.personne_id === p.id && l.saison === saison);
+  const eq = lic && equipes.find(e => e.id === lic.equipe_id);
+  return `<tr><td>${esc(p.prenom)} <b>${esc(p.nom)}</b>${p.numero_maillot != null ? ` <span class="cat">#${p.numero_maillot}</span>` : ''}</td>
+    <td>${p.date_naissance ? new Date(p.date_naissance).toLocaleDateString('fr-FR') : ''}</td>
+    <td><span class="cat">${categorieProposee(p.date_naissance, p.sexe, saison)}</span> ${eq ? '<span class="compteur">' + esc(eq.nom) + '</span>' : ''}</td>
+    <td>${lic ? `<span class="puce ${lic.statut}">${lic.statut}</span> ${lic.statut==='demandee' ? lienPaiement(lic, f.email) : ''}` : `<button class="btn second petit" data-licencier="${p.id}">Licencier ${saison}</button>`}</td>
+    <td class="act"><button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button>${staff() ? ` <button class="btn second petit" data-supprimer-personne="${p.id}">Supprimer</button>` : ''}</td></tr>`;
+}
+function tableFamille(f){
+  const ps = personnes.filter(p => p.famille_id === f.id);
+  return `<div class="tableau"><table><thead><tr>
+    <th colspan="4">${esc(f.nom)} <span class="compteur">${esc(f.email||'')} ${esc(f.telephone||'')}</span> ${staff() ? `&nbsp; code famille <span class="code">${esc(f.code_acces||'')}</span>` : ''}</th>
+    <th class="act"><button class="btn second petit" data-ouvrir="personne" data-famille="${f.id}">Ajouter un joueur</button>
+      ${staff() ? `<button class="btn second petit" data-modifier-famille="${f.id}">Modifier</button> <button class="btn second petit" data-supprimer-famille="${f.id}">Supprimer</button>` : ''}</th></tr></thead>
+    <tbody>${ps.length ? ps.map(p => carteJoueur(p, f)).join('') : '<tr><td colspan="5" class="compteur">Aucun joueur.</td></tr>'}</tbody></table></div>`;
+}
+function rendreFamilles(){
+  if(!staff()) return;
+  $('#cpt-familles').textContent = `${familles.length} famille${familles.length>1?'s':''}, ${personnes.length} joueur${personnes.length>1?'s':''}`;
+  $('#zone-familles').innerHTML = familles.length ? familles.map(tableFamille).join('') : '<div class="vide">Aucune famille. Ajoute la première.</div>';
+}
+function rendreFoyer(){
+  if(staff()) return;
+  const mf = familles.filter(f => mesFamillesIds.includes(f.id));
+  $('#zone-foyer').innerHTML = mf.length ? mf.map(tableFamille).join('') + `<p class="compteur">Saison affichée : <select id="saison-foyer" style="width:auto">${$('#saison').innerHTML}</select></p>` : '<div class="vide">Aucune famille rattachée à ton compte.</div>';
+  const sf = $('#saison-foyer'); if(sf){ sf.value = $('#saison').value; sf.addEventListener('change', () => { $('#saison').value = sf.value; rendreTout(); }); }
+}
+function ouvrirFamille(f){
+  $('#dlg-famille-titre').textContent = f ? 'Modifier la famille' : 'Nouvelle famille';
+  $('#f-id').value = f?.id || ''; $('#f-nom').value = f?.nom || ''; $('#f-email').value = f?.email || ''; $('#f-tel').value = f?.telephone || '';
+  msg('#msg-famille',''); $('#dlg-famille').showModal();
+}
+soumettre('#form-famille', async () => {
+  const ligne = { club_id: club.id, nom: $('#f-nom').value.trim(), email: $('#f-email').value.trim() || null, telephone: $('#f-tel').value.trim() || null }, id = $('#f-id').value;
+  const { error } = id ? await sb.from('familles').update(ligne).eq('id', id) : await sb.from('familles').insert(ligne);
+  if(error){ msg('#msg-famille', erreurLisible(error), 'erreur'); return; } $('#dlg-famille').close(); await toutRecharger();
+});
+function ouvrirPersonne(p, familleId){
+  $('#dlg-personne-titre').textContent = p ? 'Modifier le joueur' : 'Nouveau joueur';
+  $('#p-id').value = p?.id || ''; $('#p-famille').value = p?.famille_id || familleId || '';
+  $('#p-prenom').value = p?.prenom || ''; $('#p-nom').value = p?.nom || (familles.find(f => f.id === familleId)?.nom || '');
+  $('#p-naissance').value = p?.date_naissance || ''; $('#p-sexe').value = p?.sexe || ''; $('#p-licence').value = p?.num_licence || ''; $('#p-maillot').value = p?.numero_maillot ?? '';
+  msg('#msg-personne',''); $('#dlg-personne').showModal();
+}
+soumettre('#form-personne', async () => {
+  const ligne = { club_id: club.id, famille_id: $('#p-famille').value || null, prenom: $('#p-prenom').value.trim(), nom: $('#p-nom').value.trim(), date_naissance: $('#p-naissance').value || null,
+    sexe: $('#p-sexe').value || null, num_licence: $('#p-licence').value.trim() || null, numero_maillot: $('#p-maillot').value === '' ? null : parseInt($('#p-maillot').value,10) }, id = $('#p-id').value;
+  const { error } = id ? await sb.from('personnes').update(ligne).eq('id', id) : await sb.from('personnes').insert(ligne);
+  if(error){ msg('#msg-personne', erreurLisible(error), 'erreur'); return; } $('#dlg-personne').close(); await toutRecharger();
+});
+
+/* ─── Licences ─── */
+function ouvrirLicence(p){
+  const saison = saisonSel(); $('#l-qui').textContent = nomP(p); $('#l-personne').value = p.id; $('#l-saison').textContent = saison;
+  const prop = categorieProposee(p.date_naissance, p.sexe, saison);
+  $('#l-cat').innerHTML = CATEGORIES.map(c => `<option ${c===prop?'selected':''}>${c}</option>`).join(''); $('#l-montant').value = ''; msg('#msg-licence',''); $('#dlg-licence').showModal();
+}
+soumettre('#form-licence', async () => {
+  const { error } = await sb.from('licences').insert({ club_id: club.id, personne_id: $('#l-personne').value, saison: $('#l-saison').textContent, categorie: $('#l-cat').value, montant: $('#l-montant').value ? parseFloat($('#l-montant').value) : null });
+  if(error){ msg('#msg-licence', erreurLisible(error), 'erreur'); return; } $('#dlg-licence').close(); await toutRecharger();
+});
+async function changerStatut(statut, id){ const { error } = await sb.from('licences').update({ statut }).eq('id', id); if(error) alert(erreurLisible(error)); else await toutRecharger(); }
+function rendreLicences(){
+  if(!staff()) return; const saison = saisonSel(), ls = licences.filter(l => l.saison === saison);
+  const nb = ls.filter(l => l.statut === 'validee').length; $('#cpt-licences').textContent = ls.length ? `${ls.length} licence${ls.length>1?'s':''}, ${nb} validée${nb>1?'s':''}` : '';
+  if(!ls.length){ $('#zone-licences').innerHTML = `<div class="vide">Aucune licence pour ${saison}.</div>`; return; }
+  const ordre = { demandee:0, payee:1, validee:2, refusee:3 }; ls.sort((a,b) => ordre[a.statut]-ordre[b.statut] || a.categorie.localeCompare(b.categorie));
+  const eqs = equipes.filter(e => e.saison === saison);
+  $('#zone-licences').innerHTML = `<div class="tableau"><table><thead><tr><th>Joueur</th><th>Cat.</th><th>Équipe</th><th>Montant</th><th>Statut</th><th class="act"></th></tr></thead><tbody>` + ls.map(l => {
+    const p = personnes.find(x => x.id === l.personne_id) || {}, f = familles.find(x => x.id === p.famille_id) || {};
+    return `<tr><td>${esc(nomP(p))}</td><td><span class="cat">${esc(l.categorie)}</span></td>
+      <td><select data-equipe-licence="${l.id}" style="width:auto"><option value="">—</option>${eqs.map(e => `<option value="${e.id}" ${e.id===l.equipe_id?'selected':''}>${esc(e.nom)}</option>`).join('')}</select></td>
+      <td>${l.montant != null ? l.montant.toFixed(2).replace('.',',') + ' €' : ''}</td><td><span class="puce ${l.statut}">${l.statut}</span></td>
+      <td class="act">${l.statut==='demandee' ? lienPaiement(l, f.email) + ` <button class="btn second petit" data-statut="payee" data-licence="${l.id}">Paiement reçu</button>` : ''}
+        ${l.statut==='payee' ? `<button class="btn second petit" data-statut="validee" data-licence="${l.id}">Valider</button>` : ''}
+        ${['demandee','payee'].includes(l.statut) ? `<button class="btn second petit" data-statut="refusee" data-licence="${l.id}">Refuser</button>` : `<button class="btn second petit" data-statut="demandee" data-licence="${l.id}">Rouvrir</button>`}
+        <button class="btn second petit" data-supprimer-licence="${l.id}">Supprimer</button></td></tr>`; }).join('') + '</tbody></table></div>';
+  $$('[data-equipe-licence]').forEach(s => s.addEventListener('change', async () => { const { error } = await sb.from('licences').update({ equipe_id: s.value || null }).eq('id', s.dataset.equipeLicence); if(error) alert(erreurLisible(error)); else await toutRecharger(); }));
+}
+
+/* ─── Équipes ─── */
+const joueursEquipe = e => licences.filter(l => l.equipe_id === e.id).map(l => personnes.find(p => p.id === l.personne_id)).filter(Boolean).sort((a,b) => (a.numero_maillot ?? 999) - (b.numero_maillot ?? 999));
+function ouvrirEquipe(){ $('#e-nom').value = ''; $('#e-saison').value = saisonSel(); $('#e-cat').innerHTML = CATEGORIES.map(c => `<option>${c}</option>`).join(''); msg('#msg-equipe',''); $('#dlg-equipe').showModal(); }
+soumettre('#form-equipe', async () => {
+  const { error } = await sb.from('equipes').insert({ club_id: club.id, nom: $('#e-nom').value.trim(), categorie: $('#e-cat').value, saison: $('#e-saison').value.trim() });
+  if(error){ msg('#msg-equipe', erreurLisible(error), 'erreur'); return; } $('#dlg-equipe').close(); await toutRecharger();
+});
+function rendreEquipes(){
+  if(!staff()) return; $('#cpt-equipes').textContent = equipes.length || '';
+  if(!equipes.length){ $('#zone-equipes').innerHTML = '<div class="vide">Aucune équipe. Crée-les, puis rattache les licences depuis l\'onglet Licences.</div>'; return; }
+  $('#zone-equipes').innerHTML = equipes.map(e => { const js = joueursEquipe(e);
+    return `<div class="tableau"><table><thead><tr><th colspan="3">${esc(e.nom)} <span class="cat">${esc(e.categorie)}</span> <span class="compteur">${esc(e.saison)} · ${js.length} joueur${js.length>1?'s':''}</span></th>
+      <th class="act"><button class="btn second petit" data-supprimer-equipe="${e.id}">Supprimer</button></th></tr></thead>
+      <tbody>${js.length ? js.map(p => `<tr><td style="width:60px"><span class="cat">${p.numero_maillot != null ? '#' + p.numero_maillot : '—'}</span></td><td>${esc(nomP(p))}</td><td>${p.sexe === 'F' ? 'F' : p.sexe === 'M' ? 'G' : ''}</td><td class="act"><button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button></td></tr>`).join('') : '<tr><td colspan="4" class="compteur">Aucun joueur rattaché (onglet Licences → colonne Équipe).</td></tr>'}</tbody></table></div>`; }).join('');
+}
+
+/* ─── Agenda : matchs + entraînements + présences + covoiturage ─── */
+function optionsEquipes(sel){ return equipes.map(e => `<option value="${e.id}" ${sel===e.id?'selected':''}>${esc(e.nom)} (${esc(e.saison)})</option>`).join(''); }
+function ouvrirMatch(m){
+  if(!equipes.length){ alert('Crée d\'abord une équipe.'); return; }
+  $('#dlg-match-titre').textContent = m ? 'Modifier le match' : 'Nouveau match'; $('#m-id').value = m?.id || '';
+  $('#m-equipe').innerHTML = optionsEquipes(m?.equipe_id); $('#m-date').value = m?.date_match || aujourdhui(); $('#m-heure').value = m?.heure || '';
+  $('#m-adversaire').value = m?.adversaire || ''; $('#m-lieu-type').value = m ? String(m.domicile) : 'true'; $('#m-lieu').value = m?.lieu || '';
+  $('#m-nous').value = m?.score_nous ?? ''; $('#m-eux').value = m?.score_eux ?? ''; $('#m-comm').value = m?.commentaire || '';
+  const majLavage = () => { const e = equipes.find(x => x.id === $('#m-equipe').value); $('#m-lavage').innerHTML = '<option value="">—</option>' + (e ? joueursEquipe(e).map(p => `<option value="${p.id}" ${m?.lavage_personne_id===p.id?'selected':''}>${esc(nomP(p))}</option>`).join('') : ''); };
+  $('#m-equipe').onchange = majLavage; majLavage(); msg('#msg-match',''); $('#dlg-match').showModal();
+}
+soumettre('#form-match', async () => {
+  const n = $('#m-nous').value, x = $('#m-eux').value; if((n === '') !== (x === '')){ msg('#msg-match', 'Renseigne les deux scores, ou aucun.', 'erreur'); return; }
+  const ligne = { club_id: club.id, equipe_id: $('#m-equipe').value, date_match: $('#m-date').value, heure: $('#m-heure').value || null, adversaire: $('#m-adversaire').value.trim(), domicile: $('#m-lieu-type').value === 'true',
+    lieu: $('#m-lieu').value.trim() || null, score_nous: n === '' ? null : +n, score_eux: x === '' ? null : +x, lavage_personne_id: $('#m-lavage').value || null, commentaire: $('#m-comm').value.trim() || null }, id = $('#m-id').value;
+  const { error } = id ? await sb.from('matchs').update(ligne).eq('id', id) : await sb.from('matchs').insert(ligne);
+  if(error){ msg('#msg-match', erreurLisible(error), 'erreur'); return; } $('#dlg-match').close(); await toutRecharger();
+});
+function ouvrirEntrainement(t){
+  if(!equipes.length){ alert('Crée d\'abord une équipe.'); return; }
+  $('#dlg-entr-titre').textContent = t ? 'Modifier l\'entraînement' : 'Nouvel entraînement'; $('#t-id').value = t?.id || '';
+  $('#t-equipe').innerHTML = optionsEquipes(t?.equipe_id); $('#t-date').value = t?.date_seance || aujourdhui(); $('#t-extra').value = t ? String(t.extra) : 'false';
+  $('#t-debut').value = t?.heure_debut || ''; $('#t-fin').value = t?.heure_fin || ''; $('#t-lieu').value = t?.lieu || ''; $('#t-note').value = t?.note || ''; $('#t-repeter').value = '1';
+  $('#t-repeter').parentElement.querySelector('[for=t-repeter]').classList.toggle('cache', !!t); $('#t-repeter').classList.toggle('cache', !!t);
+  msg('#msg-entrainement',''); $('#dlg-entrainement').showModal();
+}
+soumettre('#form-entrainement', async () => {
+  const base = { club_id: club.id, equipe_id: $('#t-equipe').value, heure_debut: $('#t-debut').value || null, heure_fin: $('#t-fin').value || null, lieu: $('#t-lieu').value.trim() || null, note: $('#t-note').value.trim() || null, extra: $('#t-extra').value === 'true' }, id = $('#t-id').value;
+  let error;
+  if(id) ({ error } = await sb.from('entrainements').update({ ...base, date_seance: $('#t-date').value }).eq('id', id));
+  else { const n = +$('#t-repeter').value, d0 = new Date($('#t-date').value + 'T12:00:00');
+    const lignes = Array.from({ length: n }, (_, i) => { const d = new Date(d0); d.setDate(d0.getDate() + 7*i); return { ...base, date_seance: d.toISOString().slice(0,10) }; });
+    ({ error } = await sb.from('entrainements').insert(lignes)); }
+  if(error){ msg('#msg-entrainement', erreurLisible(error), 'erreur'); return; } $('#dlg-entrainement').close(); await toutRecharger();
+});
+async function presence(statut, type, ref, personneId){
+  const { error } = await sb.from('presences').upsert({ club_id: club.id, personne_id: personneId, type, ref_id: ref, statut, maj_le: new Date().toISOString() }, { onConflict: 'personne_id,type,ref_id' });
+  if(error) alert(erreurLisible(error)); else await toutRecharger();
+}
+function blocPresences(type, ref, equipe){
+  const js = joueursEquipe(equipe), miens = mesPersonnes().filter(p => js.some(j => j.id === p.id));
+  const pr = presences.filter(x => x.type === type && x.ref_id === ref);
+  const etat = p => pr.find(x => x.personne_id === p.id)?.statut;
+  const boutons = p => `<div class="pres"><b>${esc(p.prenom)}</b> ${etat(p) ? `<span class="puce ${etat(p)}">${etat(p)}</span>` : '<span class="compteur">pas répondu</span>'}
+    <button class="btn ok petit" data-presence="present" data-type="${type}" data-ref="${ref}" data-personne="${p.id}">Présent</button><button class="btn non petit" data-presence="absent" data-type="${type}" data-ref="${ref}" data-personne="${p.id}">Absent</button></div>`;
+  if(staff()){
+    const pres = js.filter(p => etat(p) === 'present'), abs = js.filter(p => etat(p) === 'absent'), sans = js.filter(p => !etat(p));
+    return `<div class="bloc"><b>Présences :</b> <span class="puce present">${pres.length} présent${pres.length>1?'s':''}</span> <span class="puce absent">${abs.length} absent${abs.length>1?'s':''}</span> <span class="puce">${sans.length} sans réponse</span>
+      <details><summary class="compteur" style="cursor:pointer">Détail</summary>${js.length ? js.map(boutons).join('') : '<span class="compteur">Aucun joueur rattaché à cette équipe.</span>'}</details></div>`;
+  }
+  return miens.length ? `<div class="bloc">${miens.map(boutons).join('')}</div>` : '';
+}
+function blocCovoit(m){
+  const cs = covoits.filter(c => c.match_id === m.id), total = cs.reduce((s,c) => s + c.places, 0);
+  const mien = cs.find(c => mesFamillesIds.includes(c.famille_id));
+  return `<div class="bloc"><b>🚗 Covoiturage :</b> ${cs.length ? `${total} place${total>1?'s':''} proposée${total>1?'s':''} — ` + cs.map(c => { const f = familles.find(x => x.id === c.famille_id) || {}; return `${esc(f.nom || 'Famille')} (${c.places})${c.note ? ' <span class="compteur">' + esc(c.note) + '</span>' : ''}`; }).join(', ') : '<span class="compteur">personne pour l\'instant</span>'}
+    ${!staff() && mesFamillesIds.length ? ` <button class="btn second petit" data-covoit="${m.id}">${mien ? 'Modifier ma proposition' : 'Proposer des places'}</button>${mien ? ` <button class="btn second petit" data-supprimer-covoit="${mien.id}">Retirer</button>` : ''}` : ''}</div>`;
+}
+function ouvrirCovoit(matchId){
+  const m = matchs.find(x => x.id === matchId), mien = covoits.find(c => c.match_id === matchId && mesFamillesIds.includes(c.famille_id));
+  $('#cv-match').value = matchId; $('#cv-info').textContent = `${dateFr(m.date_match)} · ${m.adversaire}`; $('#cv-places').value = mien?.places ?? 0; $('#cv-note').value = mien?.note || ''; msg('#msg-covoit',''); $('#dlg-covoit').showModal();
+}
+soumettre('#form-covoit', async () => {
+  const { error } = await sb.from('covoiturages').upsert({ club_id: club.id, match_id: $('#cv-match').value, famille_id: mesFamillesIds[0], places: +$('#cv-places').value, note: $('#cv-note').value.trim() || null }, { onConflict: 'match_id,famille_id' });
+  if(error){ msg('#msg-covoit', erreurLisible(error), 'erreur'); return; } $('#dlg-covoit').close(); await toutRecharger();
+});
+function resultat(m){ if(m.score_nous == null) return ''; const v = m.score_nous > m.score_eux, d = m.score_nous < m.score_eux; return `<span class="puce ${v?'victoire':d?'defaite':'nul'}">${v?'Victoire':d?'Défaite':'Nul'} ${m.score_nous}–${m.score_eux}</span>`; }
+function mesEquipesIds(){ if(staff()) return equipes.map(e => e.id); const ids = mesPersonnes().map(p => p.id); return equipes.filter(e => licences.some(l => l.equipe_id === e.id && ids.includes(l.personne_id))).map(e => e.id); }
+function evenements(){
+  const ok = mesEquipesIds();
+  const ev = matchs.filter(m => ok.includes(m.equipe_id)).map(m => ({ type:'match', id:m.id, date:m.date_match, heure:m.heure, o:m }))
+    .concat(entrainements.filter(t => ok.includes(t.equipe_id)).map(t => ({ type:'entrainement', id:t.id, date:t.date_seance, heure:t.heure_debut, o:t })));
+  return ev.sort((a,b) => a.date.localeCompare(b.date) || (a.heure||'').localeCompare(b.heure||''));
+}
+function carteEvt(e){
+  const eq = equipes.find(x => x.id === e.o.equipe_id) || {};
+  if(e.type === 'match'){ const m = e.o, lav = personnes.find(p => p.id === m.lavage_personne_id);
+    return `<div class="evt match"><div class="tete"><span class="quand">⚽ ${dateFr(m.date_match)}${m.heure ? ' · ' + esc(m.heure) : ''}</span>${resultat(m)}</div>
+      <div><b>${esc(eq.nom)}</b> ${m.domicile ? 'reçoit' : 'se déplace chez'} <b>${esc(m.adversaire)}</b></div>
+      <div class="detail">${m.lieu ? '📍 ' + (/^https?:/.test(m.lieu) ? `<a href="${esc(m.lieu)}" target="_blank">lieu</a>` : `<a href="https://www.google.com/maps/search/${encodeURIComponent(m.lieu)}" target="_blank" rel="noopener">${esc(m.lieu)}</a>`) : (m.domicile ? '📍 À domicile' : '📍 Lieu à préciser')}${lav ? ' · 🧺 Maillots : ' + esc(nomP(lav)) : ''}${m.commentaire ? ' · ' + esc(m.commentaire) : ''}</div>
+      ${blocPresences('match', m.id, eq)}${blocCovoit(m)}
+      ${staff() ? `<div class="actions"><button class="btn second petit" data-modifier-match="${m.id}">${m.score_nous == null ? 'Saisir le score / modifier' : 'Modifier'}</button><button class="btn second petit" data-supprimer-match="${m.id}">Supprimer</button></div>` : ''}</div>`; }
+  const t = e.o;
+  return `<div class="evt ${t.extra ? 'extra' : ''}"><div class="tete"><span class="quand">🏃 ${dateFr(t.date_seance)}${t.heure_debut ? ' · ' + esc(t.heure_debut) + (t.heure_fin ? '–' + esc(t.heure_fin) : '') : ''}</span>${t.extra ? '<span class="puce payee">Séance en plus</span>' : ''}</div>
+    <div><b>${esc(eq.nom)}</b> — entraînement${t.lieu ? ' · 📍 ' + esc(t.lieu) : ''}</div>${t.note ? `<div class="detail">${esc(t.note)}</div>` : ''}
+    ${blocPresences('entrainement', t.id, eq)}
+    ${staff() ? `<div class="actions"><button class="btn second petit" data-modifier-entr="${t.id}">Modifier</button><button class="btn second petit" data-supprimer-entr="${t.id}">Supprimer</button></div>` : ''}</div>`;
+}
+function rendreAgenda(){
+  const ev = evenements(), auj = aujourdhui(), futurs = ev.filter(e => e.date >= auj), passes = ev.filter(e => e.date < auj).reverse().slice(0, 15);
+  const joues = matchs.filter(m => m.score_nous != null), v = joues.filter(m => m.score_nous > m.score_eux).length, d = joues.filter(m => m.score_nous < m.score_eux).length;
+  $('#cpt-agenda').textContent = joues.length ? `bilan ${v} V · ${joues.length-v-d} N · ${d} D` : '';
+  if(!ev.length){ $('#zone-agenda').innerHTML = '<div class="vide">Rien de prévu pour l\'instant.</div>'; return; }
+  $('#zone-agenda').innerHTML = (futurs.length ? '<h3>À venir</h3>' + futurs.map(carteEvt).join('') : '<div class="vide">Rien de prévu prochainement.</div>') + (passes.length ? '<h3 style="margin-top:18px">Derniers résultats et séances passées</h3>' + passes.map(carteEvt).join('') : '');
+}
+
+/* ─── Infos ─── */
+function ouvrirAnnonce(){ $('#a-titre').value = ''; $('#a-texte').value = ''; $('#a-equipe').innerHTML = '<option value="">Tout le club</option>' + optionsEquipes(); msg('#msg-annonce',''); $('#dlg-annonce').showModal(); }
+soumettre('#form-annonce', async () => {
+  const { error } = await sb.from('annonces').insert({ club_id: club.id, equipe_id: $('#a-equipe').value || null, titre: $('#a-titre').value.trim(), texte: $('#a-texte').value.trim(), auteur: session.user.email });
+  if(error){ msg('#msg-annonce', erreurLisible(error), 'erreur'); return; } $('#dlg-annonce').close(); await toutRecharger();
+});
+function rendreInfos(){
+  const ok = mesEquipesIds(), as = annonces.filter(a => !a.equipe_id || ok.includes(a.equipe_id)).sort((a,b) => b.cree_le.localeCompare(a.cree_le));
+  $('#zone-infos').innerHTML = as.length ? as.map(a => { const eq = equipes.find(e => e.id === a.equipe_id);
+    return `<div class="annonce"><div class="meta">${new Date(a.cree_le).toLocaleDateString('fr-FR')} · ${eq ? esc(eq.nom) : 'Tout le club'}${a.auteur ? ' · ' + esc(a.auteur) : ''}</div><h3>${esc(a.titre)}</h3><p>${esc(a.texte)}</p>${staff() ? `<div class="actions"><button class="btn second petit" data-supprimer-annonce="${a.id}">Supprimer</button></div>` : ''}</div>`; }).join('') : '<div class="vide">Aucune info pour l\'instant.</div>';
+}
+
+/* ─── Boutique ─── */
+function ouvrirArticle(a){ $('#ar-id').value = a?.id || ''; $('#ar-nom').value = a?.nom || ''; $('#ar-prix').value = a?.prix ?? ''; $('#ar-tailles').value = a?.tailles || ''; msg('#msg-article',''); $('#dlg-article').showModal(); }
+soumettre('#form-article', async () => {
+  const ligne = { club_id: club.id, nom: $('#ar-nom').value.trim(), prix: parseFloat($('#ar-prix').value), tailles: $('#ar-tailles').value.trim() || null }, id = $('#ar-id').value;
+  const { error } = id ? await sb.from('articles').update(ligne).eq('id', id) : await sb.from('articles').insert(ligne);
+  if(error){ msg('#msg-article', erreurLisible(error), 'erreur'); return; } $('#dlg-article').close(); await toutRecharger();
+});
+function ouvrirCommande(a){
+  $('#c-article').value = a.id; $('#c-nom').textContent = a.nom;
+  const fams = staff() ? familles : familles.filter(f => mesFamillesIds.includes(f.id));
+  $('#c-famille').innerHTML = fams.map(f => `<option value="${f.id}">${esc(f.nom)}</option>`).join(''); $('#c-famille').classList.toggle('cache', !staff()); $('#lbl-c-famille').classList.toggle('cache', !staff());
+  const tailles = (a.tailles || '').split(',').map(s => s.trim()).filter(Boolean);
+  $('#c-taille').innerHTML = tailles.length ? tailles.map(t => `<option>${esc(t)}</option>`).join('') : '<option value="">Taille unique</option>'; $('#c-qte').value = 1; msg('#msg-commande',''); $('#dlg-commande').showModal();
+}
+soumettre('#form-commande', async () => {
+  const { error } = await sb.from('commandes').insert({ club_id: club.id, famille_id: $('#c-famille').value, article_id: $('#c-article').value, taille: $('#c-taille').value || null, quantite: +$('#c-qte').value });
+  if(error){ msg('#msg-commande', erreurLisible(error), 'erreur'); return; } $('#dlg-commande').close(); await toutRecharger();
+});
+async function majCommande(statut, id){ const { error } = await sb.from('commandes').update({ statut }).eq('id', id); if(error) alert(erreurLisible(error)); else await toutRecharger(); }
+function rendreBoutique(){
+  const prix = a => (+a.prix).toFixed(2).replace('.', ',') + ' €';
+  let html = articles.length ? `<div class="tableau"><table><thead><tr><th>Article</th><th>Prix</th><th>Tailles</th><th class="act"></th></tr></thead><tbody>` + articles.map(a => `<tr><td><b>${esc(a.nom)}</b></td><td>${prix(a)}</td><td>${esc(a.tailles || 'unique')}</td>
+    <td class="act"><button class="btn principal petit" data-commander="${a.id}">Commander</button>${staff() ? ` <button class="btn second petit" data-modifier-article="${a.id}">Modifier</button> <button class="btn second petit" data-supprimer-article="${a.id}">Supprimer</button>` : ''}</td></tr>`).join('') + '</tbody></table></div>' : '<div class="vide">Aucun article dans la boutique.</div>';
+  const cs = commandes.filter(c => staff() || mesFamillesIds.includes(c.famille_id)).sort((a,b) => b.cree_le.localeCompare(a.cree_le));
+  if(cs.length) html += `<h3 style="margin:16px 0 8px">${staff() ? 'Commandes' : 'Mes commandes'}</h3><div class="tableau"><table><thead><tr><th>Date</th><th>Famille</th><th>Article</th><th>Qté</th><th>Total</th><th>Statut</th><th class="act"></th></tr></thead><tbody>` + cs.map(c => {
+    const a = articles.find(x => x.id === c.article_id) || {}, f = familles.find(x => x.id === c.famille_id) || {};
+    return `<tr><td>${new Date(c.cree_le).toLocaleDateString('fr-FR')}</td><td>${esc(f.nom || '')}</td><td>${esc(a.nom || '?')}${c.taille ? ' · ' + esc(c.taille) : ''}</td><td>${c.quantite}</td><td>${a.prix != null ? (a.prix * c.quantite).toFixed(2).replace('.', ',') + ' €' : ''}</td><td><span class="puce ${c.statut}">${c.statut}</span></td>
+      <td class="act">${staff() ? (c.statut === 'nouvelle' ? `<button class="btn second petit" data-statut-cmd="payee" data-commande="${c.id}">Payée</button>` : '') + (c.statut === 'payee' ? `<button class="btn second petit" data-statut-cmd="recuperee" data-commande="${c.id}">Récupérée</button>` : '') + ` <button class="btn second petit" data-supprimer-commande="${c.id}">Supprimer</button>` : (c.statut === 'nouvelle' ? `<button class="btn second petit" data-supprimer-commande="${c.id}">Annuler</button>` : '')}</td></tr>`; }).join('') + '</tbody></table></div>';
+  $('#zone-boutique').innerHTML = html;
+}
+
+/* ─── Stats ─── */
+function rendreStats(){
+  if(!staff()) return; const saison = $('#saison-stats').value || saisonCourante(), ls = licences.filter(l => l.saison === saison);
+  const ids = ls.map(l => l.personne_id), ps = personnes.filter(p => ids.includes(p.id));
+  const g = ps.filter(p => p.sexe === 'M').length, f = ps.filter(p => p.sexe === 'F').length, inconnu = ps.length - g - f;
+  const parCat = {}; ls.forEach(l => { parCat[l.categorie] = parCat[l.categorie] || { n:0, g:0, f:0 }; const p = personnes.find(x => x.id === l.personne_id); parCat[l.categorie].n++; if(p?.sexe === 'M') parCat[l.categorie].g++; if(p?.sexe === 'F') parCat[l.categorie].f++; });
+  const paye = ls.filter(l => ['payee','validee'].includes(l.statut)).reduce((s,l) => s + (+l.montant || 0), 0), attendu = ls.reduce((s,l) => s + (+l.montant || 0), 0);
+  const joues = matchs.filter(m => m.score_nous != null), v = joues.filter(m => m.score_nous > m.score_eux).length, d = joues.filter(m => m.score_nous < m.score_eux).length;
+  $('#zone-stats').innerHTML = `<div class="kpi">
+    <div><b>${ls.length}</b><span>licences ${saison}</span></div><div><b>${g}</b><span>garçons</span></div><div><b>${f}</b><span>filles</span></div>${inconnu ? `<div><b>${inconnu}</b><span>sexe non renseigné</span></div>` : ''}
+    <div><b>${ls.filter(l => l.statut === 'validee').length}</b><span>validées</span></div><div><b>${ls.filter(l => l.statut === 'demandee').length}</b><span>en attente de paiement</span></div>
+    <div><b>${paye.toFixed(0)} €</b><span>encaissés / ${attendu.toFixed(0)} € attendus</span></div><div><b>${v}-${joues.length-v-d}-${d}</b><span>victoires-nuls-défaites</span></div>
+    <div><b>${familles.length}</b><span>familles</span></div><div><b>${commandes.filter(c => c.statut === 'nouvelle').length}</b><span>commandes boutique à traiter</span></div></div>
+    <div class="tableau"><table><thead><tr><th>Catégorie</th><th>Licenciés</th><th>Garçons</th><th>Filles</th></tr></thead><tbody>${Object.entries(parCat).sort((a,b) => CATEGORIES.indexOf(a[0]) - CATEGORIES.indexOf(b[0])).map(([c,x]) => `<tr><td><span class="cat">${esc(c)}</span></td><td>${x.n}</td><td>${x.g}</td><td>${x.f}</td></tr>`).join('') || '<tr><td colspan="4" class="compteur">Aucune licence.</td></tr>'}</tbody></table></div>`;
+}
+
+/* ─── Accès ─── */
+function rendreAcces(){
+  if(!staff()) return;
+  $('#zone-acces').innerHTML = `<div class="tableau"><table><thead><tr><th>Compte</th><th>Rôle</th></tr></thead><tbody>${membres.map(m => `<tr><td>${m.user_id === session.user.id ? esc(session.user.email) + ' (toi)' : 'Membre ' + m.user_id.slice(0,8)}</td><td>${esc(m.role)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+$('#form-invite').addEventListener('submit', async ev => {
+  ev.preventDefault(); msg('#msg-invite','');
+  if($('#invite-email').value.trim().toLowerCase() === (session.user.email || '').toLowerCase() && $('#invite-role').value !== 'admin'){ msg('#msg-invite', 'Tu ne peux pas te retirer le rôle admin toi-même.', 'erreur'); return; }
+  const { data, error } = await sb.rpc('inviter_membre', { p_club: club.id, p_email: $('#invite-email').value.trim(), p_role: $('#invite-role').value });
+  if(error){ msg('#msg-invite', erreurLisible(error), 'erreur'); return; }
+  if(data === 'inconnu'){ msg('#msg-invite', 'Cette adresse n\'a jamais ouvert le site. Demande à la personne de se connecter une fois.', 'erreur'); return; }
+  msg('#msg-invite', 'Accès donné.', 'ok'); $('#invite-email').value = ''; await toutRecharger();
+});
+
+/* ─── Notifications (cloche + rappels quand l'appli est ouverte) ─── */
+function rendreNotifs(){
+  const auj = new Date(), dans3j = new Date(auj.getTime() + 3*86400000).toISOString().slice(0,10);
+  const proches = evenements().filter(e => e.date >= aujourdhui() && e.date <= dans3j);
+  const vu = localStorage.getItem('annonces_vu_' + club.id) || '1970';
+  const ok = mesEquipesIds(), nouvelles = annonces.filter(a => a.cree_le > vu && (!a.equipe_id || ok.includes(a.equipe_id)));
+  const n = proches.length + nouvelles.length; $('#notif-badge').textContent = n; $('#notif-badge').classList.toggle('cache', !n);
+  const eq = id => equipes.find(e => e.id === id)?.nom || '';
+  $('#zone-notifs').innerHTML = (nouvelles.length ? '<h3>Nouvelles infos</h3>' + nouvelles.map(a => `<div class="annonce"><h3>${esc(a.titre)}</h3><p>${esc(a.texte)}</p></div>`).join('') : '') +
+    (proches.length ? '<h3>Dans les 3 prochains jours</h3>' + proches.map(e => `<div class="evt ${e.type}"><span class="quand">${e.type === 'match' ? '⚽' : '🏃'} ${dateFr(e.date)}${e.heure ? ' · ' + esc(e.heure) : ''}</span> — ${esc(eq(e.o.equipe_id))} ${e.type === 'match' ? 'vs ' + esc(e.o.adversaire) : 'entraînement'}</div>`).join('') : '') || '<div class="vide">Rien de nouveau.</div>';
+  $('#dlg-notifs').addEventListener('close', () => { localStorage.setItem('annonces_vu_' + club.id, new Date().toISOString()); rendreNotifs(); }, { once:true });
+  // Rappel système (si autorisé) pour les événements de demain, une seule fois chacun
+  if('Notification' in window && Notification.permission === 'granted'){
+    const demain = new Date(auj.getTime() + 86400000).toISOString().slice(0,10);
+    proches.filter(e => e.date === demain || e.date === aujourdhui()).forEach(e => { const k = 'notif_' + e.id; if(localStorage.getItem(k)) return; localStorage.setItem(k, '1');
+      new Notification(club.nom, { body: `${e.type === 'match' ? 'Match' : 'Entraînement'} ${e.date === demain ? 'demain' : 'aujourd\'hui'}${e.heure ? ' à ' + e.heure : ''} — ${eq(e.o.equipe_id)}${e.type === 'match' ? ' vs ' + e.o.adversaire : ''}`, icon: 'icon-192.png' }); });
+  }
+}
+$('#btn-autoriser-notifs').addEventListener('click', async () => { if(!('Notification' in window)){ alert('Ton navigateur ne gère pas les notifications.'); return; } const p = await Notification.requestPermission(); if(p === 'granted') rendreNotifs(); });
+
+/* ─── Installation PWA ─── */
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if(!localStorage.getItem('install_non')) $('#bandeau-install').classList.remove('cache'); });
+$('#btn-install').addEventListener('click', async () => { if(!installEvt) return; installEvt.prompt(); await installEvt.userChoice; installEvt = null; $('#bandeau-install').classList.add('cache'); });
+$('#btn-install-non').addEventListener('click', () => { localStorage.setItem('install_non', '1'); $('#bandeau-install').classList.add('cache'); });
+
+demarrer();
+</script>
+</body>
+</html>
