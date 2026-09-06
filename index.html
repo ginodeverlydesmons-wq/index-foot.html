@@ -15,12 +15,13 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{
+  color-scheme:light dark;
   --fond:#EEF1F5; --surface:#FFFFFF; --encre:#14213D; --encre-2:#4B5566;
   --ligne:#D5DBE3; --accent:#F26522; --accent-2:#C64E10; --ok:#1E7F4F; --alerte:#B45309;
   --r:6px; --display:'Barlow Condensed',Impact,'Arial Narrow',sans-serif;
   --texte:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
-@media (prefers-color-scheme:dark){:root{--fond:#0F1626;--surface:#182238;--encre:#EEF1F5;--encre-2:#A9B3C4;--ligne:#2B3A5C;--accent-2:#FF8A4C} header{background:#0B1120} .btn.second{background:#182238;color:#EEF1F5;border-color:#3B4A6B} .msg{background:#182238} .vide,.kpi div,.produit .sans{background:#182238} .titre-tableau{background:#131C30} .code{background:#2A2110;border-color:#7A5A1A} input,select,textarea{background:#0F1626;border-color:#3B4A6B} #menu-plus{background:#182238} #menu-plus button{background:#131C30;border-color:#3B4A6B} .puce{background:#182238} .evt,.annonce,.produit,.tableau{background:var(--surface)}}
+@media (prefers-color-scheme:dark){:root{--fond:#0F1626;--surface:#182238;--encre:#EEF1F5;--encre-2:#A9B3C4;--ligne:#2B3A5C;--accent-2:#FF8A4C} header{background:#0B1120} dialog{background:var(--surface);color:var(--encre)} input,select,textarea{color:var(--encre)} select option{background:#182238;color:#EEF1F5} .puce{color:var(--encre)} .msg{color:var(--encre)} .msg.erreur{background:#3A1A10;color:#FFC9B3;border-color:#7A3A1A} .msg.ok{background:#0F2E1E;color:#B7E0C8;border-color:#1E5A3A} .puce.demandee,.puce.nouvelle{background:#3A2A10;color:#F5C97A;border-color:#7A5A1A} .puce.payee,.puce.nul{background:#14213D;color:#9FBEFF;border-color:#2B4A8C} .puce.validee,.puce.present,.puce.victoire,.puce.recuperee{background:#0F2E1E;color:#B7E0C8;border-color:#1E5A3A} .puce.blesse,.puce.indisponible{background:#2A1E4A;color:#D8CCF5;border-color:#5A3AA0} .puce.refusee,.puce.absent,.puce.defaite,.puce.annulee{background:#3A1010;color:#F3B7B7;border-color:#7A1E1E} .puce.reprise{background:#3A2A10;color:#F5C97A;border-color:#7A5A1A} .code{color:#F5C97A} .kpi b{color:var(--encre)} #menu-plus button{color:var(--encre)} .produit .sans{background:#131C30} .tableau-blanc{background:#0B1120} .btn.second{background:#182238;color:#EEF1F5;border-color:#3B4A6B} .msg{background:#182238} .vide,.kpi div,.produit .sans{background:#182238} .titre-tableau{background:#131C30} .code{background:#2A2110;border-color:#7A5A1A} input,select,textarea{background:#0F1626;border-color:#3B4A6B} #menu-plus{background:#182238} #menu-plus button{background:#131C30;border-color:#3B4A6B} .puce{background:#182238} .evt,.annonce,.produit,.tableau{background:var(--surface)}}
 @media print{body{background:#fff;color:#000} header,nav,#bandeau-install,#menu-plus,#toast,.btn,button,.no-print,#bandeau-urgent,#hors-ligne{display:none!important} main{padding:0;max-width:none} .evt,.tableau{border:1px solid #999;break-inside:avoid} #feuille{display:block!important}}
 #feuille{display:none}
 *{box-sizing:border-box}
@@ -51,7 +52,7 @@ main{max-width:1040px;margin:0 auto;padding:18px 16px 70px}
 .carte h1{color:var(--encre);text-transform:uppercase;margin-bottom:4px}
 .carte p.sous{color:var(--encre-2);margin:0 0 18px}
 label{display:block;font-weight:500;margin:10px 0 4px}
-input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--ligne);border-radius:var(--r);background:#fff}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--ligne);border-radius:var(--r);background:#fff;color:var(--encre)}
 textarea{min-height:90px;resize:vertical}
 input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
 .ligne{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -71,7 +72,8 @@ table{width:100%;border-collapse:collapse}
 th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--ligne);vertical-align:middle}
 th{font-family:var(--display);font-size:1.05rem;text-transform:uppercase;letter-spacing:.03em;color:var(--encre-2);font-weight:600}
 tr:last-child td{border-bottom:0} td.act{white-space:nowrap;text-align:right}
-.puce{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.85rem;font-weight:500;border:1px solid var(--ligne);background:#fff}
+.puce{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.85rem;font-weight:500;border:1px solid var(--ligne);background:#fff;color:var(--encre)}
+.puce.indisponible{color:#7A1E1E;border-color:#F3B7B7;background:#FFF0F0} .puce.reprise{color:var(--alerte);border-color:#F1D3A8;background:#FFF8EC}
 .puce.demandee{color:var(--alerte);border-color:#F1D3A8;background:#FFF8EC}
 .puce.payee,.puce.nul{color:#1D4ED8;border-color:#BFD3FB;background:#EEF4FF}
 .puce.validee,.puce.present,.puce.victoire,.puce.recuperee{color:var(--ok);border-color:#B7E0C8;background:#EEF9F2}
@@ -102,7 +104,7 @@ tr:last-child td{border-bottom:0} td.act{white-space:nowrap;text-align:right}
 .annonce .meta{color:var(--encre-2);font-size:.85rem;margin-bottom:6px}
 .annonce p{margin:0;white-space:pre-wrap}
 .pres{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
-dialog{border:0;border-radius:var(--r);padding:0;width:min(540px,94vw);max-height:92vh;overflow:auto}
+dialog{border:0;border-radius:var(--r);padding:0;width:min(540px,94vw);max-height:92vh;overflow:auto;background:var(--surface);color:var(--encre)}
 dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog h2{margin-bottom:4px}
 .titre-tableau{padding:10px 12px;border-bottom:1px solid var(--ligne);background:#F8FAFC;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
 .titre-tableau b{font-family:var(--display);font-size:1.15rem;text-transform:uppercase;letter-spacing:.03em}
@@ -112,10 +114,14 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   nav.onglets button{padding:8px 6px;font-size:.95rem;border-bottom:0;border-top:3px solid transparent;flex:1;text-align:center}
   nav.onglets button[aria-selected=true]{border-top-color:var(--accent);border-bottom:0;margin:0}
   nav.onglets button.secondaire{display:none}
-  header{padding-bottom:10px} header .qui{font-size:.85rem} header h1{font-size:1.7rem} header h1 img{height:40px;width:40px}
-  main{padding:14px 10px 110px} #bandeau-install{bottom:56px}
-  .btn{padding:10px 14px} .btn.petit{padding:7px 10px}
-  dialog{width:100vw;max-height:100vh;border-radius:0}
+  html,body{font-size:15px}
+  header{padding:10px 12px 8px} header .qui{font-size:.8rem;gap:8px} header h1{font-size:1.45rem;gap:8px} header h1 img{height:34px;width:34px}
+  h2{font-size:1.3rem} h3{font-size:1.05rem} .evt .quand{font-size:1.1rem} .kpi b{font-size:1.6rem} .cat{font-size:1rem}
+  main{padding:12px 8px 104px} #bandeau-install{bottom:52px}
+  .btn{padding:8px 12px;font-size:.92rem} .btn.petit{padding:6px 9px;font-size:.85rem}
+  .evt{padding:10px 11px} .annonce{padding:11px} .msg{font-size:.9rem} th,td{padding:7px 9px}
+  nav.onglets button{font-size:.88rem;padding:7px 4px}
+  dialog{width:100vw;max-height:100dvh;border-radius:0} dialog form{padding:16px 14px 24px}
   .tableau{overflow:visible}
   table,tbody,tr,td{display:block;width:100%} thead{display:none}
   tr{padding:8px 10px;border-bottom:1px solid var(--ligne)} tr:last-child{border-bottom:0}
@@ -127,10 +133,23 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;background:var(--encre);color:#fff;padding:10px 16px;border-radius:999px;z-index:9;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:92vw;opacity:0;transition:opacity .2s;pointer-events:none}
 #toast.visible{opacity:1} #toast.erreur{background:#8B2E0B}
 #menu-plus{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--ligne);padding:8px 8px calc(64px + env(safe-area-inset-bottom));z-index:7;display:grid;grid-template-columns:1fr 1fr;gap:6px}
-#menu-plus button{padding:12px;border:1px solid var(--ligne);background:#F8FAFC;border-radius:var(--r);font-family:var(--display);font-size:1.1rem;text-transform:uppercase}
+#menu-plus button{padding:12px;border:1px solid var(--ligne);background:#F8FAFC;color:var(--encre);border-radius:var(--r);font-family:var(--display);font-size:1.1rem;text-transform:uppercase}
 @media (min-width:641px){#menu-plus{display:none!important} nav.onglets .plus{display:none}}
 #chargement{position:fixed;top:0;left:0;right:0;height:3px;background:var(--accent);z-index:20;animation:barre 1s linear infinite;background:linear-gradient(90deg,transparent,var(--accent),transparent);background-size:50% 100%}
 @keyframes barre{from{background-position:-50% 0}to{background-position:150% 0}}
+.chrono{background:var(--surface);border:1px solid var(--ligne);border-radius:var(--r);padding:14px;margin-bottom:14px;text-align:center}
+.chrono .temps{font-family:var(--display);font-size:5rem;line-height:1;margin:6px 0}
+.chrono .phase{font-family:var(--display);font-size:1.4rem;text-transform:uppercase;letter-spacing:.05em}
+.chrono.travail .temps{color:var(--ok)} .chrono.repos .temps{color:var(--accent-2)}
+.chrono .reglages{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0;text-align:left}
+.tableau-blanc{background:#1E7F4F;border-radius:var(--r);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+.tableau-blanc svg{display:block;width:100%;height:auto}
+.tableau-blanc .jeton{cursor:grab} .tableau-blanc text{pointer-events:none;font-family:var(--texte);font-weight:600}
+.perm{background:var(--surface);border:1px solid var(--ligne);border-left:5px solid #1D4ED8;border-radius:var(--r);padding:12px 14px;margin-bottom:10px}
+.perm .tete{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.perm.complet{border-left-color:var(--ok)} .perm.manque{border-left-color:var(--alerte)}
+.jauge{display:inline-block;height:8px;width:120px;background:var(--ligne);border-radius:999px;overflow:hidden;vertical-align:middle}
+.jauge i{display:block;height:100%;background:var(--ok)} .jauge.pleine i{background:#7A1E1E}
 #hors-ligne{background:#B45309;color:#fff;text-align:center;padding:8px 12px;font-weight:600}
 #bandeau-urgent{background:#B91C1C;color:#fff;padding:10px 16px;text-align:center;font-weight:600} #bandeau-urgent a{color:#fff}
 #bandeau-install{position:fixed;bottom:0;left:0;right:0;background:var(--encre);color:#fff;padding:10px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;z-index:5}
@@ -208,6 +227,32 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
       <div class="barre"><h2>Infos du club</h2><button class="btn principal staff-seul" type="button" data-ouvrir="annonce">Publier une info</button></div>
       <div id="zone-infos"></div>
     </section>
+    <section class="onglet cache" id="onglet-buvette">
+      <div class="barre"><h2>Buvette et événements</h2><div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="permanence">Ajouter un créneau</button> <button class="btn second" type="button" data-ouvrir="stock">Ajouter un produit</button></div></div>
+      <div id="zone-buvette"></div>
+    </section>
+    <section class="onglet cache" id="onglet-stages">
+      <div class="barre"><h2>Stages et tombola</h2><div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="stage">Ajouter un stage</button> <button class="btn second" type="button" data-ouvrir="tombola">Tombola</button></div></div>
+      <div id="zone-stages"></div>
+    </section>
+    <section class="onglet cache" id="onglet-coach">
+      <div class="barre"><h2>Outils du coach</h2></div>
+      <div class="chrono" id="chrono">
+        <div class="phase" id="ch-phase">Prêt</div><div class="temps" id="ch-temps">0:30</div>
+        <div class="compteur" id="ch-info">Série 0 / 0</div>
+        <div class="reglages">
+          <div><label for="ch-travail">Exercice (s)</label><input id="ch-travail" type="number" min="5" max="900" value="30"></div>
+          <div><label for="ch-repos">Pause (s)</label><input id="ch-repos" type="number" min="0" max="600" value="15"></div>
+          <div><label for="ch-series">Séries</label><input id="ch-series" type="number" min="1" max="50" value="8"></div>
+          <div><label for="ch-son">Bip sonore</label><select id="ch-son"><option value="1">Oui</option><option value="0">Non</option></select></div>
+        </div>
+        <div class="actions" style="justify-content:center;margin-top:8px"><button class="btn principal" type="button" id="ch-start">▶ Démarrer</button><button class="btn second" type="button" id="ch-pause">⏸ Pause</button><button class="btn second" type="button" id="ch-reset">↺ Remise à zéro</button><button class="btn second" type="button" id="ch-simple">⏱ Chrono simple</button></div>
+      </div>
+      <h3 style="margin-bottom:8px">Tableau tactique</h3>
+      <div class="actions" style="margin:0 0 8px;flex-wrap:wrap"><button class="btn second petit" type="button" data-jeton="nous">+ Joueur (nous)</button><button class="btn second petit" type="button" data-jeton="eux">+ Adversaire</button><button class="btn second petit" type="button" data-jeton="plot">+ Plot</button><button class="btn second petit" type="button" data-jeton="ballon">+ Ballon</button><button class="btn second petit" type="button" data-jeton="gk">+ Gardien</button><button class="btn second petit" type="button" data-jeton="8">Foot à 8 : placer l'équipe</button><button class="btn second petit" type="button" data-jeton="11">Foot à 11 : placer l'équipe</button><button class="btn second petit" type="button" data-jeton="vider">Tout effacer</button></div>
+      <div class="tableau-blanc" id="tableau-blanc"><svg viewBox="0 0 700 460" xmlns="http://www.w3.org/2000/svg" id="terrain"></svg></div>
+      <p class="compteur">Glisse les jetons avec le doigt. Le schéma reste sur cet appareil jusqu'au prochain effacement.</p>
+    </section>
     <section class="onglet cache" id="onglet-boutique">
       <div class="barre"><h2>Boutique</h2><button class="btn principal staff-seul" type="button" data-ouvrir="article">Ajouter un article</button></div>
       <div id="zone-boutique"></div>
@@ -254,6 +299,8 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
     <div><label for="p-sexe">Sexe</label><select id="p-sexe"><option value="">—</option><option value="F">Fille / femme</option><option value="M">Garçon / homme</option></select></div></div>
   <div class="ligne"><div><label for="p-licence">N° de licence FFF (si connu)</label><input id="p-licence"></div><div><label for="p-maillot">Numéro de maillot</label><input id="p-maillot" type="number" min="0" max="99"></div></div>
   <label for="p-email">Email du joueur (pour qu'il se connecte à l'appli, en lecture seule)</label><input id="p-email" type="email" placeholder="prenom@exemple.fr">
+  <div class="staff-seul" style="margin-top:12px;border-top:1px solid var(--ligne);padding-top:4px"><div class="ligne"><div><label for="p-blessure">Blessure / disponibilité</label><select id="p-blessure"><option value="">Disponible</option><option value="indisponible">Indisponible (blessé)</option><option value="reprise">En reprise (ménager)</option></select></div><div><label for="p-jusqu">Jusqu'au</label><input id="p-jusqu" type="date"></div></div>
+  <label for="p-blessure-note">Précision</label><input id="p-blessure-note" placeholder="Ex. entorse cheville, pas de match avant le 15"></div>
   <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-personne"></div></form></dialog>
 
 <dialog id="dlg-licence"><form method="dialog" id="form-licence"><h2>Licence <span id="l-qui"></span></h2><input type="hidden" id="l-personne">
@@ -310,6 +357,46 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   <div class="ligne"><div><label for="c-taille">Taille</label><select id="c-taille"></select></div><div><label for="c-qte">Quantité</label><input id="c-qte" type="number" min="1" value="1"></div></div>
   <div class="actions"><button class="btn principal" value="ok">Commander</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-commande"></div></form></dialog>
 
+<dialog id="dlg-sante"><form method="dialog" id="form-sante"><h2>Fiche d'urgence <span id="s-qui"></span></h2><input type="hidden" id="s-personne">
+  <p class="compteur">Visible par le bureau et les coachs du club. À remplir par les parents ou le club.</p>
+  <label for="s-allergies">Allergies majeures</label><input id="s-allergies" placeholder="Ex. arachide, piqûre de guêpe">
+  <label for="s-problemes">Problèmes de santé à connaître</label><textarea id="s-problemes" placeholder="Ex. asthme (Ventoline dans le sac), diabète, épilepsie…"></textarea>
+  <div class="ligne"><div><label for="s-urg-nom">Personne à prévenir en priorité</label><input id="s-urg-nom" placeholder="Ex. Maman — Julie Martin"></div><div><label for="s-urg-tel">Son téléphone</label><input id="s-urg-tel" type="tel" placeholder="06 …"></div></div>
+  <div class="ligne"><div><label for="s-urg2-nom">Deuxième personne</label><input id="s-urg2-nom"></div><div><label for="s-urg2-tel">Téléphone</label><input id="s-urg2-tel" type="tel"></div></div>
+  <label for="s-note">Autre information utile</label><input id="s-note" placeholder="Ex. médecin traitant, lunettes…">
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-sante"></div></form></dialog>
+
+<dialog id="dlg-permanence"><form method="dialog" id="form-permanence"><h2 id="dlg-perm-titre">Créneau de permanence</h2><input type="hidden" id="pm-id">
+  <label for="pm-titre">Intitulé</label><input id="pm-titre" required placeholder="Ex. Buvette match U13, Tournoi de Pâques — stand crêpes">
+  <div class="ligne"><div><label for="pm-date">Date</label><input id="pm-date" type="date" required></div><div><label for="pm-besoin">Bénévoles nécessaires</label><input id="pm-besoin" type="number" min="1" max="30" value="2"></div></div>
+  <div class="ligne"><div><label for="pm-debut">Début</label><input id="pm-debut" type="time"></div><div><label for="pm-fin">Fin</label><input id="pm-fin" type="time"></div></div>
+  <label for="pm-note">Consigne</label><input id="pm-note" placeholder="Ex. Apporter un gâteau, clé de la buvette chez Marc">
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-permanence"></div></form></dialog>
+
+<dialog id="dlg-stock"><form method="dialog" id="form-stock"><h2 id="dlg-stock-titre">Produit de la buvette</h2><input type="hidden" id="st-id">
+  <label for="st-article">Produit</label><input id="st-article" required placeholder="Ex. Café, Coca 33 cl, Chips">
+  <div class="ligne"><div><label for="st-qte">Quantité en stock</label><input id="st-qte" type="number" min="0" value="0"></div><div><label for="st-seuil">Racheter en dessous de</label><input id="st-seuil" type="number" min="0" value="5"></div></div>
+  <label for="st-note">Où acheter / remarque</label><input id="st-note" placeholder="Ex. Metro, pack de 24">
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-stock"></div></form></dialog>
+
+<dialog id="dlg-stage"><form method="dialog" id="form-stage"><h2 id="dlg-stage-titre">Stage</h2><input type="hidden" id="sg-id">
+  <label for="sg-titre">Intitulé</label><input id="sg-titre" required placeholder="Ex. Stage de Toussaint U9-U13">
+  <div class="ligne"><div><label for="sg-debut">Du</label><input id="sg-debut" type="date" required></div><div><label for="sg-fin">Au</label><input id="sg-fin" type="date" required></div></div>
+  <div class="ligne"><div><label for="sg-heures">Horaires</label><input id="sg-heures" placeholder="Ex. 9h30–16h30, repas tiré du sac"></div><div><label for="sg-cats">Catégories</label><input id="sg-cats" placeholder="Ex. U9 à U13"></div></div>
+  <div class="ligne"><div><label for="sg-prix">Prix (€)</label><input id="sg-prix" type="number" step="0.01" min="0"></div><div><label for="sg-places">Places maximum</label><input id="sg-places" type="number" min="1" value="20"></div></div>
+  <label for="sg-desc">Description</label><textarea id="sg-desc" placeholder="Programme, matériel à apporter, lieu…"></textarea>
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-stage"></div></form></dialog>
+
+<dialog id="dlg-inscription"><form method="dialog" id="form-inscription"><h2>Inscrire au stage <span id="in-titre"></span></h2><input type="hidden" id="in-stage">
+  <label for="in-personne">Enfant</label><select id="in-personne"></select>
+  <p class="compteur" id="in-info"></p>
+  <div class="actions"><button class="btn principal" value="ok">Inscrire</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-inscription"></div></form></dialog>
+
+<dialog id="dlg-tombola"><form method="dialog" id="form-tombola"><h2>Tombola <span id="tb-saison"></span></h2>
+  <div class="ligne"><div><label for="tb-prix">Prix d'un carnet (€)</label><input id="tb-prix" type="number" step="0.01" min="0"></div><div><label for="tb-defaut">Carnets par joueur (par défaut)</label><input id="tb-defaut" type="number" min="0" value="2"></div></div>
+  <p class="compteur">Enregistrer crée ou met à jour une ligne par licencié de la saison avec ce nombre de carnets ; tu ajustes ensuite joueur par joueur dans le tableau.</p>
+  <div class="actions"><button class="btn principal" value="ok">Distribuer les carnets</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-tombola"></div></form></dialog>
+
 <dialog id="dlg-covoit"><form method="dialog" id="form-covoit"><h2>Covoiturage</h2><input type="hidden" id="cv-match">
   <p class="compteur" id="cv-info"></p>
   <label for="cv-famille" id="lbl-cv-famille">Famille</label><select id="cv-famille"></select>
@@ -355,6 +442,7 @@ const nomP = p => p ? `${p.prenom} ${p.nom}` : '?';
 /* ─── État ─── */
 let sb, session = null, club = null, clubs = [], role = 'parent';
 let familles = [], personnes = [], equipes = [], licences = [], membres = [], matchs = [], entrainements = [], presences = [], covoits = [], annonces = [], articles = [], commandes = [], fil = [], mesFamillesIds = [], mesPersonnesIds = [];
+let sante = [], permanences = [], permInscr = [], stocks = [], stages = [], stageInscr = [], tombola = [], extrasOk = true;
 const staff = () => ['admin','bureau','coach'].includes(role);
 const parent = () => role === 'parent';
 const mesPersonnes = () => staff() ? personnes : role === 'joueur' ? personnes.filter(p => mesPersonnesIds.includes(p.id)) : personnes.filter(p => mesFamillesIds.includes(p.famille_id));
@@ -422,9 +510,9 @@ async function ouvrirClub(c){
   const s = saisonCourante(), opts = [s, `${+s.slice(0,4)-1}-${+s.slice(0,4)}`, `${+s.slice(0,4)+1}-${+s.slice(0,4)+2}`];
   ['#saison','#saison-stats'].forEach(id => $(id).innerHTML = opts.map(x => `<option ${x===s?'selected':''}>${x}</option>`).join(''));
   $$('.staff-seul').forEach(el => el.classList.toggle('cache', !staff()));
-  const onglets = staff() ? [['familles','Familles'],['licences','Licences'],['equipes','Équipes'],['agenda','Agenda'],['infos','Infos'],['boutique','Boutique'],['stats','Stats'],['acces','Accès']]
-                          : [['foyer', role === 'joueur' ? 'Ma fiche' : 'Mon foyer'],['agenda','Agenda'],['infos','Infos'],['boutique','Boutique']];
-  const principaux = staff() ? ['familles','licences','agenda','infos'] : onglets.map(o => o[0]);
+  const onglets = staff() ? [['familles','Familles'],['licences','Licences'],['equipes','Équipes'],['agenda','Agenda'],['infos','Infos'],['buvette','Buvette'],['stages','Stages'],['coach','Coach'],['boutique','Boutique'],['stats','Stats'],['acces','Accès']]
+                          : [['foyer', role === 'joueur' ? 'Ma fiche' : 'Mon foyer'],['agenda','Agenda'],['infos','Infos'],['buvette','Buvette'],['stages','Stages'],['boutique','Boutique']];
+  const principaux = staff() ? ['familles','licences','agenda','infos'] : ['foyer','agenda','infos','buvette'];
   $('#nav').innerHTML = onglets.map(([k,l],i) => `<button role="tab" aria-selected="${i===0}" data-onglet="${k}" class="${principaux.includes(k) ? '' : 'secondaire'}">${l}</button>`).join('') + (onglets.length > 5 ? '<button type="button" class="plus" data-plus>Plus ☰</button>' : '');
   $('#menu-plus').innerHTML = onglets.filter(o => !principaux.includes(o[0])).map(([k,l]) => `<button type="button" data-onglet="${k}">${l}</button>`).join('');
   $$('#nav [data-onglet], #menu-plus [data-onglet]').forEach(b => b.addEventListener('click', () => { allerOnglet(b.dataset.onglet); $('#menu-plus').classList.add('cache'); }));
@@ -449,13 +537,17 @@ async function toutRecharger(){
   [matchs, entrainements, presences, covoits, annonces, articles, commandes] = r.slice(5,12).map(x => x.data || []);
   mesFamillesIds = (r[12].data || []).map(x => x.famille_id); mesPersonnesIds = (r[12].data || []).map(x => x.personne_id).filter(Boolean); fil = r[13].data || [];
   const manque = r.slice(5).find(x => x.error); if(manque) $('#zone-agenda').innerHTML = `<div class="vide">${erreurLisible(manque.error)}</div>`;
+  const x = await Promise.all([ q('sante','maj_le'), q('permanences','date_perm'), q('permanence_inscriptions'), q('stocks','article'), q('stages','date_debut'), q('stage_inscriptions'), q('tombola') ]);
+  extrasOk = !x.some(y => y.error);
+  [sante, permanences, permInscr, stocks, stages, stageInscr, tombola] = x.map(y => y.data || []);
   rendreTout();
   } catch(e){ toast(navigator.onLine ? 'Erreur de chargement : ' + erreurLisible(e) : 'Pas de connexion', true); }
   finally { $('#chargement').classList.add('cache'); }
 }
 function majReseau(){ $('#hors-ligne').classList.toggle('cache', navigator.onLine); if(navigator.onLine && club) toutRecharger(); }
 window.addEventListener('online', majReseau); window.addEventListener('offline', majReseau);
-function rendreTout(){ rendreFoyer(); rendreFamilles(); rendreLicences(); rendreEquipes(); rendreAgenda(); rendreInfos(); rendreBoutique(); rendreStats(); rendreAcces(); rendreNotifs(); }
+function rendreTout(){ rendreFoyer(); rendreFamilles(); rendreLicences(); rendreEquipes(); rendreAgenda(); rendreInfos(); rendreBuvette(); rendreStages(); rendreBoutique(); rendreStats(); rendreAcces(); rendreNotifs(); }
+const msgExtras = '<div class="vide">Cette partie n\'est pas encore activée : lance le script <b>07_extras.sql</b> dans Supabase (SQL Editor).</div>';
 $('#saison').addEventListener('change', rendreTout); $('#saison-stats').addEventListener('change', rendreStats);
 
 /* ─── Clics délégués ─── */
@@ -495,6 +587,24 @@ document.addEventListener('click', ev => {
   if(d.commander) ouvrirCommande(articles.find(a => a.id === d.commander));
   if(d.statutCmd) majCommande(d.statutCmd, d.commande);
   if(d.supprimerCommande) supprimer('commandes', d.supprimerCommande, 'Annuler cette commande ?');
+  if(d.sante) ouvrirSante(personnes.find(p => p.id === d.sante));
+  if(d.ouvrir === 'permanence') ouvrirPermanence();
+  if(d.modifierPerm) ouvrirPermanence(permanences.find(p => p.id === d.modifierPerm));
+  if(d.supprimerPerm) supprimer('permanences', d.supprimerPerm, 'Supprimer ce créneau et ses inscrits ?');
+  if(d.inscrirePerm) inscrirePerm(d.inscrirePerm);
+  if(d.retirerPerm) supprimer('permanence_inscriptions', d.retirerPerm, 'Retirer cette inscription ?');
+  if(d.ouvrir === 'stock') ouvrirStock();
+  if(d.modifierStock) ouvrirStock(stocks.find(x => x.id === d.modifierStock));
+  if(d.supprimerStock) supprimer('stocks', d.supprimerStock, 'Retirer ce produit ?');
+  if(d.stockPlus) majStock(d.stockPlus, +d.delta);
+  if(d.ouvrir === 'stage') ouvrirStage();
+  if(d.modifierStage) ouvrirStage(stages.find(x => x.id === d.modifierStage));
+  if(d.supprimerStage) supprimer('stages', d.supprimerStage, 'Supprimer ce stage et ses inscriptions ?');
+  if(d.inscrireStage) ouvrirInscription(stages.find(x => x.id === d.inscrireStage));
+  if(d.statutInscr) majInscription(d.statutInscr, d.inscription);
+  if(d.supprimerInscr) supprimer('stage_inscriptions', d.supprimerInscr, 'Annuler cette inscription ?');
+  if(d.ouvrir === 'tombola') ouvrirTombola();
+  if(d.tombolaPlus) majTombola(d.tombolaPlus, d.champ, +d.delta);
   if(d.notifs !== undefined) $('#dlg-notifs').showModal();
   if(d.reglages !== undefined){ $('#r-nom').value = club.nom; $('#r-lien').value = club.lien_paiement || ''; $('#r-nom-urg').value = club.nom_urgence || ''; $('#r-tel-urg').value = club.tel_urgence || ''; msg('#msg-reglages',''); $('#dlg-reglages').showModal(); }
 });
@@ -532,11 +642,11 @@ function lienPaiement(l, email){
 function carteJoueur(p, f){
   const saison = saisonSel(), lic = licences.find(l => l.personne_id === p.id && l.saison === saison);
   const eq = lic && equipes.find(e => e.id === lic.equipe_id);
-  return `<tr><td>${esc(p.prenom)} <b>${esc(p.nom)}</b>${p.numero_maillot != null ? ` <span class="cat">#${p.numero_maillot}</span>` : ''}</td>
+  return `<tr><td>${esc(p.prenom)} <b>${esc(p.nom)}</b>${p.numero_maillot != null ? ` <span class="cat">#${p.numero_maillot}</span>` : ''} ${puceBlessure(p)}</td>
     <td>${p.date_naissance ? new Date(p.date_naissance).toLocaleDateString('fr-FR') : ''}</td>
     <td><span class="cat">${categorieProposee(p.date_naissance, p.sexe, saison)}</span> ${eq ? '<span class="compteur">' + esc(eq.nom) + '</span>' : ''}</td>
     <td>${lic ? `<span class="puce ${lic.statut}">${lic.statut}</span> ${lic.statut==='demandee' && role !== 'joueur' ? lienPaiement(lic, f.email) : ''}` : (role === 'joueur' ? '<span class="compteur">pas de licence (demande à tes parents)</span>' : `<button class="btn second petit" data-licencier="${p.id}">Licencier ${saison}</button>`)}</td>
-    <td class="act">${role !== 'joueur' ? `<button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button>` : ''}${staff() ? ` <button class="btn second petit" data-supprimer-personne="${p.id}">Supprimer</button>` : ''}</td></tr>`;
+    <td class="act">${role !== 'joueur' ? `<button class="btn second petit" data-sante="${p.id}">🩺 Fiche d'urgence${sante.some(x => x.personne_id === p.id) ? ' ✓' : ''}</button> <button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button>` : ''}${staff() ? ` <button class="btn second petit" data-supprimer-personne="${p.id}">Supprimer</button>` : ''}</td></tr>`;
 }
 function tableFamille(f){
   const ps = personnes.filter(p => p.famille_id === f.id && (role !== 'joueur' || mesPersonnesIds.includes(p.id))), peutModifier = staff() || role === 'parent';
@@ -572,11 +682,13 @@ function ouvrirPersonne(p, familleId){
   $('#p-id').value = p?.id || ''; $('#p-famille').value = p?.famille_id || familleId || '';
   $('#p-prenom').value = p?.prenom || ''; $('#p-nom').value = p?.nom || (familles.find(f => f.id === familleId)?.nom || '');
   $('#p-naissance').value = p?.date_naissance || ''; $('#p-sexe').value = p?.sexe || ''; $('#p-licence').value = p?.num_licence || ''; $('#p-maillot').value = p?.numero_maillot ?? ''; $('#p-email').value = p?.email || '';
+  $('#p-blessure').value = p?.blessure_statut || ''; $('#p-jusqu').value = p?.blessure_jusqu_au || ''; $('#p-blessure-note').value = p?.blessure_note || '';
   msg('#msg-personne',''); $('#dlg-personne').showModal();
 }
 soumettre('#form-personne', async () => {
   const ligne = { club_id: club.id, famille_id: $('#p-famille').value || null, prenom: $('#p-prenom').value.trim(), nom: $('#p-nom').value.trim(), date_naissance: $('#p-naissance').value || null,
     sexe: $('#p-sexe').value || null, num_licence: $('#p-licence').value.trim() || null, email: $('#p-email').value.trim().toLowerCase() || null, numero_maillot: $('#p-maillot').value === '' ? null : parseInt($('#p-maillot').value,10) }, id = $('#p-id').value;
+  if(staff() && extrasOk){ ligne.blessure_statut = $('#p-blessure').value || null; ligne.blessure_jusqu_au = $('#p-blessure').value ? ($('#p-jusqu').value || null) : null; ligne.blessure_note = $('#p-blessure').value ? ($('#p-blessure-note').value.trim() || null) : null; }
   const { error } = id ? await sb.from('personnes').update(ligne).eq('id', id) : await sb.from('personnes').insert(ligne);
   if(error){ msg('#msg-personne', erreurLisible(error), 'erreur'); return; } $('#dlg-personne').close(); await toutRecharger();
 });
@@ -642,7 +754,7 @@ function rendreEquipes(){
   $('#zone-equipes').innerHTML = equipes.map(e => { const js = joueursEquipe(e);
     return `<div class="tableau"><div class="titre-tableau"><div><b>${esc(e.nom)}</b> <span class="cat">${esc(e.categorie)}</span> <span class="compteur">${esc(e.saison)} · ${js.length} joueur${js.length>1?'s':''}${e.coach_nom ? ' · coach ' + esc(e.coach_nom) : ''}</span> ${btnWhatsapp(e)} ${btnTel(e.coach_nom, e.coach_tel, 'Appeler le coach')}</div><div><button class="btn second petit" data-modifier-equipe="${e.id}">Modifier</button> <button class="btn second petit" data-supprimer-equipe="${e.id}">Supprimer</button></div></div>
       <table><thead><tr><th>N°</th><th>Joueur</th><th>G/F</th><th></th></tr></thead>
-      <tbody>${js.length ? js.map(p => { const st = assiduite(p, e); return `<tr><td style="width:60px"><span class="cat">${p.numero_maillot != null ? '#' + p.numero_maillot : '—'}</span></td><td>${esc(nomP(p))}</td><td>${p.sexe === 'F' ? 'F' : p.sexe === 'M' ? 'G' : ''} <span class="compteur">· entraînements ${st.ePres}/${st.eTot} · matchs joués ${st.conv}</span></td><td class="act"><button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button></td></tr>`; }).join('') : '<tr><td colspan="4" class="compteur">Aucun joueur rattaché (onglet Licences → colonne Équipe).</td></tr>'}</tbody></table></div>`; }).join('');
+      <tbody>${js.length ? js.map(p => { const st = assiduite(p, e); return `<tr><td style="width:60px"><span class="cat">${p.numero_maillot != null ? '#' + p.numero_maillot : '—'}</span></td><td>${esc(nomP(p))} ${puceBlessure(p)}</td><td>${p.sexe === 'F' ? 'F' : p.sexe === 'M' ? 'G' : ''} <span class="compteur">· entraînements ${st.ePres}/${st.eTot} · matchs joués ${st.conv}</span></td><td class="act"><button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button></td></tr>`; }).join('') : '<tr><td colspan="4" class="compteur">Aucun joueur rattaché (onglet Licences → colonne Équipe).</td></tr>'}</tbody></table>${blocSanteEquipe(e)}</div>`; }).join('');
 }
 
 /* ─── Agenda : matchs + entraînements + présences + covoiturage ─── */
@@ -656,7 +768,7 @@ function ouvrirMatch(m){
   $('#m-adversaire').value = m?.adversaire || ''; $('#m-lieu-type').value = m ? String(m.domicile) : 'true'; $('#m-lieu').value = m?.lieu || ''; $('#m-terrain').value = m?.terrain || '';
   $('#m-nous').value = m?.score_nous ?? ''; $('#m-eux').value = m?.score_eux ?? ''; $('#m-comm').value = m?.commentaire || ''; $('#m-arbitre').value = m?.arbitre || ''; $('#m-materiel').value = m?.materiel || '';
   const majLavage = () => { const e = equipes.find(x => x.id === $('#m-equipe').value), js = e ? joueursEquipe(e) : []; $('#m-lavage').innerHTML = '<option value="">—</option>' + js.map(p => `<option value="${p.id}" ${m?.lavage_personne_id===p.id?'selected':''}>${esc(nomP(p))}</option>`).join('');
-    $('#m-convoques').innerHTML = js.length ? js.map(p => `<label style="display:inline-block;margin:0 10px 4px 0;font-weight:400"><input type="checkbox" value="${p.id}" style="width:auto;margin-right:4px" ${(m?.convoques||[]).includes(p.id)?'checked':''}>${esc(nomP(p))}</label>`).join('') : '<span class="compteur">Aucun joueur rattaché à cette équipe.</span>'; };
+    $('#m-convoques').innerHTML = js.length ? js.map(p => `<label style="display:inline-block;margin:0 10px 4px 0;font-weight:400${blessure(p) === 'indisponible' ? ';opacity:.6' : ''}"><input type="checkbox" value="${p.id}" style="width:auto;margin-right:4px" ${(m?.convoques||[]).includes(p.id)?'checked':''}>${esc(nomP(p))} ${puceBlessure(p)}</label>`).join('') : '<span class="compteur">Aucun joueur rattaché à cette équipe.</span>'; };
   $('#m-equipe').onchange = majLavage; majLavage(); msg('#msg-match',''); $('#dlg-match').showModal();
 }
 soumettre('#form-match', async () => {
@@ -819,6 +931,194 @@ function rendreInfos(){
   $('#zone-infos').innerHTML = regles + (as.length ? as.map(a => { const eq = equipes.find(e => e.id === a.equipe_id);
     return `<div class="annonce"${a.urgent ? ' style="border-left:5px solid #B91C1C"' : ''}><div class="meta">${a.urgent ? '🚨 URGENT · ' : ''}${new Date(a.cree_le).toLocaleDateString('fr-FR')} · ${eq ? esc(eq.nom) : 'Tout le club'}${a.auteur ? ' · ' + esc(a.auteur) : ''}</div><h3>${esc(a.titre)}</h3><p>${esc(a.texte)}</p>${staff() ? `<div class="actions"><button class="btn second petit" data-supprimer-annonce="${a.id}">Supprimer</button></div>` : ''}</div>`; }).join('') : '<div class="vide">Aucune info pour l\'instant.</div>');
 }
+
+/* ─── Santé et blessures ─── */
+function blessure(p){ if(!p?.blessure_statut) return ''; if(p.blessure_jusqu_au && p.blessure_jusqu_au < aujourdhui()) return ''; return p.blessure_statut; }
+function puceBlessure(p){ const b = blessure(p); if(!b) return ''; return `<span class="puce ${b}" title="${esc(p.blessure_note || '')}">${b === 'indisponible' ? '⛔ indisponible' : '⚠️ en reprise'}${p.blessure_jusqu_au ? ' jusqu\'au ' + new Date(p.blessure_jusqu_au + 'T12:00:00').toLocaleDateString('fr-FR', { day:'numeric', month:'short' }) : ''}</span>`; }
+function ouvrirSante(p){
+  if(!extrasOk){ toast('Lance d\'abord le script 07_extras.sql', true); return; }
+  const f = sante.find(x => x.personne_id === p.id) || {};
+  $('#s-qui').textContent = nomP(p); $('#s-personne').value = p.id;
+  $('#s-allergies').value = f.allergies || ''; $('#s-problemes').value = f.problemes || ''; $('#s-urg-nom').value = f.urgence_nom || ''; $('#s-urg-tel').value = f.urgence_tel || '';
+  $('#s-urg2-nom').value = f.urgence2_nom || ''; $('#s-urg2-tel').value = f.urgence2_tel || ''; $('#s-note').value = f.note || '';
+  msg('#msg-sante',''); $('#dlg-sante').showModal();
+}
+soumettre('#form-sante', async () => {
+  const v = id => $(id).value.trim() || null;
+  const { error } = await sb.from('sante').upsert({ club_id: club.id, personne_id: $('#s-personne').value, allergies: v('#s-allergies'), problemes: v('#s-problemes'), urgence_nom: v('#s-urg-nom'), urgence_tel: v('#s-urg-tel'), urgence2_nom: v('#s-urg2-nom'), urgence2_tel: v('#s-urg2-tel'), note: v('#s-note'), maj_le: new Date().toISOString() }, { onConflict: 'personne_id' });
+  if(error){ msg('#msg-sante', erreurLisible(error), 'erreur'); return; } $('#dlg-sante').close(); await toutRecharger();
+});
+function blocSanteEquipe(e){
+  if(!staff()) return ''; const js = joueursEquipe(e).filter(p => sante.some(x => x.personne_id === p.id) || blessure(p)); if(!js.length) return '';
+  return `<details style="padding:8px 12px;border-top:1px solid var(--ligne)"><summary style="cursor:pointer;font-weight:600">🩺 Urgences et santé (${js.length})</summary>${js.map(p => { const f = sante.find(x => x.personne_id === p.id) || {};
+    return `<div class="pres"><b>${esc(p.prenom)}</b> ${puceBlessure(p)}${f.allergies ? ` <span class="puce refusee">allergie : ${esc(f.allergies)}</span>` : ''}${f.problemes ? ` <span class="puce demandee">${esc(f.problemes)}</span>` : ''} ${btnTel(f.urgence_nom, f.urgence_tel, f.urgence_nom || 'Prévenir')} ${btnTel(f.urgence2_nom, f.urgence2_tel, f.urgence2_nom || '2e contact')}</div>`; }).join('')}</details>`;
+}
+
+/* ─── Buvette : permanences + stocks ─── */
+function ouvrirPermanence(p){
+  $('#dlg-perm-titre').textContent = p ? 'Modifier le créneau' : 'Nouveau créneau'; $('#pm-id').value = p?.id || ''; $('#pm-titre').value = p?.titre || ''; $('#pm-date').value = p?.date_perm || aujourdhui();
+  $('#pm-besoin').value = p?.besoin ?? 2; $('#pm-debut').value = p?.heure_debut || ''; $('#pm-fin').value = p?.heure_fin || ''; $('#pm-note').value = p?.note || ''; msg('#msg-permanence',''); $('#dlg-permanence').showModal();
+}
+soumettre('#form-permanence', async () => {
+  const ligne = { club_id: club.id, titre: $('#pm-titre').value.trim(), date_perm: $('#pm-date').value, besoin: +$('#pm-besoin').value || 1, heure_debut: $('#pm-debut').value || null, heure_fin: $('#pm-fin').value || null, note: $('#pm-note').value.trim() || null }, id = $('#pm-id').value;
+  const { error } = id ? await sb.from('permanences').update(ligne).eq('id', id) : await sb.from('permanences').insert(ligne);
+  if(error){ msg('#msg-permanence', erreurLisible(error), 'erreur'); return; } $('#dlg-permanence').close(); await toutRecharger();
+});
+async function inscrirePerm(id){
+  let nom, familleId = mesFamillesIds[0] || null;
+  if(staff()){ nom = prompt('Nom du bénévole :'); if(!nom) return; familleId = null; }
+  else { const f = familles.find(x => x.id === familleId); nom = prompt('Qui tient la permanence ?', f ? 'Famille ' + f.nom : '') ; if(!nom) return; }
+  const { error } = await sb.from('permanence_inscriptions').insert({ club_id: club.id, permanence_id: id, famille_id: familleId, nom: nom.trim() });
+  if(error){ toast(erreurLisible(error), true); return; } toast('Merci ! Inscription notée ✓'); await toutRecharger();
+}
+function ouvrirStock(x){ $('#dlg-stock-titre').textContent = x ? 'Modifier le produit' : 'Nouveau produit'; $('#st-id').value = x?.id || ''; $('#st-article').value = x?.article || ''; $('#st-qte').value = x?.quantite ?? 0; $('#st-seuil').value = x?.seuil ?? 5; $('#st-note').value = x?.note || ''; msg('#msg-stock',''); $('#dlg-stock').showModal(); }
+soumettre('#form-stock', async () => {
+  const ligne = { club_id: club.id, article: $('#st-article').value.trim(), quantite: +$('#st-qte').value || 0, seuil: +$('#st-seuil').value || 0, note: $('#st-note').value.trim() || null, maj_le: new Date().toISOString() }, id = $('#st-id').value;
+  const { error } = id ? await sb.from('stocks').update(ligne).eq('id', id) : await sb.from('stocks').insert(ligne);
+  if(error){ msg('#msg-stock', erreurLisible(error), 'erreur'); return; } $('#dlg-stock').close(); await toutRecharger();
+});
+async function majStock(id, delta){ const x = stocks.find(s => s.id === id); if(!x) return; const { error } = await sb.from('stocks').update({ quantite: Math.max(0, (x.quantite||0) + delta), maj_le: new Date().toISOString() }).eq('id', id); if(error) toast(erreurLisible(error), true); else await toutRecharger(); }
+function rendreBuvette(){
+  if(!extrasOk){ $('#zone-buvette').innerHTML = msgExtras; return; }
+  const auj = aujourdhui(), futures = permanences.filter(p => p.date_perm >= auj), passees = permanences.filter(p => p.date_perm < auj).reverse().slice(0, 5);
+  const carte = p => { const ins = permInscr.filter(i => i.permanence_id === p.id), manque = Math.max(0, p.besoin - ins.length), mienne = ins.find(i => i.famille_id && mesFamillesIds.includes(i.famille_id));
+    return `<div class="perm ${manque ? 'manque' : 'complet'}"><div class="tete"><span class="quand" style="font-family:var(--display);font-size:1.15rem">🥤 ${dateFr(p.date_perm)}${p.heure_debut ? ' · ' + esc(p.heure_debut) + (p.heure_fin ? '–' + esc(p.heure_fin) : '') : ''}</span>${manque ? `<span class="puce demandee">il manque ${manque} bénévole${manque>1?'s':''}</span>` : '<span class="puce present">complet ✓</span>'}</div>
+      <div><b>${esc(p.titre)}</b>${p.note ? ` <span class="compteur">· ${esc(p.note)}</span>` : ''}</div>
+      <div class="pres">${ins.length ? ins.map(i => `<span class="puce ${i.famille_id && mesFamillesIds.includes(i.famille_id) ? 'present' : ''}">${esc(i.nom)}${staff() || (i.famille_id && mesFamillesIds.includes(i.famille_id)) ? ` <button class="btn second petit" style="padding:0 5px;font-size:.75rem" data-retirer-perm="${i.id}">✕</button>` : ''}</span>`).join(' ') : '<span class="compteur">personne pour l\'instant</span>'}</div>
+      <div class="actions" style="margin-top:8px">${p.date_perm >= auj && (staff() || (!mienne && manque)) ? `<button class="btn ${staff() ? 'second' : 'principal'} petit" data-inscrire-perm="${p.id}">${staff() ? '+ Ajouter un bénévole' : '🙋 Je m\'inscris'}</button>` : ''}${staff() ? ` <button class="btn second petit" data-modifier-perm="${p.id}">Modifier</button> <button class="btn second petit" data-supprimer-perm="${p.id}">Supprimer</button>` : ''}</div></div>`; };
+  const aRacheter = stocks.filter(s => (s.quantite||0) <= (s.seuil||0));
+  let html = '<h3>Permanences à pourvoir</h3>' + (futures.length ? futures.map(carte).join('') : '<div class="vide">Aucun créneau prévu. ' + (staff() ? 'Ajoute un créneau pour que les parents s\'inscrivent.' : 'Le club n\'a pas encore ouvert d\'inscriptions.') + '</div>');
+  if(passees.length && staff()) html += '<h3 style="margin-top:16px">Créneaux passés</h3>' + passees.map(carte).join('');
+  html += `<h3 style="margin:18px 0 8px">Stock de la buvette ${aRacheter.length ? `<span class="puce demandee">${aRacheter.length} produit${aRacheter.length>1?'s':''} à racheter</span>` : '<span class="puce present">tout est en stock</span>'}</h3>`;
+  if(!stocks.length) html += '<div class="vide">Aucun produit suivi. ' + (staff() ? 'Ajoute café, boissons, snacks…' : '') + '</div>';
+  else html += `<div class="tableau"><table><thead><tr><th>Produit</th><th>En stock</th><th>Seuil</th><th>Où / remarque</th><th class="act"></th></tr></thead><tbody>${stocks.map(s => `<tr${(s.quantite||0) <= (s.seuil||0) ? ' style="background:rgba(180,83,9,.08)"' : ''}><td><b>${esc(s.article)}</b> ${(s.quantite||0) <= (s.seuil||0) ? '<span class="puce demandee">à racheter</span>' : ''}</td><td>${staff() ? `<button class="btn second petit" data-stock-plus="${s.id}" data-delta="-1">−</button> <b>${s.quantite||0}</b> <button class="btn second petit" data-stock-plus="${s.id}" data-delta="1">+</button>` : `<b>${s.quantite||0}</b>`}</td><td>${s.seuil||0}</td><td class="compteur">${esc(s.note||'')}</td><td class="act">${staff() ? `<button class="btn second petit" data-modifier-stock="${s.id}">Modifier</button> <button class="btn second petit" data-supprimer-stock="${s.id}">Retirer</button>` : ''}</td></tr>`).join('')}</tbody></table></div>`;
+  $('#zone-buvette').innerHTML = html;
+}
+
+/* ─── Stages + tombola ─── */
+function ouvrirStage(x){
+  $('#dlg-stage-titre').textContent = x ? 'Modifier le stage' : 'Nouveau stage'; $('#sg-id').value = x?.id || ''; $('#sg-titre').value = x?.titre || ''; $('#sg-debut').value = x?.date_debut || aujourdhui(); $('#sg-fin').value = x?.date_fin || aujourdhui();
+  $('#sg-heures').value = x?.heures || ''; $('#sg-cats').value = x?.categories || ''; $('#sg-prix').value = x?.prix ?? ''; $('#sg-places').value = x?.places_max ?? 20; $('#sg-desc').value = x?.description || ''; msg('#msg-stage',''); $('#dlg-stage').showModal();
+}
+soumettre('#form-stage', async () => {
+  if($('#sg-fin').value < $('#sg-debut').value){ msg('#msg-stage', 'La date de fin est avant le début.', 'erreur'); return; }
+  const ligne = { club_id: club.id, titre: $('#sg-titre').value.trim(), date_debut: $('#sg-debut').value, date_fin: $('#sg-fin').value, heures: $('#sg-heures').value.trim() || null, categories: $('#sg-cats').value.trim() || null, prix: $('#sg-prix').value === '' ? null : parseFloat($('#sg-prix').value), places_max: +$('#sg-places').value || 1, description: $('#sg-desc').value.trim() || null }, id = $('#sg-id').value;
+  const { error } = id ? await sb.from('stages').update(ligne).eq('id', id) : await sb.from('stages').insert(ligne);
+  if(error){ msg('#msg-stage', erreurLisible(error), 'erreur'); return; } $('#dlg-stage').close(); await toutRecharger();
+});
+function ouvrirInscription(st){
+  const deja = stageInscr.filter(i => i.stage_id === st.id).map(i => i.personne_id), cand = mesPersonnes().filter(p => !deja.includes(p.id));
+  if(!cand.length){ toast(staff() ? 'Tous les joueurs sont déjà inscrits.' : 'Tes enfants sont déjà inscrits.'); return; }
+  $('#in-stage').value = st.id; $('#in-titre').textContent = st.titre; $('#in-personne').innerHTML = cand.map(p => `<option value="${p.id}">${esc(nomP(p))}</option>`).join('');
+  const reste = st.places_max - deja.length; $('#in-info').textContent = `${reste} place${reste>1?'s':''} restante${reste>1?'s':''}${st.prix != null ? ' · ' + (+st.prix).toFixed(2).replace('.', ',') + ' € par enfant' : ''}`;
+  msg('#msg-inscription',''); $('#dlg-inscription').showModal();
+}
+soumettre('#form-inscription', async () => {
+  const st = stages.find(x => x.id === $('#in-stage').value), nb = stageInscr.filter(i => i.stage_id === st.id).length;
+  if(nb >= st.places_max){ msg('#msg-inscription', 'Le stage est complet.', 'erreur'); return; }
+  const p = personnes.find(x => x.id === $('#in-personne').value);
+  const { error } = await sb.from('stage_inscriptions').insert({ club_id: club.id, stage_id: st.id, personne_id: p.id, famille_id: p.famille_id || null });
+  if(error){ msg('#msg-inscription', erreurLisible(error), 'erreur'); return; } $('#dlg-inscription').close(); await toutRecharger();
+});
+async function majInscription(statut, id){ const { error } = await sb.from('stage_inscriptions').update({ statut }).eq('id', id); if(error) toast(erreurLisible(error), true); else await toutRecharger(); }
+function ouvrirTombola(){ const s = saisonSel(); $('#tb-saison').textContent = s; const ex = tombola.find(t => t.saison === s); $('#tb-prix').value = ex?.prix_carnet ?? ''; $('#tb-defaut').value = 2; msg('#msg-tombola',''); $('#dlg-tombola').showModal(); }
+soumettre('#form-tombola', async () => {
+  const s = saisonSel(), prix = $('#tb-prix').value === '' ? null : parseFloat($('#tb-prix').value), n = +$('#tb-defaut').value || 0;
+  const ids = licences.filter(l => l.saison === s).map(l => l.personne_id);
+  if(!ids.length){ msg('#msg-tombola', 'Aucune licence pour cette saison.', 'erreur'); return; }
+  const lignes = ids.map(pid => { const ex = tombola.find(t => t.saison === s && t.personne_id === pid); return { club_id: club.id, saison: s, personne_id: pid, carnets: ex ? ex.carnets : n, vendus: ex ? ex.vendus : 0, prix_carnet: prix, maj_le: new Date().toISOString() }; });
+  const { error } = await sb.from('tombola').upsert(lignes, { onConflict: 'saison,personne_id' });
+  if(error){ msg('#msg-tombola', erreurLisible(error), 'erreur'); return; } $('#dlg-tombola').close(); await toutRecharger();
+});
+async function majTombola(id, champ, delta){ const t = tombola.find(x => x.id === id); if(!t) return; const v = Math.max(0, (t[champ]||0) + delta); if(champ === 'vendus' && v > t.carnets){ toast('Plus de carnets vendus que distribués'); return; } const { error } = await sb.from('tombola').update({ [champ]: v, maj_le: new Date().toISOString() }).eq('id', id); if(error) toast(erreurLisible(error), true); else await toutRecharger(); }
+function rendreStages(){
+  if(!extrasOk){ $('#zone-stages').innerHTML = msgExtras; return; }
+  const auj = aujourdhui(), miens = mesPersonnes().map(p => p.id);
+  const carte = st => { const ins = stageInscr.filter(i => i.stage_id === st.id), reste = Math.max(0, st.places_max - ins.length), mesIns = ins.filter(i => miens.includes(i.personne_id));
+    return `<div class="evt extra"><div class="tete"><span class="quand">🏕️ ${dateFr(st.date_debut)}${st.date_fin !== st.date_debut ? ' → ' + dateFr(st.date_fin) : ''}</span><span>${reste ? `<span class="puce present">${reste} place${reste>1?'s':''} sur ${st.places_max}</span>` : '<span class="puce refusee">complet</span>'}</span></div>
+      <div><b>${esc(st.titre)}</b>${st.categories ? ` <span class="cat">${esc(st.categories)}</span>` : ''}${st.prix != null ? ` <span class="prix" style="font-family:var(--display);color:var(--accent-2)">${(+st.prix).toFixed(2).replace('.', ',')} €</span>` : ''}</div>
+      <div class="detail">${st.heures ? '🕘 ' + esc(st.heures) : ''}${st.description ? (st.heures ? ' · ' : '') + esc(st.description) : ''}</div>
+      <div class="jauge${reste ? '' : ' pleine'}" style="margin-top:6px"><i style="width:${Math.min(100, 100*ins.length/st.places_max)}%"></i></div> <span class="compteur">${ins.length} inscrit${ins.length>1?'s':''}</span>
+      ${mesIns.length && !staff() ? `<div class="bloc"><b>Mes inscriptions :</b> ${mesIns.map(i => { const p = personnes.find(x => x.id === i.personne_id); return `<span class="puce ${i.statut === 'paye' ? 'validee' : 'present'}">${esc(p?.prenom||'?')} · ${i.statut === 'paye' ? 'payé' : 'inscrit'}</span> ${st.date_debut > auj && i.statut !== 'paye' ? `<button class="btn second petit" data-supprimer-inscr="${i.id}">Annuler</button>` : ''}`; }).join(' ')}</div>` : ''}
+      ${staff() && ins.length ? `<details class="bloc"><summary style="cursor:pointer;font-weight:600">Liste des inscrits (${ins.length})</summary>${ins.map(i => { const p = personnes.find(x => x.id === i.personne_id), f = familles.find(x => x.id === i.famille_id); return `<div class="pres">${esc(nomP(p))} <span class="compteur">${esc(f?.nom||'')} ${esc(f?.telephone||'')}</span> <span class="puce ${i.statut === 'paye' ? 'validee' : 'demandee'}">${i.statut === 'paye' ? 'payé' : 'à payer'}</span> ${i.statut !== 'paye' ? `<button class="btn second petit" data-statut-inscr="paye" data-inscription="${i.id}">Paiement reçu</button>` : `<button class="btn second petit" data-statut-inscr="inscrit" data-inscription="${i.id}">Rouvrir</button>`} <button class="btn second petit" data-supprimer-inscr="${i.id}">Retirer</button></div>`; }).join('')}</details>` : ''}
+      <div class="actions">${st.date_debut >= auj && reste && role !== 'joueur' ? `<button class="btn principal petit" data-inscrire-stage="${st.id}">${staff() ? 'Inscrire un joueur' : 'Inscrire mon enfant'}</button>` : ''}${staff() ? ` <button class="btn second petit" data-modifier-stage="${st.id}">Modifier</button> <button class="btn second petit" data-supprimer-stage="${st.id}">Supprimer</button>` : ''}</div></div>`; };
+  const futurs = stages.filter(s => s.date_fin >= auj), passes = stages.filter(s => s.date_fin < auj).reverse().slice(0, 5);
+  let html = '<h3>Stages du club</h3>' + (futurs.length ? futurs.map(carte).join('') : '<div class="vide">Aucun stage ouvert aux inscriptions.</div>') + (passes.length && staff() ? '<h3 style="margin-top:16px">Stages passés</h3>' + passes.map(carte).join('') : '');
+  // tombola
+  const s = saisonSel(), ts = tombola.filter(t => t.saison === s), prix = ts.find(t => t.prix_carnet != null)?.prix_carnet;
+  const visibles = staff() ? ts : ts.filter(t => miens.includes(t.personne_id));
+  html += `<h3 style="margin:18px 0 8px">🎟️ Tombola ${s}</h3>`;
+  if(!ts.length) html += `<div class="vide">${staff() ? 'Pas encore de carnets distribués : clique sur « Tombola » pour lancer la distribution.' : 'Pas de tombola en cours.'}</div>`;
+  else {
+    const tot = ts.reduce((a,t) => a + (t.carnets||0), 0), vend = ts.reduce((a,t) => a + (t.vendus||0), 0);
+    if(staff()) html += `<div class="kpi"><div><b>${tot}</b><span>carnets distribués</span></div><div><b>${vend}</b><span>carnets vendus</span></div><div><b>${tot ? Math.round(100*vend/tot) : 0} %</b><span>écoulés</span></div>${prix != null ? `<div><b>${(vend*prix).toFixed(0)} €</b><span>récoltés sur ${(tot*prix).toFixed(0)} € possibles</span></div>` : ''}</div>`;
+    const parEq = {}; visibles.forEach(t => { const l = licences.find(x => x.personne_id === t.personne_id && x.saison === s), e = equipes.find(x => x.id === l?.equipe_id); (parEq[e?.nom || 'Sans équipe'] = parEq[e?.nom || 'Sans équipe'] || []).push(t); });
+    html += Object.entries(parEq).sort().map(([nom, ts2]) => `<div class="tableau"><div class="titre-tableau"><b>${esc(nom)}</b><span class="compteur">${ts2.reduce((a,t) => a + (t.vendus||0), 0)} / ${ts2.reduce((a,t) => a + (t.carnets||0), 0)} carnets vendus</span></div><table><thead><tr><th>Joueur</th><th>Carnets</th><th>Vendus</th><th>Reste</th></tr></thead><tbody>${ts2.map(t => { const p = personnes.find(x => x.id === t.personne_id); const reste = (t.carnets||0) - (t.vendus||0);
+      return `<tr><td>${esc(nomP(p))}</td><td>${staff() ? `<button class="btn second petit" data-tombola-plus="${t.id}" data-champ="carnets" data-delta="-1">−</button> <b>${t.carnets||0}</b> <button class="btn second petit" data-tombola-plus="${t.id}" data-champ="carnets" data-delta="1">+</button>` : `<b>${t.carnets||0}</b>`}</td><td>${staff() ? `<button class="btn second petit" data-tombola-plus="${t.id}" data-champ="vendus" data-delta="-1">−</button> <b>${t.vendus||0}</b> <button class="btn second petit" data-tombola-plus="${t.id}" data-champ="vendus" data-delta="1">+</button>` : `<b>${t.vendus||0}</b>`}</td><td>${reste ? `<span class="puce demandee">${reste} à vendre</span>` : '<span class="puce present">tout vendu ✓</span>'}</td></tr>`; }).join('')}</tbody></table></div>`).join('');
+  }
+  $('#zone-stages').innerHTML = html;
+}
+
+/* ─── Outils du coach : minuteur d'exercices ─── */
+const chrono = { etat:'pret', reste:30, serie:0, timer:null, simple:false, total:0 };
+let ctxAudio; function bip(n = 1, f = 880){ if($('#ch-son').value !== '1') return; try { ctxAudio = ctxAudio || new (window.AudioContext || window.webkitAudioContext)(); for(let i = 0; i < n; i++){ const o = ctxAudio.createOscillator(), g = ctxAudio.createGain(); o.frequency.value = f; o.connect(g); g.connect(ctxAudio.destination); const t = ctxAudio.currentTime + i*0.25; g.gain.setValueAtTime(0.4, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18); o.start(t); o.stop(t + 0.2); } } catch(e){} }
+function fmtS(s){ return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
+function chronoAffiche(){ const c = $('#chrono'); c.className = 'chrono ' + (chrono.etat === 'travail' ? 'travail' : chrono.etat === 'repos' ? 'repos' : ''); $('#ch-temps').textContent = fmtS(chrono.simple ? chrono.total : chrono.reste);
+  $('#ch-phase').textContent = chrono.simple ? 'Chrono' : ({ pret:'Prêt', travail:'Exercice', repos:'Pause', pause:'En pause', fini:'Terminé !' })[chrono.etat];
+  $('#ch-info').textContent = chrono.simple ? '' : `Série ${chrono.serie} / ${$('#ch-series').value}`; }
+function chronoTick(){
+  if(chrono.simple){ chrono.total++; chronoAffiche(); return; }
+  chrono.reste--; if(chrono.reste <= 3 && chrono.reste > 0) bip(1, 660);
+  if(chrono.reste <= 0){
+    if(chrono.etat === 'travail'){ const repos = +$('#ch-repos').value; if(chrono.serie >= +$('#ch-series').value){ chrono.etat = 'fini'; bip(3, 1040); clearInterval(chrono.timer); chrono.timer = null; chronoAffiche(); return; }
+      if(repos > 0){ chrono.etat = 'repos'; chrono.reste = repos; bip(2, 520); } else { chrono.serie++; chrono.reste = +$('#ch-travail').value; bip(1, 1040); } }
+    else { chrono.etat = 'travail'; chrono.serie++; chrono.reste = +$('#ch-travail').value; bip(1, 1040); }
+  }
+  chronoAffiche();
+}
+let wakeLock = null; async function garderEcran(on){ try { if(on && 'wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); else if(!on && wakeLock){ wakeLock.release(); wakeLock = null; } } catch(e){} }
+$('#ch-start').addEventListener('click', () => { if(chrono.timer) return; if(chrono.etat === 'pret' || chrono.etat === 'fini'){ chrono.simple = false; chrono.serie = 1; chrono.etat = 'travail'; chrono.reste = +$('#ch-travail').value; bip(1, 1040); } else if(chrono.etat === 'pause') chrono.etat = chrono.avant || 'travail'; chrono.timer = setInterval(chronoTick, 1000); garderEcran(true); chronoAffiche(); });
+$('#ch-pause').addEventListener('click', () => { if(!chrono.timer) return; clearInterval(chrono.timer); chrono.timer = null; if(!chrono.simple){ chrono.avant = chrono.etat; chrono.etat = 'pause'; } chronoAffiche(); });
+$('#ch-reset').addEventListener('click', () => { clearInterval(chrono.timer); chrono.timer = null; chrono.etat = 'pret'; chrono.simple = false; chrono.serie = 0; chrono.total = 0; chrono.reste = +$('#ch-travail').value; garderEcran(false); chronoAffiche(); });
+$('#ch-simple').addEventListener('click', () => { clearInterval(chrono.timer); chrono.simple = true; chrono.total = 0; chrono.etat = 'travail'; chrono.timer = setInterval(chronoTick, 1000); garderEcran(true); chronoAffiche(); });
+$('#ch-travail').addEventListener('change', () => { if(chrono.etat === 'pret'){ chrono.reste = +$('#ch-travail').value; chronoAffiche(); } });
+
+/* ─── Outils du coach : tableau tactique ─── */
+const svgNS = 'http://www.w3.org/2000/svg';
+let jetons = []; try { jetons = JSON.parse(localStorage.getItem('tableau_jetons') || '[]'); } catch(e){}
+function dessinerTerrain(){
+  const svg = $('#terrain'); if(!svg) return; svg.innerHTML = '';
+  const l = (x1,y1,x2,y2) => { const e = document.createElementNS(svgNS,'line'); e.setAttribute('x1',x1); e.setAttribute('y1',y1); e.setAttribute('x2',x2); e.setAttribute('y2',y2); e.setAttribute('stroke','#fff'); e.setAttribute('stroke-width','2'); svg.appendChild(e); };
+  const r = (x,y,w,h) => { const e = document.createElementNS(svgNS,'rect'); e.setAttribute('x',x); e.setAttribute('y',y); e.setAttribute('width',w); e.setAttribute('height',h); e.setAttribute('fill','none'); e.setAttribute('stroke','#fff'); e.setAttribute('stroke-width','2'); svg.appendChild(e); };
+  const c = (x,y,rad) => { const e = document.createElementNS(svgNS,'circle'); e.setAttribute('cx',x); e.setAttribute('cy',y); e.setAttribute('r',rad); e.setAttribute('fill','none'); e.setAttribute('stroke','#fff'); e.setAttribute('stroke-width','2'); svg.appendChild(e); };
+  r(20,20,660,420); l(350,20,350,440); c(350,230,60); r(20,120,90,220); r(590,120,90,220); r(20,170,30,120); r(650,170,30,120); c(120,230,3); c(580,230,3);
+  jetons.forEach((j,i) => {
+    const g = document.createElementNS(svgNS,'g'); g.setAttribute('class','jeton'); g.dataset.i = i; g.setAttribute('transform',`translate(${j.x},${j.y})`);
+    const forme = j.t === 'plot' ? 'polygon' : 'circle', e = document.createElementNS(svgNS, forme);
+    if(forme === 'polygon'){ e.setAttribute('points','-12,12 12,12 0,-14'); e.setAttribute('fill','#F26522'); } else { e.setAttribute('r', j.t === 'ballon' ? 9 : 16); e.setAttribute('fill', j.t === 'nous' ? '#14213D' : j.t === 'eux' ? '#B91C1C' : j.t === 'gk' ? '#F5C97A' : '#fff'); }
+    e.setAttribute('stroke','#fff'); e.setAttribute('stroke-width', j.t === 'ballon' ? 3 : 2); if(j.t === 'ballon') e.setAttribute('stroke','#000'); g.appendChild(e);
+    if(j.n){ const t = document.createElementNS(svgNS,'text'); t.setAttribute('text-anchor','middle'); t.setAttribute('dy','5'); t.setAttribute('font-size','14'); t.setAttribute('fill', j.t === 'gk' ? '#000' : '#fff'); t.textContent = j.n; g.appendChild(t); }
+    svg.appendChild(g);
+  });
+  localStorage.setItem('tableau_jetons', JSON.stringify(jetons));
+}
+function ajouterJeton(t){
+  const n = t === 'nous' || t === 'eux' ? jetons.filter(j => j.t === t).length + 1 : t === 'gk' ? 'G' : '';
+  jetons.push({ t, n, x: 60 + Math.random()*580, y: 60 + Math.random()*340 }); dessinerTerrain();
+}
+function placerEquipe(n){
+  jetons = jetons.filter(j => j.t !== 'nous' && j.t !== 'gk');
+  const pos = n === 8 ? [[70,230],[160,120],[160,340],[230,230],[300,150],[300,310],[380,230],[440,160]] : [[70,230],[150,80],[150,180],[150,280],[150,380],[250,120],[250,230],[250,340],[360,100],[360,230],[360,360]];
+  pos.forEach((p,i) => jetons.push({ t: i === 0 ? 'gk' : 'nous', n: i === 0 ? 'G' : i, x:p[0], y:p[1] })); dessinerTerrain();
+}
+$$('[data-jeton]').forEach(b => b.addEventListener('click', () => { const v = b.dataset.jeton; if(v === 'vider'){ if(confirm('Effacer le schéma ?')){ jetons = []; dessinerTerrain(); } } else if(v === '8' || v === '11') placerEquipe(+v); else ajouterJeton(v); }));
+(function(){ const svg = $('#terrain'); if(!svg) return; let actif = null;
+  const pos = ev => { const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY; const p = pt.matrixTransform(svg.getScreenCTM().inverse()); return { x: Math.max(20, Math.min(680, p.x)), y: Math.max(20, Math.min(440, p.y)) }; };
+  svg.addEventListener('pointerdown', ev => { const g = ev.target.closest('.jeton'); if(!g) return; actif = +g.dataset.i; svg.setPointerCapture(ev.pointerId); ev.preventDefault(); });
+  svg.addEventListener('pointermove', ev => { if(actif == null) return; const p = pos(ev); jetons[actif].x = p.x; jetons[actif].y = p.y; svg.querySelector(`.jeton[data-i="${actif}"]`).setAttribute('transform', `translate(${p.x},${p.y})`); });
+  const fin = () => { if(actif != null){ actif = null; localStorage.setItem('tableau_jetons', JSON.stringify(jetons)); } }; svg.addEventListener('pointerup', fin); svg.addEventListener('pointercancel', fin);
+  svg.addEventListener('dblclick', ev => { const g = ev.target.closest('.jeton'); if(!g) return; jetons.splice(+g.dataset.i, 1); dessinerTerrain(); });
+  dessinerTerrain(); })();
 
 /* ─── Boutique ─── */
 function ouvrirArticle(a){ $('#ar-id').value = a?.id || ''; $('#ar-nom').value = a?.nom || ''; $('#ar-prix').value = a?.prix ?? ''; $('#ar-tailles').value = a?.tailles || ''; $('#ar-photo').value = ''; $('#ar-photo-info').textContent = a?.photo_url ? 'Une photo est en place ; choisis un fichier pour la remplacer.' : ''; msg('#msg-article',''); $('#dlg-article').showModal(); }
