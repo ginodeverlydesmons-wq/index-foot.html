@@ -21,6 +21,8 @@
   --texte:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
 @media (prefers-color-scheme:dark){:root{--fond:#0F1626;--surface:#182238;--encre:#EEF1F5;--encre-2:#A9B3C4;--ligne:#2B3A5C;--accent-2:#FF8A4C} header{background:#0B1120} .btn.second{background:#182238;color:#EEF1F5;border-color:#3B4A6B} .msg{background:#182238} .vide,.kpi div,.produit .sans{background:#182238} .titre-tableau{background:#131C30} .code{background:#2A2110;border-color:#7A5A1A} input,select,textarea{background:#0F1626;border-color:#3B4A6B} #menu-plus{background:#182238} #menu-plus button{background:#131C30;border-color:#3B4A6B} .puce{background:#182238} .evt,.annonce,.produit,.tableau{background:var(--surface)}}
+@media print{body{background:#fff;color:#000} header,nav,#bandeau-install,#menu-plus,#toast,.btn,button,.no-print,#bandeau-urgent,#hors-ligne{display:none!important} main{padding:0;max-width:none} .evt,.tableau{border:1px solid #999;break-inside:avoid} #feuille{display:block!important}}
+#feuille{display:none}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--fond);color:var(--encre);font:16px/1.45 var(--texte);overflow-x:hidden;max-width:100vw}
 p,td,.detail,.annonce,.evt,a{overflow-wrap:anywhere} *{min-width:0}
@@ -236,6 +238,7 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   <label for="r-nom">Nom du club</label><input id="r-nom" required>
   <label for="r-lien">Lien de paiement Stripe (cotisation)</label><input id="r-lien" type="url" placeholder="https://buy.stripe.com/…">
   <p class="compteur">Stripe → Payment Links → New → produit « Licence » → copie le lien.</p>
+  <div class="ligne"><div><label for="r-nom-urg">Contact d'urgence (nom)</label><input id="r-nom-urg" placeholder="Ex. Marc, président"></div><div><label for="r-tel-urg">Téléphone d'urgence</label><input id="r-tel-urg" type="tel" placeholder="06 …"></div></div>
   <label for="r-logo">Logo du club (PNG ou JPG, 2 Mo max)</label><input id="r-logo" type="file" accept="image/png,image/jpeg,image/webp">
   <p class="compteur" id="r-logo-info"></p>
   <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-reglages"></div></form></dialog>
@@ -261,6 +264,7 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
 <dialog id="dlg-equipe"><form method="dialog" id="form-equipe"><h2 id="dlg-equipe-titre">Nouvelle équipe</h2><input type="hidden" id="e-id">
   <label for="e-nom">Nom de l'équipe</label><input id="e-nom" required placeholder="Ex. U11 équipe 1, Seniors équipe 2">
   <p class="compteur">S'il y a trop d'effectif dans une catégorie, crée plusieurs équipes (U11 équipe 1, U11 équipe 2…) et répartis les joueurs depuis l'onglet Licences.</p>
+  <div class="ligne"><div><label for="e-coach">Coach (nom)</label><input id="e-coach"></div><div><label for="e-coach-tel">Téléphone du coach</label><input id="e-coach-tel" type="tel"></div></div>
   <label for="e-whatsapp">Lien du groupe WhatsApp (facultatif)</label><input id="e-whatsapp" type="url" placeholder="https://chat.whatsapp.com/…">
   <div class="ligne"><div><label for="e-cat">Catégorie</label><select id="e-cat"></select></div><div><label for="e-saison">Saison</label><input id="e-saison" required></div></div>
   <div class="actions"><button class="btn principal" value="ok">Créer l'équipe</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-equipe"></div></form></dialog>
@@ -273,6 +277,7 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   <div><label for="m-terrain">Terrain</label><select id="m-terrain"><option value="">—</option><option value="herbe">Herbe (crampons vissés/moulés)</option><option value="synthetique">Synthétique (moulés)</option><option value="stabilise">Stabilisé</option><option value="salle">Salle (futsal)</option></select></div></div>
   <div class="ligne"><div><label for="m-nous">Buts pour nous</label><input id="m-nous" type="number" min="0" placeholder="— si pas joué"></div><div><label for="m-eux">Buts pour eux</label><input id="m-eux" type="number" min="0"></div></div>
   <label for="m-lavage">Qui lave les maillots</label><select id="m-lavage"><option value="">—</option></select>
+  <div class="ligne"><div><label for="m-arbitre">Arbitre bénévole (touche / centre)</label><input id="m-arbitre" placeholder="Ex. Papa de Léo (touche)"></div><div><label for="m-materiel">Matériel (ballons, chasubles)</label><input id="m-materiel" placeholder="Ex. Famille Martin"></div></div>
   <label>Joueurs convoqués (qui joue)</label><div id="m-convoques" class="tailles"></div>
   <label for="m-comm">Commentaire</label><input id="m-comm" placeholder="Buteurs, remarques…">
   <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-match"></div></form></dialog>
@@ -349,7 +354,7 @@ const nomP = p => p ? `${p.prenom} ${p.nom}` : '?';
 
 /* ─── État ─── */
 let sb, session = null, club = null, clubs = [], role = 'parent';
-let familles = [], personnes = [], equipes = [], licences = [], membres = [], matchs = [], entrainements = [], presences = [], covoits = [], annonces = [], articles = [], commandes = [], mesFamillesIds = [], mesPersonnesIds = [];
+let familles = [], personnes = [], equipes = [], licences = [], membres = [], matchs = [], entrainements = [], presences = [], covoits = [], annonces = [], articles = [], commandes = [], fil = [], mesFamillesIds = [], mesPersonnesIds = [];
 const staff = () => ['admin','bureau','coach'].includes(role);
 const parent = () => role === 'parent';
 const mesPersonnes = () => staff() ? personnes : role === 'joueur' ? personnes.filter(p => mesPersonnesIds.includes(p.id)) : personnes.filter(p => mesFamillesIds.includes(p.famille_id));
@@ -383,7 +388,7 @@ $$('[data-changer-club]').forEach(b => b.addEventListener('click', () => { club 
 /* ─── Clubs et rôle ─── */
 async function chargerClubs(){
   try { await sb.rpc('rattacher_par_email'); } catch(e){}
-  const [c, m] = await Promise.all([ sb.from('clubs').select('id, nom, ville, lien_paiement, logo_url').order('nom'), sb.from('membres_club').select('club_id, role').eq('user_id', session.user.id) ]);
+  const [c, m] = await Promise.all([ sb.from('clubs').select('id, nom, ville, lien_paiement, logo_url, nom_urgence, tel_urgence').order('nom'), sb.from('membres_club').select('club_id, role').eq('user_id', session.user.id) ]);
   if(c.error){ montrer('#ecran-club'); msg('#msg-club', erreurLisible(c.error), 'erreur'); return; }
   clubs = (c.data || []).map(x => ({ ...x, role: (m.data || []).find(y => y.club_id === x.id)?.role || 'parent' }));
   const memo = localStorage.getItem('club_id');
@@ -438,11 +443,11 @@ async function toutRecharger(){
   const q = (t, o='') => sb.from(t).select('*').eq('club_id', club.id).order(o || 'cree_le');
   const r = await Promise.all([ q('familles','nom'), q('personnes','nom'), q('equipes','nom'), q('licences'), sb.from('membres_club').select('user_id, role').eq('club_id', club.id),
     q('matchs','date_match'), q('entrainements','date_seance'), q('presences','maj_le'), q('covoiturages'), q('annonces'), q('articles','nom'), q('commandes'),
-    sb.from('acces_famille').select('famille_id, personne_id').eq('user_id', session.user.id) ]);
+    sb.from('acces_famille').select('famille_id, personne_id').eq('user_id', session.user.id), q('fil_match') ]);
   const fatal = r.slice(0,4).find(x => x.error); if(fatal){ toast('Chargement impossible : ' + erreurLisible(fatal.error), true); return; }
   [familles, personnes, equipes, licences] = r.slice(0,4).map(x => x.data || []); membres = r[4].data || [];
   [matchs, entrainements, presences, covoits, annonces, articles, commandes] = r.slice(5,12).map(x => x.data || []);
-  mesFamillesIds = (r[12].data || []).map(x => x.famille_id); mesPersonnesIds = (r[12].data || []).map(x => x.personne_id).filter(Boolean);
+  mesFamillesIds = (r[12].data || []).map(x => x.famille_id); mesPersonnesIds = (r[12].data || []).map(x => x.personne_id).filter(Boolean); fil = r[13].data || [];
   const manque = r.slice(5).find(x => x.error); if(manque) $('#zone-agenda').innerHTML = `<div class="vide">${erreurLisible(manque.error)}</div>`;
   rendreTout();
   } catch(e){ toast(navigator.onLine ? 'Erreur de chargement : ' + erreurLisible(e) : 'Pas de connexion', true); }
@@ -473,6 +478,8 @@ document.addEventListener('click', ev => {
   if(d.ouvrir === 'match') ouvrirMatch();
   if(d.modifierMatch) ouvrirMatch(matchs.find(x => x.id === d.modifierMatch));
   if(d.partagerMatch) partagerMatch(matchs.find(x => x.id === d.partagerMatch));
+  if(d.feuille) imprimerFeuille(matchs.find(x => x.id === d.feuille));
+  if(d.fil) publierFil(d.fil);
   if(d.supprimerMatch) supprimer('matchs', d.supprimerMatch, 'Supprimer ce match ?');
   if(d.ouvrir === 'entrainement') ouvrirEntrainement();
   if(d.modifierEntr) ouvrirEntrainement(entrainements.find(x => x.id === d.modifierEntr));
@@ -489,7 +496,7 @@ document.addEventListener('click', ev => {
   if(d.statutCmd) majCommande(d.statutCmd, d.commande);
   if(d.supprimerCommande) supprimer('commandes', d.supprimerCommande, 'Annuler cette commande ?');
   if(d.notifs !== undefined) $('#dlg-notifs').showModal();
-  if(d.reglages !== undefined){ $('#r-nom').value = club.nom; $('#r-lien').value = club.lien_paiement || ''; msg('#msg-reglages',''); $('#dlg-reglages').showModal(); }
+  if(d.reglages !== undefined){ $('#r-nom').value = club.nom; $('#r-lien').value = club.lien_paiement || ''; $('#r-nom-urg').value = club.nom_urgence || ''; $('#r-tel-urg').value = club.tel_urgence || ''; msg('#msg-reglages',''); $('#dlg-reglages').showModal(); }
 });
 async function supprimer(table, id, q){ if(!confirm(q)) return; const { error } = await sb.from(table).delete().eq('id', id); if(error){ toast(erreurLisible(error), true); return; } toast('Supprimé'); await toutRecharger(); }
 function soumettre(formId, fn){ $(formId).addEventListener('submit', async ev => { if(ev.submitter?.value !== 'ok') return; ev.preventDefault(); const avant = $(formId).closest('dialog').open; await fn(ev); if(avant && !$(formId).closest('dialog').open) toast('Enregistré ✓'); }); }
@@ -498,7 +505,7 @@ function soumettre(formId, fn){ $(formId).addEventListener('submit', async ev =>
 soumettre('#form-reglages', async () => {
   const lien = $('#r-lien').value.trim();
   if(lien && !/^https:\/\/(buy\.stripe\.com|checkout\.stripe\.com|www\.helloasso\.com)\//.test(lien)){ msg('#msg-reglages', 'Le lien doit commencer par https://buy.stripe.com/', 'erreur'); return; }
-  const maj = { nom: $('#r-nom').value.trim(), lien_paiement: lien || null };
+  const maj = { nom: $('#r-nom').value.trim(), lien_paiement: lien || null, nom_urgence: $('#r-nom-urg').value.trim() || null, tel_urgence: $('#r-tel-urg').value.trim() || null };
   const fichier = $('#r-logo').files[0];
   if(fichier){
     if(fichier.size > 2*1024*1024){ msg('#msg-reglages', 'Le logo dépasse 2 Mo.', 'erreur'); return; }
@@ -546,8 +553,8 @@ function rendreFamilles(){
 function rendreFoyer(){
   if(staff()) return; $('#titre-foyer').textContent = role === 'joueur' ? 'Ma fiche' : 'Mon foyer';
   const mf = familles.filter(f => mesFamillesIds.includes(f.id));
-  const mesEq = equipes.filter(e => mesEquipesIds().includes(e.id) && e.lien_whatsapp);
-  $('#zone-foyer').innerHTML = (mesEq.length ? `<div class="annonce"><b>Mes groupes WhatsApp :</b> ${mesEq.map(e => esc(e.nom) + ' ' + btnWhatsapp(e)).join(' ')}</div>` : '') + (mf.length ? mf.map(tableFamille).join('') + `<p class="compteur">Saison affichée : <select id="saison-foyer" style="width:auto">${$('#saison').innerHTML}</select></p>` : '<div class="vide">Aucune famille rattachée à ton compte.</div>');
+  const mesEq = equipes.filter(e => mesEquipesIds().includes(e.id) && (e.lien_whatsapp || e.coach_tel));
+  $('#zone-foyer').innerHTML = ((mesEq.length || club.tel_urgence) ? `<div class="annonce"><b>Contacts :</b> ${btnTel(club.nom_urgence, club.tel_urgence, 'Urgence club' + (club.nom_urgence ? ' · ' + club.nom_urgence : ''))} ${mesEq.map(e => `<div class="pres">${esc(e.nom)} ${btnWhatsapp(e)} ${btnTel(e.coach_nom, e.coach_tel, 'Coach ' + (e.coach_nom || ''))}</div>`).join('')}</div>` : '') + (mf.length ? mf.map(tableFamille).join('') + `<p class="compteur">Saison affichée : <select id="saison-foyer" style="width:auto">${$('#saison').innerHTML}</select></p>` : '<div class="vide">Aucune famille rattachée à ton compte.</div>');
   const sf = $('#saison-foyer'); if(sf){ sf.value = $('#saison').value; sf.addEventListener('change', () => { $('#saison').value = sf.value; rendreTout(); }); }
 }
 function ouvrirFamille(f){
@@ -620,11 +627,11 @@ function assiduite(p, e){
   return { ePres, eTot: ents.length, conv };
 }
 const joueursEquipe = e => licences.filter(l => l.equipe_id === e.id).map(l => personnes.find(p => p.id === l.personne_id)).filter(Boolean).sort((a,b) => (a.numero_maillot ?? 999) - (b.numero_maillot ?? 999));
-function ouvrirEquipe(e){ $('#dlg-equipe-titre').textContent = e ? 'Modifier l\'équipe' : 'Nouvelle équipe'; $('#e-id').value = e?.id || ''; $('#e-nom').value = e?.nom || ''; $('#e-whatsapp').value = e?.lien_whatsapp || ''; $('#e-saison').value = e?.saison || saisonSel(); $('#e-cat').innerHTML = CATEGORIES.map(c => `<option ${e?.categorie===c?'selected':''}>${c}</option>`).join(''); msg('#msg-equipe',''); $('#dlg-equipe').showModal(); }
+function ouvrirEquipe(e){ $('#dlg-equipe-titre').textContent = e ? 'Modifier l\'équipe' : 'Nouvelle équipe'; $('#e-id').value = e?.id || ''; $('#e-nom').value = e?.nom || ''; $('#e-whatsapp').value = e?.lien_whatsapp || ''; $('#e-coach').value = e?.coach_nom || ''; $('#e-coach-tel').value = e?.coach_tel || ''; $('#e-saison').value = e?.saison || saisonSel(); $('#e-cat').innerHTML = CATEGORIES.map(c => `<option ${e?.categorie===c?'selected':''}>${c}</option>`).join(''); msg('#msg-equipe',''); $('#dlg-equipe').showModal(); }
 soumettre('#form-equipe', async () => {
   const wa = $('#e-whatsapp').value.trim();
   if(wa && !/^https:\/\/chat\.whatsapp\.com\//.test(wa)){ msg('#msg-equipe', 'Le lien doit commencer par https://chat.whatsapp.com/ (WhatsApp → groupe → Inviter via un lien).', 'erreur'); return; }
-  const ligne = { club_id: club.id, nom: $('#e-nom').value.trim(), categorie: $('#e-cat').value, saison: $('#e-saison').value.trim(), lien_whatsapp: wa || null }, id = $('#e-id').value;
+  const ligne = { club_id: club.id, nom: $('#e-nom').value.trim(), categorie: $('#e-cat').value, saison: $('#e-saison').value.trim(), lien_whatsapp: wa || null, coach_nom: $('#e-coach').value.trim() || null, coach_tel: $('#e-coach-tel').value.trim() || null }, id = $('#e-id').value;
   const { error } = id ? await sb.from('equipes').update(ligne).eq('id', id) : await sb.from('equipes').insert(ligne);
   if(error){ msg('#msg-equipe', erreurLisible(error), 'erreur'); return; } $('#dlg-equipe').close(); await toutRecharger();
 });
@@ -633,12 +640,13 @@ function rendreEquipes(){
   $('#cpt-equipes').textContent = equipes.length ? `${equipes.length} — ` + Object.entries(parCat).map(([c,n]) => `${c} : ${n}`).join(', ') : '';
   if(!equipes.length){ $('#zone-equipes').innerHTML = '<div class="vide">Aucune équipe. Crée-les, puis rattache les licences depuis l\'onglet Licences.</div>'; return; }
   $('#zone-equipes').innerHTML = equipes.map(e => { const js = joueursEquipe(e);
-    return `<div class="tableau"><div class="titre-tableau"><div><b>${esc(e.nom)}</b> <span class="cat">${esc(e.categorie)}</span> <span class="compteur">${esc(e.saison)} · ${js.length} joueur${js.length>1?'s':''}</span> ${btnWhatsapp(e)}</div><div><button class="btn second petit" data-modifier-equipe="${e.id}">Modifier</button> <button class="btn second petit" data-supprimer-equipe="${e.id}">Supprimer</button></div></div>
+    return `<div class="tableau"><div class="titre-tableau"><div><b>${esc(e.nom)}</b> <span class="cat">${esc(e.categorie)}</span> <span class="compteur">${esc(e.saison)} · ${js.length} joueur${js.length>1?'s':''}${e.coach_nom ? ' · coach ' + esc(e.coach_nom) : ''}</span> ${btnWhatsapp(e)} ${btnTel(e.coach_nom, e.coach_tel, 'Appeler le coach')}</div><div><button class="btn second petit" data-modifier-equipe="${e.id}">Modifier</button> <button class="btn second petit" data-supprimer-equipe="${e.id}">Supprimer</button></div></div>
       <table><thead><tr><th>N°</th><th>Joueur</th><th>G/F</th><th></th></tr></thead>
       <tbody>${js.length ? js.map(p => { const st = assiduite(p, e); return `<tr><td style="width:60px"><span class="cat">${p.numero_maillot != null ? '#' + p.numero_maillot : '—'}</span></td><td>${esc(nomP(p))}</td><td>${p.sexe === 'F' ? 'F' : p.sexe === 'M' ? 'G' : ''} <span class="compteur">· entraînements ${st.ePres}/${st.eTot} · matchs joués ${st.conv}</span></td><td class="act"><button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button></td></tr>`; }).join('') : '<tr><td colspan="4" class="compteur">Aucun joueur rattaché (onglet Licences → colonne Équipe).</td></tr>'}</tbody></table></div>`; }).join('');
 }
 
 /* ─── Agenda : matchs + entraînements + présences + covoiturage ─── */
+const btnTel = (nom, tel, lib) => tel ? `<a class="btn second petit" href="tel:${esc(tel.replace(/\s/g,''))}">📞 ${esc(lib || nom || tel)}</a>` : '';
 const btnWhatsapp = e => e?.lien_whatsapp ? `<a class="btn second petit" href="${esc(e.lien_whatsapp)}" target="_blank" rel="noopener">💬 Groupe WhatsApp</a>` : '';
 function optionsEquipes(sel){ return equipes.map(e => `<option value="${e.id}" ${sel===e.id?'selected':''}>${esc(e.nom)} (${esc(e.saison)})</option>`).join(''); }
 function ouvrirMatch(m){
@@ -646,7 +654,7 @@ function ouvrirMatch(m){
   $('#dlg-match-titre').textContent = m ? 'Modifier le match' : 'Nouveau match'; $('#m-id').value = m?.id || '';
   $('#m-equipe').innerHTML = optionsEquipes(m?.equipe_id); $('#m-date').value = m?.date_match || aujourdhui(); $('#m-heure').value = m?.heure || '';
   $('#m-adversaire').value = m?.adversaire || ''; $('#m-lieu-type').value = m ? String(m.domicile) : 'true'; $('#m-lieu').value = m?.lieu || ''; $('#m-terrain').value = m?.terrain || '';
-  $('#m-nous').value = m?.score_nous ?? ''; $('#m-eux').value = m?.score_eux ?? ''; $('#m-comm').value = m?.commentaire || '';
+  $('#m-nous').value = m?.score_nous ?? ''; $('#m-eux').value = m?.score_eux ?? ''; $('#m-comm').value = m?.commentaire || ''; $('#m-arbitre').value = m?.arbitre || ''; $('#m-materiel').value = m?.materiel || '';
   const majLavage = () => { const e = equipes.find(x => x.id === $('#m-equipe').value), js = e ? joueursEquipe(e) : []; $('#m-lavage').innerHTML = '<option value="">—</option>' + js.map(p => `<option value="${p.id}" ${m?.lavage_personne_id===p.id?'selected':''}>${esc(nomP(p))}</option>`).join('');
     $('#m-convoques').innerHTML = js.length ? js.map(p => `<label style="display:inline-block;margin:0 10px 4px 0;font-weight:400"><input type="checkbox" value="${p.id}" style="width:auto;margin-right:4px" ${(m?.convoques||[]).includes(p.id)?'checked':''}>${esc(nomP(p))}</label>`).join('') : '<span class="compteur">Aucun joueur rattaché à cette équipe.</span>'; };
   $('#m-equipe').onchange = majLavage; majLavage(); msg('#msg-match',''); $('#dlg-match').showModal();
@@ -654,7 +662,7 @@ function ouvrirMatch(m){
 soumettre('#form-match', async () => {
   const n = $('#m-nous').value, x = $('#m-eux').value; if((n === '') !== (x === '')){ msg('#msg-match', 'Renseigne les deux scores, ou aucun.', 'erreur'); return; }
   const ligne = { club_id: club.id, equipe_id: $('#m-equipe').value, date_match: $('#m-date').value, heure: $('#m-heure').value || null, adversaire: $('#m-adversaire').value.trim(), domicile: $('#m-lieu-type').value === 'true',
-    lieu: $('#m-lieu').value.trim() || null, terrain: $('#m-terrain').value || null, convoques: [...document.querySelectorAll('#m-convoques input:checked')].map(i => i.value), score_nous: n === '' ? null : +n, score_eux: x === '' ? null : +x, lavage_personne_id: $('#m-lavage').value || null, commentaire: $('#m-comm').value.trim() || null }, id = $('#m-id').value;
+    lieu: $('#m-lieu').value.trim() || null, terrain: $('#m-terrain').value || null, arbitre: $('#m-arbitre').value.trim() || null, materiel: $('#m-materiel').value.trim() || null, convoques: [...document.querySelectorAll('#m-convoques input:checked')].map(i => i.value), score_nous: n === '' ? null : +n, score_eux: x === '' ? null : +x, lavage_personne_id: $('#m-lavage').value || null, commentaire: $('#m-comm').value.trim() || null }, id = $('#m-id').value;
   const { error } = id ? await sb.from('matchs').update(ligne).eq('id', id) : await sb.from('matchs').insert(ligne);
   if(error){ msg('#msg-match', erreurLisible(error), 'erreur'); return; } $('#dlg-match').close(); await toutRecharger();
 });
@@ -697,6 +705,28 @@ function blocConvoques(m){
   const miens = mesPersonnes().map(p => p.id), moi = cs.filter(p => miens.includes(p.id));
   return `<div class="bloc"><b>📋 Convoqués (${cs.length}) :</b> ${cs.map(p => `<span class="puce ${miens.includes(p.id) ? 'present' : ''}">${esc(p.prenom)}${p.numero_maillot != null ? ' #' + p.numero_maillot : ''}</span>`).join(' ')}${!staff() && moi.length ? ` <b style="color:var(--ok)">→ ${moi.map(p => p.prenom).join(', ')} ${moi.length>1?'sont convoqués':'est convoqué'} !</b>` : ''}</div>`;
 }
+function blocFil(m){
+  const auj = aujourdhui(); if(m.date_match !== auj && !fil.some(f => f.match_id === m.id)) return '';
+  const fs = fil.filter(f => f.match_id === m.id).sort((a,b) => b.cree_le.localeCompare(a.cree_le));
+  return `<div class="bloc"><b>📣 Fil du match</b>${staff() && m.date_match === auj ? ` <input id="fil-${m.id}" placeholder="Ex. 12' but de Gino ! 1-0" style="margin:6px 0"><button class="btn principal petit" data-fil="${m.id}">Publier</button> <span class="compteur">(ou tape « fin » pour clore)</span>` : ''}
+    ${fs.length ? fs.map(f => `<div class="detail">${new Date(f.cree_le).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} — ${esc(f.texte)}</div>`).join('') : '<div class="compteur">Rien encore. Le coach peut publier les temps forts pendant le match.</div>'}</div>`;
+}
+async function publierFil(id){
+  const inp = $('#fil-' + id), t = inp.value.trim(); if(!t) return;
+  const { error } = await sb.from('fil_match').insert({ club_id: club.id, match_id: id, texte: t });
+  if(error){ toast(erreurLisible(error), true); return; } toast('Publié'); await toutRecharger();
+}
+function imprimerFeuille(m){
+  const eq = equipes.find(e => e.id === m.equipe_id) || {}, cs = (m.convoques || []).map(id => personnes.find(p => p.id === id)).filter(Boolean).sort((a,b) => (a.numero_maillot ?? 999) - (b.numero_maillot ?? 999));
+  const w = window.open('', '_blank'); if(!w){ toast('Autorise les fenêtres pop-up pour imprimer', true); return; }
+  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Feuille de match</title><style>body{font-family:Arial,sans-serif;padding:20px;color:#000}h1{margin:0 0 4px}h2{margin:16px 0 6px;font-size:1.1rem}table{border-collapse:collapse;width:100%}th,td{border:1px solid #000;padding:6px 8px;text-align:left}th{background:#eee}.c{text-align:center;width:60px}</style></head><body>
+    <h1>${esc(club.nom)} — ${esc(eq.nom)}</h1><div>${dateFr(m.date_match)}${m.heure ? ' à ' + esc(m.heure) : ''} · ${m.domicile ? 'Domicile' : 'Extérieur'} · contre <b>${esc(m.adversaire)}</b>${m.lieu ? ' · ' + esc(m.lieu) : ''}</div>
+    <div>${m.arbitre ? 'Arbitre : ' + esc(m.arbitre) + ' · ' : ''}${m.materiel ? 'Matériel : ' + esc(m.materiel) + ' · ' : ''}${eq.coach_nom ? 'Coach : ' + esc(eq.coach_nom) : ''}</div>
+    <h2>Joueurs convoqués (${cs.length})</h2><table><tr><th class="c">N°</th><th>Nom</th><th>Né le</th><th>Licence FFF</th><th class="c">Présent</th><th>Buts</th></tr>
+    ${cs.map(p => `<tr><td class="c">${p.numero_maillot ?? ''}</td><td>${esc(nomP(p))}</td><td>${p.date_naissance ? new Date(p.date_naissance).toLocaleDateString('fr-FR') : ''}</td><td>${esc(p.num_licence || '')}</td><td class="c">☐</td><td></td></tr>`).join('')}</table>
+    <h2>Score</h2><table><tr><th>${esc(eq.nom)}</th><th>${esc(m.adversaire)}</th></tr><tr><td style="height:40px"></td><td></td></tr></table>
+    <p>Observations : ______________________________________________________________</p><script>window.print()<\/script></body></html>`); w.document.close();
+}
 function blocCovoit(m){
   const cs = covoits.filter(c => c.match_id === m.id), total = cs.reduce((s,c) => s + c.places, 0);
   const mien = cs.find(c => mesFamillesIds.includes(c.famille_id));
@@ -738,9 +768,9 @@ function carteEvt(e){
   if(e.type === 'match'){ const m = e.o, lav = personnes.find(p => p.id === m.lavage_personne_id);
     return `<div class="evt match"><div class="tete"><span class="quand">⚽ ${dateFr(m.date_match)}${m.heure ? ' · ' + esc(m.heure) : ''}</span>${resultat(m)}</div>
       <div><b>${esc(eq.nom)}</b> ${m.domicile ? 'reçoit' : 'se déplace chez'} <b>${esc(m.adversaire)}</b> ${btnWhatsapp(eq)}</div>
-      <div class="detail">${m.lieu ? '📍 ' + (/^https?:/.test(m.lieu) ? `<a href="${esc(m.lieu)}" target="_blank">lieu</a>` : `<a href="https://www.google.com/maps/search/${encodeURIComponent(m.lieu)}" target="_blank" rel="noopener">${esc(m.lieu)}</a> · <a href="https://waze.com/ul?q=${encodeURIComponent(m.lieu)}&navigate=yes" target="_blank" rel="noopener">Waze</a>`) : (m.domicile ? '📍 À domicile' : '📍 Lieu à préciser')}${m.terrain ? ' · ' + ({herbe:'🌱 Herbe',synthetique:'🟩 Synthétique',stabilise:'🟫 Stabilisé',salle:'🏟️ Salle'})[m.terrain] : ''}${lav ? ' · 🧺 Maillots : ' + esc(nomP(lav)) : ''}${m.commentaire ? ' · ' + esc(m.commentaire) : ''}<span id="meteo-${m.id}"></span></div>${blocConvoques(m)}
-      ${blocPresences('match', m.id, eq)}${blocCovoit(m)}
-      ${staff() ? `<div class="actions"><button class="btn second petit" data-partager-match="${m.id}">📤 Envoyer sur WhatsApp</button><button class="btn second petit" data-modifier-match="${m.id}">${m.score_nous == null ? 'Saisir le score / modifier' : 'Modifier'}</button><button class="btn second petit" data-supprimer-match="${m.id}">Supprimer</button></div>` : ''}</div>`; }
+      <div class="detail">${m.lieu ? '📍 ' + (/^https?:/.test(m.lieu) ? `<a href="${esc(m.lieu)}" target="_blank">lieu</a>` : `<a href="https://www.google.com/maps/search/${encodeURIComponent(m.lieu)}" target="_blank" rel="noopener">${esc(m.lieu)}</a> · <a href="https://waze.com/ul?q=${encodeURIComponent(m.lieu)}&navigate=yes" target="_blank" rel="noopener">Waze</a>`) : (m.domicile ? '📍 À domicile' : '📍 Lieu à préciser')}${m.terrain ? ' · ' + ({herbe:'🌱 Herbe',synthetique:'🟩 Synthétique',stabilise:'🟫 Stabilisé',salle:'🏟️ Salle'})[m.terrain] : ''}${lav ? ' · 🧺 Maillots : ' + esc(nomP(lav)) : ''}${m.arbitre ? ' · 🟨 Arbitre : ' + esc(m.arbitre) : ''}${m.materiel ? ' · 🎒 Matériel : ' + esc(m.materiel) : ''}${m.commentaire ? ' · ' + esc(m.commentaire) : ''}<span id="meteo-${m.id}"></span></div>${blocConvoques(m)}
+      ${blocFil(m)}${blocPresences('match', m.id, eq)}${blocCovoit(m)}
+      ${staff() ? `<div class="actions"><button class="btn second petit" data-feuille="${m.id}">🖨️ Feuille de match</button><button class="btn second petit" data-partager-match="${m.id}">📤 Envoyer sur WhatsApp</button><button class="btn second petit" data-modifier-match="${m.id}">${m.score_nous == null ? 'Saisir le score / modifier' : 'Modifier'}</button><button class="btn second petit" data-supprimer-match="${m.id}">Supprimer</button></div>` : ''}</div>`; }
   const t = e.o;
   return `<div class="evt ${t.extra ? 'extra' : ''}"><div class="tete"><span class="quand">🏃 ${dateFr(t.date_seance)}${t.heure_debut ? ' · ' + esc(t.heure_debut) + (t.heure_fin ? '–' + esc(t.heure_fin) : '') : ''}</span>${t.extra ? '<span class="puce payee">Séance en plus</span>' : ''}</div>
     <div><b>${esc(eq.nom)}</b> — entraînement${t.lieu ? ' · 📍 ' + esc(t.lieu) : ''}</div>${t.note ? `<div class="detail">${esc(t.note)}</div>` : ''}
@@ -783,8 +813,11 @@ function rendreInfos(){
   const ok = mesEquipesIds(), as = annonces.filter(a => !a.equipe_id || ok.includes(a.equipe_id)).sort((a,b) => b.cree_le.localeCompare(a.cree_le));
   const lim = new Date(Date.now() - 48*3600000).toISOString(), urg = as.filter(a => a.urgent && a.cree_le > lim);
   $('#bandeau-urgent').classList.toggle('cache', !urg.length); $('#bandeau-urgent').innerHTML = urg.map(a => `🚨 ${esc(a.titre)} — ${esc(a.texte)}`).join('<br>');
-  $('#zone-infos').innerHTML = as.length ? as.map(a => { const eq = equipes.find(e => e.id === a.equipe_id);
-    return `<div class="annonce"${a.urgent ? ' style="border-left:5px solid #B91C1C"' : ''}><div class="meta">${a.urgent ? '🚨 URGENT · ' : ''}${new Date(a.cree_le).toLocaleDateString('fr-FR')} · ${eq ? esc(eq.nom) : 'Tout le club'}${a.auteur ? ' · ' + esc(a.auteur) : ''}</div><h3>${esc(a.titre)}</h3><p>${esc(a.texte)}</p>${staff() ? `<div class="actions"><button class="btn second petit" data-supprimer-annonce="${a.id}">Supprimer</button></div>` : ''}</div>`; }).join('') : '<div class="vide">Aucune info pour l\'instant.</div>';
+  const regles = `<details class="annonce no-print"><summary style="cursor:pointer;font-weight:600">📖 Rappel des règles du foot à 8 (U10 à U13)</summary>
+    <ul style="margin:8px 0 0;padding-left:18px"><li>8 joueurs dont un gardien ; remplacements illimités et « volants ».</li><li>Terrain : moitié d'un terrain à 11, buts de 6 m × 2 m, surface de réparation à 13 m.</li><li>Hors-jeu uniquement dans la zone des 13 mètres (entre la ligne des 13 m et le but adverse).</li><li>Coup d'envoi : le ballon peut partir en avant ou en arrière ; l'adversaire à 6 m.</li><li>Passe volontaire au gardien : il ne peut pas la prendre à la main.</li><li>Relance du gardien : à la main ou au pied, ballon posé ou en volée ; les adversaires hors de la surface.</li><li>Pas de carton rouge direct pour les jeunes en général : exclusion temporaire selon le règlement du district.</li></ul>
+    <p class="compteur">Rappel indicatif : le règlement de ton district fait foi.</p></details>`;
+  $('#zone-infos').innerHTML = regles + (as.length ? as.map(a => { const eq = equipes.find(e => e.id === a.equipe_id);
+    return `<div class="annonce"${a.urgent ? ' style="border-left:5px solid #B91C1C"' : ''}><div class="meta">${a.urgent ? '🚨 URGENT · ' : ''}${new Date(a.cree_le).toLocaleDateString('fr-FR')} · ${eq ? esc(eq.nom) : 'Tout le club'}${a.auteur ? ' · ' + esc(a.auteur) : ''}</div><h3>${esc(a.titre)}</h3><p>${esc(a.texte)}</p>${staff() ? `<div class="actions"><button class="btn second petit" data-supprimer-annonce="${a.id}">Supprimer</button></div>` : ''}</div>`; }).join('') : '<div class="vide">Aucune info pour l\'instant.</div>');
 }
 
 /* ─── Boutique ─── */
@@ -866,9 +899,10 @@ function rendreNotifs(){
   const vu = localStorage.getItem('annonces_vu_' + club.id) || '1970';
   const ok = mesEquipesIds(), nouvelles = annonces.filter(a => a.cree_le > vu && (!a.equipe_id || ok.includes(a.equipe_id)));
   const convoc = matchs.filter(m => m.date_match >= aujourdhui() && (m.convoques||[]).some(id => mesPersonnes().map(p => p.id).includes(id)) && !staff());
-  const n = proches.length + nouvelles.length + convoc.length; $('#notif-badge').textContent = n; $('#notif-badge').classList.toggle('cache', !n);
+  const filJour = fil.filter(f => f.cree_le > vu && matchs.some(m => m.id === f.match_id && ok.includes(m.equipe_id)));
+  const n = proches.length + nouvelles.length + convoc.length + filJour.length; $('#notif-badge').textContent = n; $('#notif-badge').classList.toggle('cache', !n);
   const eq = id => equipes.find(e => e.id === id)?.nom || '';
-  $('#zone-notifs').innerHTML = (convoc.length ? '<h3>Convocations</h3>' + convoc.map(m => `<div class="evt match"><span class="quand">⚽ ${dateFr(m.date_match)}${m.heure ? ' · ' + esc(m.heure) : ''}</span> — ${esc(eq(m.equipe_id))} vs ${esc(m.adversaire)}${m.lieu ? ' · 📍 ' + esc(m.lieu) : ''}</div>`).join('') : '') + (nouvelles.length ? '<h3>Nouvelles infos</h3>' + nouvelles.map(a => `<div class="annonce"><h3>${esc(a.titre)}</h3><p>${esc(a.texte)}</p></div>`).join('') : '') +
+  $('#zone-notifs').innerHTML = (filJour.length ? '<h3>En direct</h3>' + filJour.slice(0,8).map(f => `<div class="detail">📣 ${esc(f.texte)}</div>`).join('') : '') + (convoc.length ? '<h3>Convocations</h3>' + convoc.map(m => `<div class="evt match"><span class="quand">⚽ ${dateFr(m.date_match)}${m.heure ? ' · ' + esc(m.heure) : ''}</span> — ${esc(eq(m.equipe_id))} vs ${esc(m.adversaire)}${m.lieu ? ' · 📍 ' + esc(m.lieu) : ''}</div>`).join('') : '') + (nouvelles.length ? '<h3>Nouvelles infos</h3>' + nouvelles.map(a => `<div class="annonce"><h3>${esc(a.titre)}</h3><p>${esc(a.texte)}</p></div>`).join('') : '') +
     (proches.length ? '<h3>Dans les 3 prochains jours</h3>' + proches.map(e => `<div class="evt ${e.type}"><span class="quand">${e.type === 'match' ? '⚽' : '🏃'} ${dateFr(e.date)}${e.heure ? ' · ' + esc(e.heure) : ''}</span> — ${esc(eq(e.o.equipe_id))} ${e.type === 'match' ? 'vs ' + esc(e.o.adversaire) : 'entraînement'}</div>`).join('') : '') || '<div class="vide">Rien de nouveau.</div>';
   $('#dlg-notifs').addEventListener('close', () => { localStorage.setItem('annonces_vu_' + club.id, new Date().toISOString()); rendreNotifs(); }, { once:true });
   // Rappel système (si autorisé) pour les événements de demain, une seule fois chacun
