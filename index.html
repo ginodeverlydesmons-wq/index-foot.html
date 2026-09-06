@@ -150,6 +150,19 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
 .perm.complet{border-left-color:var(--ok)} .perm.manque{border-left-color:var(--alerte)}
 .jauge{display:inline-block;height:8px;width:120px;background:var(--ligne);border-radius:999px;overflow:hidden;vertical-align:middle}
 .jauge i{display:block;height:100%;background:var(--ok)} .jauge.pleine i{background:#7A1E1E}
+#bandeau-sponsors{max-width:1040px;margin:0 auto;padding:14px 16px 90px;text-align:center}
+#bandeau-sponsors h3{font-size:.85rem;margin-bottom:8px}
+#bandeau-sponsors .logos{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center}
+#bandeau-sponsors a,#bandeau-sponsors span.sp{display:inline-flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--ligne);border-radius:var(--r);padding:8px 12px;min-height:56px;text-decoration:none;color:#14213D;font-weight:600}
+#bandeau-sponsors img{max-height:44px;max-width:140px;object-fit:contain}
+@media (max-width:640px){#bandeau-sponsors{padding-bottom:110px}}
+.sondage .option{display:flex;align-items:center;gap:8px;margin:6px 0}
+.sondage .barre-vote{flex:1;height:10px;background:var(--ligne);border-radius:999px;overflow:hidden} .sondage .barre-vote i{display:block;height:100%;background:#1D4ED8}
+#recherche{width:auto;min-width:150px;max-width:220px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:#fff;font-size:.9rem} #recherche::placeholder{color:#C9D0DB}
+#resultats{position:absolute;right:16px;top:100%;z-index:8;background:var(--surface);color:var(--encre);border:1px solid var(--ligne);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.25);width:min(420px,92vw);max-height:60vh;overflow:auto;text-align:left}
+#resultats button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--ligne);padding:9px 12px;cursor:pointer;color:var(--encre)} #resultats button:hover{background:rgba(29,78,216,.08)}
+#resultats .type{font-size:.75rem;color:var(--encre-2);text-transform:uppercase;letter-spacing:.05em}
+@media (max-width:640px){#recherche{max-width:100%;width:100%} #resultats{left:8px;right:8px;width:auto}}
 #hors-ligne{background:#B45309;color:#fff;text-align:center;padding:8px 12px;font-weight:600}
 #bandeau-urgent{background:#B91C1C;color:#fff;padding:10px 16px;text-align:center;font-weight:600} #bandeau-urgent a{color:#fff}
 #bandeau-install{position:fixed;bottom:0;left:0;right:0;background:var(--encre);color:#fff;padding:10px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;z-index:5}
@@ -194,13 +207,14 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   <header>
     <div class="club">
       <h1><img id="logo-club" class="cache" alt=""><span id="titre-club">Club</span></h1>
-      <div class="qui"><span id="qui-email"></span>
+      <div class="qui"><input id="recherche" type="search" placeholder="🔎 Rechercher…" autocomplete="off"><span id="qui-email"></span>
         <button class="cloche" type="button" data-notifs title="Notifications">🔔<span class="badge cache" id="notif-badge"></span></button>
         <button type="button" data-reglages class="staff-seul">Réglages</button>
         <button type="button" data-changer-club>Changer de club</button>
         <button type="button" data-deconnexion>Déconnexion</button></div>
     </div>
     <nav class="onglets" role="tablist" id="nav"></nav>
+    <div id="resultats" class="cache"></div>
   </header>
   <main>
     <section class="onglet cache" id="onglet-foyer">
@@ -220,12 +234,12 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
     </section>
     <section class="onglet cache" id="onglet-agenda">
       <div class="barre"><h2>Agenda <span class="compteur" id="cpt-agenda"></span></h2>
-        <div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="match">Ajouter un match</button> <button class="btn second" type="button" data-ouvrir="entrainement">Ajouter un entraînement</button></div></div>
+        <div><button class="btn second petit" type="button" data-ics>📅 Mettre dans mon calendrier</button> <span class="staff-seul"><button class="btn principal" type="button" data-ouvrir="match">Ajouter un match</button> <button class="btn second" type="button" data-ouvrir="entrainement">Ajouter un entraînement</button></span></div></div>
       <div id="zone-agenda"></div>
     </section>
     <section class="onglet cache" id="onglet-infos">
-      <div class="barre"><h2>Infos du club</h2><button class="btn principal staff-seul" type="button" data-ouvrir="annonce">Publier une info</button></div>
-      <div id="zone-infos"></div>
+      <div class="barre"><h2>Infos du club</h2><div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="annonce">Publier une info</button> <button class="btn second" type="button" data-ouvrir="sondage">Créer un sondage</button> <button class="btn second" type="button" data-ouvrir="sponsor">Ajouter un partenaire</button> <button class="btn second bureau-seul" type="button" data-ouvrir="document">Déposer un document</button></div></div>
+      <div id="zone-sondages"></div><div id="zone-infos"></div><div id="zone-avantages"></div><div id="zone-idees"></div><div id="zone-documents"></div>
     </section>
     <section class="onglet cache" id="onglet-buvette">
       <div class="barre"><h2>Buvette et événements</h2><div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="permanence">Ajouter un créneau</button> <button class="btn second" type="button" data-ouvrir="stock">Ajouter un produit</button></div></div>
@@ -271,6 +285,7 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
       </form><div class="msg" id="msg-invite"></div><div id="zone-acces" style="margin-top:14px"></div>
     </section>
   </main>
+  <footer id="bandeau-sponsors" class="cache"><h3>Ils soutiennent le club</h3><div class="logos" id="logos-sponsors"></div></footer>
 </div>
 <div id="toast"></div><div id="menu-plus" class="cache"></div>
 <div id="bandeau-install" class="cache"><span>📱 Installe l'appli sur ton téléphone</span><button class="btn principal petit" id="btn-install">Installer</button><button class="btn second petit" id="btn-install-non">Plus tard</button></div>
@@ -397,6 +412,25 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   <p class="compteur">Enregistrer crée ou met à jour une ligne par licencié de la saison avec ce nombre de carnets ; tu ajustes ensuite joueur par joueur dans le tableau.</p>
   <div class="actions"><button class="btn principal" value="ok">Distribuer les carnets</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-tombola"></div></form></dialog>
 
+<dialog id="dlg-sponsor"><form method="dialog" id="form-sponsor"><h2 id="dlg-sponsor-titre">Partenaire</h2><input type="hidden" id="sp-id">
+  <label for="sp-nom">Nom du commerce ou de l'entreprise</label><input id="sp-nom" required placeholder="Ex. Boulangerie Martin">
+  <div class="ligne"><div><label for="sp-site">Site ou page (facultatif)</label><input id="sp-site" type="url" placeholder="https://…"></div><div><label for="sp-ville">Ville</label><input id="sp-ville"></div></div>
+  <label for="sp-avantage">Avantage pour les licenciés (facultatif)</label><input id="sp-avantage" placeholder="Ex. −10 % sur présentation de la licence">
+  <label for="sp-logo">Logo (PNG ou JPG, 1 Mo max)</label><input id="sp-logo" type="file" accept="image/png,image/jpeg,image/webp">
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-sponsor"></div></form></dialog>
+
+<dialog id="dlg-sondage"><form method="dialog" id="form-sondage"><h2>Nouveau sondage</h2>
+  <label for="so-question">Question</label><input id="so-question" required placeholder="Ex. Quel horaire pour l'entraînement U11 ?">
+  <label for="so-options">Réponses possibles (une par ligne, 2 à 6)</label><textarea id="so-options" required placeholder="Mercredi 14h&#10;Mercredi 16h&#10;Samedi 10h"></textarea>
+  <div class="ligne"><div><label for="so-equipe">Pour</label><select id="so-equipe"><option value="">Tout le club</option></select></div><div><label for="so-fin">Clôture</label><input id="so-fin" type="date"></div></div>
+  <div class="actions"><button class="btn principal" value="ok">Lancer le sondage</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-sondage"></div></form></dialog>
+
+<dialog id="dlg-document"><form method="dialog" id="form-document"><h2>Document du bureau</h2>
+  <p class="compteur">Réservé aux membres du bureau et admins : PV de réunion, bilan financier, statuts…</p>
+  <label for="do-titre">Titre</label><input id="do-titre" required placeholder="Ex. PV assemblée générale 2026">
+  <label for="do-fichier">Fichier (PDF, Word, Excel, image — 10 Mo max)</label><input id="do-fichier" type="file" required>
+  <div class="actions"><button class="btn principal" value="ok">Déposer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-document"></div></form></dialog>
+
 <dialog id="dlg-covoit"><form method="dialog" id="form-covoit"><h2>Covoiturage</h2><input type="hidden" id="cv-match">
   <p class="compteur" id="cv-info"></p>
   <label for="cv-famille" id="lbl-cv-famille">Famille</label><select id="cv-famille"></select>
@@ -443,6 +477,8 @@ const nomP = p => p ? `${p.prenom} ${p.nom}` : '?';
 let sb, session = null, club = null, clubs = [], role = 'parent';
 let familles = [], personnes = [], equipes = [], licences = [], membres = [], matchs = [], entrainements = [], presences = [], covoits = [], annonces = [], articles = [], commandes = [], fil = [], mesFamillesIds = [], mesPersonnesIds = [];
 let sante = [], permanences = [], permInscr = [], stocks = [], stages = [], stageInscr = [], tombola = [], extrasOk = true;
+let sponsors = [], sondages = [], votes = [], idees = [], documents = [], extras2Ok = true;
+const bureau = () => ['admin','bureau'].includes(role);
 const staff = () => ['admin','bureau','coach'].includes(role);
 const parent = () => role === 'parent';
 const mesPersonnes = () => staff() ? personnes : role === 'joueur' ? personnes.filter(p => mesPersonnesIds.includes(p.id)) : personnes.filter(p => mesFamillesIds.includes(p.famille_id));
@@ -509,7 +545,7 @@ async function ouvrirClub(c){
   $('#qui-email').textContent = `${session.user.email} · ${({admin:'admin',bureau:'bureau',coach:'coach',parent:'parent',joueur:'joueur'})[role] || role}`;
   const s = saisonCourante(), opts = [s, `${+s.slice(0,4)-1}-${+s.slice(0,4)}`, `${+s.slice(0,4)+1}-${+s.slice(0,4)+2}`];
   ['#saison','#saison-stats'].forEach(id => $(id).innerHTML = opts.map(x => `<option ${x===s?'selected':''}>${x}</option>`).join(''));
-  $$('.staff-seul').forEach(el => el.classList.toggle('cache', !staff()));
+  $$('.staff-seul').forEach(el => el.classList.toggle('cache', !staff())); $$('.bureau-seul').forEach(el => el.classList.toggle('cache', !bureau()));
   const onglets = staff() ? [['familles','Familles'],['licences','Licences'],['equipes','Équipes'],['agenda','Agenda'],['infos','Infos'],['buvette','Buvette'],['stages','Stages'],['coach','Coach'],['boutique','Boutique'],['stats','Stats'],['acces','Accès']]
                           : [['foyer', role === 'joueur' ? 'Ma fiche' : 'Mon foyer'],['agenda','Agenda'],['infos','Infos'],['buvette','Buvette'],['stages','Stages'],['boutique','Boutique']];
   const principaux = staff() ? ['familles','licences','agenda','infos'] : ['foyer','agenda','infos','buvette'];
@@ -540,13 +576,16 @@ async function toutRecharger(){
   const x = await Promise.all([ q('sante','maj_le'), q('permanences','date_perm'), q('permanence_inscriptions'), q('stocks','article'), q('stages','date_debut'), q('stage_inscriptions'), q('tombola') ]);
   extrasOk = !x.some(y => y.error);
   [sante, permanences, permInscr, stocks, stages, stageInscr, tombola] = x.map(y => y.data || []);
+  const z = await Promise.all([ q('sponsors','nom'), q('sondages'), q('sondage_votes'), q('idees'), bureau() ? q('documents') : Promise.resolve({ data: [] }) ]);
+  extras2Ok = !z.slice(0,4).some(y => y.error);
+  [sponsors, sondages, votes, idees, documents] = z.map(y => y.data || []);
   rendreTout();
   } catch(e){ toast(navigator.onLine ? 'Erreur de chargement : ' + erreurLisible(e) : 'Pas de connexion', true); }
   finally { $('#chargement').classList.add('cache'); }
 }
 function majReseau(){ $('#hors-ligne').classList.toggle('cache', navigator.onLine); if(navigator.onLine && club) toutRecharger(); }
 window.addEventListener('online', majReseau); window.addEventListener('offline', majReseau);
-function rendreTout(){ rendreFoyer(); rendreFamilles(); rendreLicences(); rendreEquipes(); rendreAgenda(); rendreInfos(); rendreBuvette(); rendreStages(); rendreBoutique(); rendreStats(); rendreAcces(); rendreNotifs(); }
+function rendreTout(){ rendreFoyer(); rendreFamilles(); rendreLicences(); rendreEquipes(); rendreAgenda(); rendreInfos(); rendreSondages(); rendreSponsors(); rendreIdees(); rendreDocuments(); rendreBuvette(); rendreStages(); rendreBoutique(); rendreStats(); rendreAcces(); rendreNotifs(); }
 const msgExtras = '<div class="vide">Cette partie n\'est pas encore activée : lance le script <b>07_extras.sql</b> dans Supabase (SQL Editor).</div>';
 $('#saison').addEventListener('change', rendreTout); $('#saison-stats').addEventListener('change', rendreStats);
 
@@ -588,6 +627,20 @@ document.addEventListener('click', ev => {
   if(d.statutCmd) majCommande(d.statutCmd, d.commande);
   if(d.supprimerCommande) supprimer('commandes', d.supprimerCommande, 'Annuler cette commande ?');
   if(d.sante) ouvrirSante(personnes.find(p => p.id === d.sante));
+  if(d.ics !== undefined) exporterIcs();
+  if(d.agenda) lienAgenda(d.agenda, d.type);
+  if(d.ouvrir === 'sponsor') ouvrirSponsor();
+  if(d.modifierSponsor) ouvrirSponsor(sponsors.find(x => x.id === d.modifierSponsor));
+  if(d.supprimerSponsor) supprimer('sponsors', d.supprimerSponsor, 'Retirer ce partenaire ?');
+  if(d.ouvrir === 'sondage') ouvrirSondage();
+  if(d.voter) voter(d.voter, +d.choix);
+  if(d.clore) clore(d.clore, d.etat === 'true');
+  if(d.supprimerSondage) supprimer('sondages', d.supprimerSondage, 'Supprimer ce sondage et ses votes ?');
+  if(d.idee !== undefined) envoyerIdee();
+  if(d.supprimerIdee) supprimer('idees', d.supprimerIdee, 'Supprimer cette idée ?');
+  if(d.ouvrir === 'document') { $('#do-titre').value = ''; $('#do-fichier').value = ''; msg('#msg-document',''); $('#dlg-document').showModal(); }
+  if(d.ouvrirDoc) ouvrirDocument(documents.find(x => x.id === d.ouvrirDoc));
+  if(d.supprimerDoc) supprimerDocument(documents.find(x => x.id === d.supprimerDoc));
   if(d.ouvrir === 'permanence') ouvrirPermanence();
   if(d.modifierPerm) ouvrirPermanence(permanences.find(p => p.id === d.modifierPerm));
   if(d.supprimerPerm) supprimer('permanences', d.supprimerPerm, 'Supprimer ce créneau et ses inscrits ?');
@@ -882,12 +935,12 @@ function carteEvt(e){
       <div><b>${esc(eq.nom)}</b> ${m.domicile ? 'reçoit' : 'se déplace chez'} <b>${esc(m.adversaire)}</b> ${btnWhatsapp(eq)}</div>
       <div class="detail">${m.lieu ? '📍 ' + (/^https?:/.test(m.lieu) ? `<a href="${esc(m.lieu)}" target="_blank">lieu</a>` : `<a href="https://www.google.com/maps/search/${encodeURIComponent(m.lieu)}" target="_blank" rel="noopener">${esc(m.lieu)}</a> · <a href="https://waze.com/ul?q=${encodeURIComponent(m.lieu)}&navigate=yes" target="_blank" rel="noopener">Waze</a>`) : (m.domicile ? '📍 À domicile' : '📍 Lieu à préciser')}${m.terrain ? ' · ' + ({herbe:'🌱 Herbe',synthetique:'🟩 Synthétique',stabilise:'🟫 Stabilisé',salle:'🏟️ Salle'})[m.terrain] : ''}${lav ? ' · 🧺 Maillots : ' + esc(nomP(lav)) : ''}${m.arbitre ? ' · 🟨 Arbitre : ' + esc(m.arbitre) : ''}${m.materiel ? ' · 🎒 Matériel : ' + esc(m.materiel) : ''}${m.commentaire ? ' · ' + esc(m.commentaire) : ''}<span id="meteo-${m.id}"></span></div>${blocConvoques(m)}
       ${blocFil(m)}${blocPresences('match', m.id, eq)}${blocCovoit(m)}
-      ${staff() ? `<div class="actions"><button class="btn second petit" data-feuille="${m.id}">🖨️ Feuille de match</button><button class="btn second petit" data-partager-match="${m.id}">📤 Envoyer sur WhatsApp</button><button class="btn second petit" data-modifier-match="${m.id}">${m.score_nous == null ? 'Saisir le score / modifier' : 'Modifier'}</button><button class="btn second petit" data-supprimer-match="${m.id}">Supprimer</button></div>` : ''}</div>`; }
+      <div class="actions"><button class="btn second petit" data-agenda="${m.id}" data-type="match">📅 Ajouter à mon agenda</button>${staff() ? `<button class="btn second petit" data-feuille="${m.id}">🖨️ Feuille de match</button><button class="btn second petit" data-partager-match="${m.id}">📤 Envoyer sur WhatsApp</button><button class="btn second petit" data-modifier-match="${m.id}">${m.score_nous == null ? 'Saisir le score / modifier' : 'Modifier'}</button><button class="btn second petit" data-supprimer-match="${m.id}">Supprimer</button>` : ''}</div></div>`; }
   const t = e.o;
   return `<div class="evt ${t.extra ? 'extra' : ''}"><div class="tete"><span class="quand">🏃 ${dateFr(t.date_seance)}${t.heure_debut ? ' · ' + esc(t.heure_debut) + (t.heure_fin ? '–' + esc(t.heure_fin) : '') : ''}</span>${t.extra ? '<span class="puce payee">Séance en plus</span>' : ''}</div>
     <div><b>${esc(eq.nom)}</b> — entraînement${t.lieu ? ' · 📍 ' + esc(t.lieu) : ''}</div>${t.note ? `<div class="detail">${esc(t.note)}</div>` : ''}
     ${blocPresences('entrainement', t.id, eq)}
-    ${staff() ? `<div class="actions"><button class="btn second petit" data-modifier-entr="${t.id}">Modifier</button><button class="btn second petit" data-supprimer-entr="${t.id}">Supprimer</button></div>` : ''}</div>`;
+    <div class="actions"><button class="btn second petit" data-agenda="${t.id}" data-type="entrainement">📅 Ajouter à mon agenda</button>${staff() ? `<button class="btn second petit" data-modifier-entr="${t.id}">Modifier</button><button class="btn second petit" data-supprimer-entr="${t.id}">Supprimer</button>` : ''}</div></div>`;
 }
 const meteoCache = {};
 async function chargerMeteo(m){
@@ -1119,6 +1172,134 @@ $$('[data-jeton]').forEach(b => b.addEventListener('click', () => { const v = b.
   const fin = () => { if(actif != null){ actif = null; localStorage.setItem('tableau_jetons', JSON.stringify(jetons)); } }; svg.addEventListener('pointerup', fin); svg.addEventListener('pointercancel', fin);
   svg.addEventListener('dblclick', ev => { const g = ev.target.closest('.jeton'); if(!g) return; jetons.splice(+g.dataset.i, 1); dessinerTerrain(); });
   dessinerTerrain(); })();
+
+/* ─── Calendrier : export iCal + lien Google Agenda ─── */
+function evtIcs(e){
+  const eq = equipes.find(x => x.id === e.o.equipe_id) || {}, d = e.date.replace(/-/g,''), h = (e.heure || '').replace(':','') || null;
+  const debut = h ? d + 'T' + h.slice(0,4) + '00' : d, finH = e.type === 'entrainement' && e.o.heure_fin ? e.o.heure_fin.replace(':','').slice(0,4) + '00' : h ? String(+h.slice(0,2) + 2).padStart(2,'0') + h.slice(2,4) + '00' : null;
+  const fin = h ? d + 'T' + finH : new Date(new Date(e.date + 'T12:00:00').getTime() + 86400000).toISOString().slice(0,10).replace(/-/g,'');
+  const titre = e.type === 'match' ? `⚽ ${eq.nom} vs ${e.o.adversaire}${e.o.domicile ? ' (domicile)' : ' (extérieur)'}` : `🏃 Entraînement ${eq.nom}${e.o.extra ? ' (séance en plus)' : ''}`;
+  const lieu = e.o.lieu || (e.type === 'match' && e.o.domicile ? club.nom : ''), desc = e.type === 'match' ? (e.o.commentaire || '') : (e.o.note || '');
+  return { debut, fin, allDay: !h, titre, lieu, desc, uid: e.id + '@monclubfoot' };
+}
+function exporterIcs(){
+  const evs = evenements().filter(e => e.date >= aujourdhui()); if(!evs.length){ toast('Rien à exporter'); return; }
+  const esc2 = t => String(t || '').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+  const lignes = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Mon club foot//FR','CALSCALE:GREGORIAN','X-WR-CALNAME:' + esc2(club.nom)];
+  evs.forEach(e => { const i = evtIcs(e); lignes.push('BEGIN:VEVENT','UID:' + i.uid,'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z',
+    i.allDay ? 'DTSTART;VALUE=DATE:' + i.debut : 'DTSTART;TZID=Europe/Paris:' + i.debut, i.allDay ? 'DTEND;VALUE=DATE:' + i.fin : 'DTEND;TZID=Europe/Paris:' + i.fin,
+    'SUMMARY:' + esc2(i.titre), i.lieu ? 'LOCATION:' + esc2(i.lieu) : '', i.desc ? 'DESCRIPTION:' + esc2(i.desc) : '', 'END:VEVENT'); });
+  lignes.push('END:VCALENDAR');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lignes.filter(Boolean).join('\r\n')], { type:'text/calendar;charset=utf-8' })); a.download = `${club.nom.replace(/[^\w-]+/g,'_')}.ics`; a.click();
+  toast('Fichier calendrier téléchargé : ouvre-le pour l\'ajouter');
+}
+function lienAgenda(id, type){
+  const e = evenements().find(x => x.id === id && x.type === type); if(!e) return; const i = evtIcs(e);
+  const fmt = v => i.allDay ? v : v.replace(/(\d{8}T\d{6})/, '$1');
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(i.titre)}&dates=${fmt(i.debut)}/${fmt(i.fin)}${i.lieu ? '&location=' + encodeURIComponent(i.lieu) : ''}${i.desc ? '&details=' + encodeURIComponent(i.desc) : ''}&ctz=Europe/Paris`;
+  if(/iPhone|iPad|Macintosh/.test(navigator.userAgent)){ // iOS : fichier .ics d'un seul événement (s'ouvre dans Calendrier)
+    const esc2 = t => String(t || '').replace(/,/g,'\\,').replace(/;/g,'\\;');
+    const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Mon club foot//FR','BEGIN:VEVENT','UID:' + i.uid,'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z', i.allDay ? 'DTSTART;VALUE=DATE:' + i.debut : 'DTSTART;TZID=Europe/Paris:' + i.debut, i.allDay ? 'DTEND;VALUE=DATE:' + i.fin : 'DTEND;TZID=Europe/Paris:' + i.fin,'SUMMARY:' + esc2(i.titre), i.lieu ? 'LOCATION:' + esc2(i.lieu) : '','END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([ics], { type:'text/calendar;charset=utf-8' })); a.download = 'evenement.ics'; a.click(); return; }
+  window.open(url, '_blank', 'noopener');
+}
+
+/* ─── Partenaires et sponsors ─── */
+function ouvrirSponsor(x){ $('#dlg-sponsor-titre').textContent = x ? 'Modifier le partenaire' : 'Nouveau partenaire'; $('#sp-id').value = x?.id || ''; $('#sp-nom').value = x?.nom || ''; $('#sp-site').value = x?.site_url || ''; $('#sp-ville').value = x?.ville || ''; $('#sp-avantage').value = x?.avantage || ''; $('#sp-logo').value = ''; msg('#msg-sponsor',''); $('#dlg-sponsor').showModal(); }
+soumettre('#form-sponsor', async () => {
+  const ligne = { club_id: club.id, nom: $('#sp-nom').value.trim(), site_url: $('#sp-site').value.trim() || null, ville: $('#sp-ville').value.trim() || null, avantage: $('#sp-avantage').value.trim() || null }, id = $('#sp-id').value;
+  const fichier = $('#sp-logo').files[0];
+  if(fichier){
+    if(fichier.size > 1024*1024){ msg('#msg-sponsor', 'Le logo dépasse 1 Mo.', 'erreur'); return; }
+    const ext = fichier.type === 'image/png' ? 'png' : fichier.type === 'image/webp' ? 'webp' : 'jpg', chemin = `${club.id}/${id || crypto.randomUUID()}.${ext}`;
+    const up = await sb.storage.from('sponsors').upload(chemin, fichier, { upsert: true, contentType: fichier.type });
+    if(up.error){ msg('#msg-sponsor', 'Logo refusé : ' + erreurLisible(up.error) + ' (le script 08_extras2.sql est-il passé ?)', 'erreur'); return; }
+    ligne.logo_url = sb.storage.from('sponsors').getPublicUrl(chemin).data.publicUrl + '?v=' + Date.now();
+  }
+  const { error } = id ? await sb.from('sponsors').update(ligne).eq('id', id) : await sb.from('sponsors').insert(ligne);
+  if(error){ msg('#msg-sponsor', erreurLisible(error), 'erreur'); return; } $('#dlg-sponsor').close(); await toutRecharger();
+});
+function rendreSponsors(){
+  const f = $('#bandeau-sponsors'); f.classList.toggle('cache', !sponsors.length);
+  $('#logos-sponsors').innerHTML = sponsors.map(s => { const inner = s.logo_url ? `<img src="${esc(s.logo_url)}" alt="${esc(s.nom)}" loading="lazy">` : esc(s.nom); return s.site_url ? `<a href="${esc(s.site_url)}" target="_blank" rel="noopener" title="${esc(s.nom)}">${inner}</a>` : `<span class="sp">${inner}</span>`; }).join('');
+  const av = sponsors.filter(s => s.avantage);
+  $('#zone-avantages').innerHTML = (av.length || staff()) && extras2Ok ? `<h3 style="margin:18px 0 8px">🎁 Avantages licenciés chez nos partenaires</h3>` + (av.length ? av.map(s => `<div class="annonce"><b>${esc(s.nom)}</b>${s.ville ? ` <span class="compteur">· ${esc(s.ville)}</span>` : ''} — ${esc(s.avantage)}${s.site_url ? ` <a href="${esc(s.site_url)}" target="_blank" rel="noopener">site</a>` : ''}${staff() ? ` <button class="btn second petit" data-modifier-sponsor="${s.id}">Modifier</button>` : ''}</div>`).join('') : '<div class="vide">Aucun avantage renseigné pour l\'instant.</div>') +
+    (staff() && sponsors.filter(s => !s.avantage).length ? `<div class="compteur" style="margin-top:6px">Partenaires sans avantage : ${sponsors.filter(s => !s.avantage).map(s => `${esc(s.nom)} <button class="btn second petit" data-modifier-sponsor="${s.id}">Modifier</button> <button class="btn second petit" data-supprimer-sponsor="${s.id}">Retirer</button>`).join(' · ')}</div>` : '') : '';
+}
+
+/* ─── Sondages et boîte à idées ─── */
+function ouvrirSondage(){ $('#so-question').value = ''; $('#so-options').value = ''; $('#so-fin').value = ''; $('#so-equipe').innerHTML = '<option value="">Tout le club</option>' + optionsEquipes(); msg('#msg-sondage',''); $('#dlg-sondage').showModal(); }
+soumettre('#form-sondage', async () => {
+  const opts = $('#so-options').value.split('\n').map(x => x.trim()).filter(Boolean);
+  if(opts.length < 2 || opts.length > 6){ msg('#msg-sondage', 'Entre 2 et 6 réponses, une par ligne.', 'erreur'); return; }
+  const { error } = await sb.from('sondages').insert({ club_id: club.id, question: $('#so-question').value.trim(), options: opts, equipe_id: $('#so-equipe').value || null, date_fin: $('#so-fin').value || null });
+  if(error){ msg('#msg-sondage', erreurLisible(error), 'erreur'); return; } $('#dlg-sondage').close(); await toutRecharger();
+});
+async function voter(id, choix){ const { error } = await sb.from('sondage_votes').upsert({ club_id: club.id, sondage_id: id, user_id: session.user.id, choix }, { onConflict: 'sondage_id,user_id' }); if(error) toast(erreurLisible(error), true); else { toast('Vote enregistré ✓'); await toutRecharger(); } }
+async function clore(id, clos){ const { error } = await sb.from('sondages').update({ clos }).eq('id', id); if(error) toast(erreurLisible(error), true); else await toutRecharger(); }
+function rendreSondages(){
+  if(!extras2Ok){ $('#zone-sondages').innerHTML = ''; return; }
+  const ok = mesEquipesIds(), auj = aujourdhui();
+  const ss = sondages.filter(s => !s.equipe_id || ok.includes(s.equipe_id) || staff()).sort((a,b) => (a.clos - b.clos) || b.cree_le.localeCompare(a.cree_le)).slice(0, 8);
+  if(!ss.length){ $('#zone-sondages').innerHTML = ''; return; }
+  $('#zone-sondages').innerHTML = ss.map(s => { const vs = votes.filter(v => v.sondage_id === s.id), mien = vs.find(v => v.user_id === session.user.id), ferme = s.clos || (s.date_fin && s.date_fin < auj), total = vs.length, eq = equipes.find(e => e.id === s.equipe_id);
+    const montrer = staff() || mien || ferme;
+    return `<div class="annonce sondage" style="border-left:5px solid #1D4ED8"><div class="meta">🗳️ Sondage · ${eq ? esc(eq.nom) : 'Tout le club'}${s.date_fin ? ' · jusqu\'au ' + dateFr(s.date_fin) : ''}${ferme ? ' · <b>clos</b>' : ''} · ${total} vote${total>1?'s':''}</div><h3>${esc(s.question)}</h3>
+      ${(s.options || []).map((o,i) => { const n = vs.filter(v => v.choix === i).length, pct = total ? Math.round(100*n/total) : 0;
+        return `<div class="option">${!ferme ? `<button class="btn ${mien?.choix === i ? 'ok' : 'second'} petit" data-voter="${s.id}" data-choix="${i}">${mien?.choix === i ? '✓ ' : ''}${esc(o)}</button>` : `<span class="puce ${mien?.choix === i ? 'present' : ''}">${esc(o)}</span>`}${montrer ? `<div class="barre-vote"><i style="width:${pct}%"></i></div><span class="compteur">${n} · ${pct} %</span>` : ''}</div>`; }).join('')}
+      ${!montrer ? '<div class="compteur">Les résultats s\'affichent après ton vote.</div>' : ''}
+      ${staff() ? `<div class="actions"><button class="btn second petit" data-clore="${s.id}" data-etat="${!s.clos}">${s.clos ? 'Rouvrir' : 'Clore le sondage'}</button><button class="btn second petit" data-supprimer-sondage="${s.id}">Supprimer</button></div>` : ''}</div>`; }).join('');
+}
+async function envoyerIdee(){ const t = $('#idee-texte')?.value.trim(); if(!t) return; const { error } = await sb.from('idees').insert({ club_id: club.id, user_id: session.user.id, auteur: session.user.email, texte: t }); if(error){ toast(erreurLisible(error), true); return; } toast('Merci, idée transmise au bureau ✓'); await toutRecharger(); }
+function rendreIdees(){
+  if(!extras2Ok){ $('#zone-idees').innerHTML = staff() ? msgExtras.replace('07_extras.sql','08_extras2.sql') : ''; return; }
+  const miennes = idees.filter(i => i.user_id === session.user.id).sort((a,b) => b.cree_le.localeCompare(a.cree_le));
+  let html = `<h3 style="margin:18px 0 8px">💡 Boîte à idées</h3><div class="annonce"><label for="idee-texte" style="margin-top:0">Une remarque, une envie, un horaire à revoir ? Écris-la au bureau.</label><textarea id="idee-texte" style="min-height:60px" placeholder="Ex. Un tournoi parents-enfants en juin ?"></textarea><div class="actions" style="margin-top:8px"><button class="btn principal petit" type="button" data-idee>Envoyer</button></div></div>`;
+  if(staff()){ const toutes = idees.slice().sort((a,b) => b.cree_le.localeCompare(a.cree_le));
+    html += toutes.length ? `<div class="tableau"><div class="titre-tableau"><b>Idées reçues</b><span class="compteur">${toutes.length}</span></div><table><thead><tr><th>Date</th><th>De</th><th>Idée</th><th class="act"></th></tr></thead><tbody>${toutes.map(i => `<tr><td>${new Date(i.cree_le).toLocaleDateString('fr-FR')}</td><td class="compteur">${esc(i.auteur || '')}</td><td>${esc(i.texte)}</td><td class="act"><button class="btn second petit" data-supprimer-idee="${i.id}">Traité</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="vide">Aucune idée reçue pour l\'instant.</div>'; }
+  else if(miennes.length) html += `<div class="compteur">Tes idées envoyées : ${miennes.map(i => '« ' + esc(i.texte) + ' »').join(' · ')}</div>`;
+  $('#zone-idees').innerHTML = html;
+}
+
+/* ─── Documents du bureau ─── */
+soumettre('#form-document', async () => {
+  const f = $('#do-fichier').files[0]; if(!f){ msg('#msg-document', 'Choisis un fichier.', 'erreur'); return; }
+  if(f.size > 10*1024*1024){ msg('#msg-document', 'Le fichier dépasse 10 Mo.', 'erreur'); return; }
+  const chemin = `${club.id}/${crypto.randomUUID()}-${f.name.replace(/[^\w.\-]+/g,'_')}`;
+  const up = await sb.storage.from('documents').upload(chemin, f, { contentType: f.type || 'application/octet-stream' });
+  if(up.error){ msg('#msg-document', 'Dépôt refusé : ' + erreurLisible(up.error) + ' (le script 08_extras2.sql est-il passé ?)', 'erreur'); return; }
+  const { error } = await sb.from('documents').insert({ club_id: club.id, titre: $('#do-titre').value.trim(), chemin, nom_fichier: f.name, taille: f.size, auteur: session.user.email });
+  if(error){ msg('#msg-document', erreurLisible(error), 'erreur'); return; } $('#dlg-document').close(); await toutRecharger();
+});
+async function ouvrirDocument(d){ const { data, error } = await sb.storage.from('documents').createSignedUrl(d.chemin, 300); if(error){ toast(erreurLisible(error), true); return; } window.open(data.signedUrl, '_blank', 'noopener'); }
+async function supprimerDocument(d){ if(!confirm('Supprimer ce document ?')) return; await sb.storage.from('documents').remove([d.chemin]); const { error } = await sb.from('documents').delete().eq('id', d.id); if(error) toast(erreurLisible(error), true); else { toast('Supprimé'); await toutRecharger(); } }
+function rendreDocuments(){
+  if(!bureau()){ $('#zone-documents').innerHTML = ''; return; }
+  const ko = f => f > 1048576 ? (f/1048576).toFixed(1) + ' Mo' : Math.round(f/1024) + ' Ko';
+  const ds = documents.slice().sort((a,b) => b.cree_le.localeCompare(a.cree_le));
+  $('#zone-documents').innerHTML = `<h3 style="margin:18px 0 8px">📁 Documents du bureau <span class="compteur">visibles uniquement par le bureau et les admins</span></h3>` + (ds.length ? `<div class="tableau"><table><thead><tr><th>Document</th><th>Déposé le</th><th>Taille</th><th class="act"></th></tr></thead><tbody>${ds.map(d => `<tr><td><b>${esc(d.titre)}</b> <span class="compteur">${esc(d.nom_fichier || '')}${d.auteur ? ' · ' + esc(d.auteur) : ''}</span></td><td>${new Date(d.cree_le).toLocaleDateString('fr-FR')}</td><td>${ko(d.taille || 0)}</td><td class="act"><button class="btn second petit" data-ouvrir-doc="${d.id}">Ouvrir</button> <button class="btn second petit" data-supprimer-doc="${d.id}">Supprimer</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="vide">Aucun document. Dépose le PV de la dernière réunion ou le bilan financier.</div>');
+}
+
+/* ─── Recherche globale ─── */
+function normaliser(t){ return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+function rechercher(q){
+  const box = $('#resultats'); q = normaliser(q).trim(); if(q.length < 2){ box.classList.add('cache'); return; }
+  const hit = t => normaliser(t).includes(q), r = [];
+  familles.filter(f => staff() || mesFamillesIds.includes(f.id)).forEach(f => { if(hit(f.nom) || hit(f.email) || hit(f.telephone)) r.push({ type:'Famille', titre: f.nom, sous: [f.email, f.telephone].filter(Boolean).join(' · '), onglet: staff() ? 'familles' : 'foyer' }); });
+  mesPersonnes().forEach(p => { if(hit(p.prenom + ' ' + p.nom) || hit(p.nom + ' ' + p.prenom)){ const f = familles.find(x => x.id === p.famille_id); r.push({ type:'Joueur', titre: nomP(p) + (p.numero_maillot != null ? ' #' + p.numero_maillot : ''), sous: (f ? 'famille ' + f.nom + ' · ' : '') + categorieProposee(p.date_naissance, p.sexe, saisonSel()), onglet: staff() ? 'familles' : 'foyer' }); } });
+  equipes.forEach(e => { if(hit(e.nom) || hit(e.coach_nom)) r.push({ type:'Équipe', titre: e.nom, sous: e.coach_nom ? 'coach ' + e.coach_nom : '', onglet: staff() ? 'equipes' : 'agenda' }); });
+  evenements().forEach(e => { const eq = equipes.find(x => x.id === e.o.equipe_id) || {}, txt = e.type === 'match' ? `${eq.nom} vs ${e.o.adversaire} ${e.o.lieu || ''}` : `entrainement ${eq.nom} ${e.o.lieu || ''}`; if(hit(txt) || hit(dateFr(e.date)) || e.date.includes(q)) r.push({ type: e.type === 'match' ? 'Match' : 'Entraînement', titre: (e.type === 'match' ? '⚽ ' : '🏃 ') + dateFr(e.date) + (e.heure ? ' ' + e.heure : ''), sous: e.type === 'match' ? `${eq.nom} vs ${e.o.adversaire}` : eq.nom, onglet:'agenda' }); });
+  annonces.forEach(a => { if(hit(a.titre) || hit(a.texte)) r.push({ type:'Info', titre: a.titre, sous: new Date(a.cree_le).toLocaleDateString('fr-FR'), onglet:'infos' }); });
+  stages.forEach(s => { if(hit(s.titre)) r.push({ type:'Stage', titre: s.titre, sous: dateFr(s.date_debut), onglet:'stages' }); });
+  permanences.forEach(p => { if(hit(p.titre)) r.push({ type:'Permanence', titre: p.titre, sous: dateFr(p.date_perm), onglet:'buvette' }); });
+  sponsors.forEach(s => { if(hit(s.nom)) r.push({ type:'Partenaire', titre: s.nom, sous: s.avantage || '', onglet:'infos' }); });
+  box.innerHTML = r.length ? r.slice(0, 25).map(x => `<button type="button" data-aller="${x.onglet}"><span class="type">${x.type}</span><br><b>${esc(x.titre)}</b>${x.sous ? ` <span class="compteur">${esc(x.sous)}</span>` : ''}</button>`).join('') : '<button type="button" disabled><span class="compteur">Rien trouvé.</span></button>';
+  box.classList.remove('cache');
+  $$('#resultats [data-aller]').forEach(b => b.addEventListener('click', () => { allerOnglet(b.dataset.aller); box.classList.add('cache'); $('#recherche').value = ''; $('#menu-plus').classList.add('cache'); window.scrollTo({ top: 0 }); }));
+}
+$('#recherche').addEventListener('input', ev => rechercher(ev.target.value));
+$('#recherche').addEventListener('keydown', ev => { if(ev.key === 'Escape'){ ev.target.value = ''; $('#resultats').classList.add('cache'); } });
+document.addEventListener('click', ev => { if(!ev.target.closest('#resultats') && !ev.target.closest('#recherche')) $('#resultats').classList.add('cache'); });
 
 /* ─── Boutique ─── */
 function ouvrirArticle(a){ $('#ar-id').value = a?.id || ''; $('#ar-nom').value = a?.nom || ''; $('#ar-prix').value = a?.prix ?? ''; $('#ar-tailles').value = a?.tailles || ''; $('#ar-photo').value = ''; $('#ar-photo-info').textContent = a?.photo_url ? 'Une photo est en place ; choisis un fichier pour la remplacer.' : ''; msg('#msg-article',''); $('#dlg-article').showModal(); }
