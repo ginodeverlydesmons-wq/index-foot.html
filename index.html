@@ -173,6 +173,10 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
 #ecran-public h1{font-size:2rem;text-align:center;margin:8px 0} #ecran-public .compteur{text-align:center;display:block}
 #ecran-public .kpi div{text-align:center}
 .qr{text-align:center;padding:12px;background:#fff;border-radius:var(--r);display:inline-block}
+.filtres{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px} .filtres button{border:1px solid var(--ligne);background:var(--surface);color:var(--encre);border-radius:999px;padding:5px 12px;cursor:pointer;font-weight:500} .filtres button[aria-pressed=true]{background:var(--encre);color:#fff;border-color:var(--encre)}
+.meteo{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px} .meteo div{flex:1;min-width:110px;background:var(--surface);border:1px solid var(--ligne);border-radius:var(--r);padding:8px 10px;text-align:center} .meteo b{display:block;font-family:var(--display);font-size:1.4rem} .meteo .gel{border-color:#7A1E1E;background:#FFF0F0} .meteo .ico{font-size:1.6rem}
+.trombi{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:14px} .trombi div{background:var(--surface);border:1px solid var(--ligne);border-radius:var(--r);padding:10px;text-align:center} .trombi img,.trombi .sans{width:84px;height:84px;border-radius:50%;object-fit:cover;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:2rem;background:#EEF1F5} .trombi b{display:block} .trombi .r{color:var(--accent-2);font-family:var(--display);font-size:1rem;text-transform:uppercase}
+.perm.fermeture{border-left-color:#6D28D9}
 #hors-ligne{background:#B45309;color:#fff;text-align:center;padding:8px 12px;font-weight:600}
 #bandeau-urgent{background:#B91C1C;color:#fff;padding:10px 16px;text-align:center;font-weight:600} #bandeau-urgent a{color:#fff}
 #bandeau-install{position:fixed;bottom:0;left:0;right:0;background:var(--encre);color:#fff;padding:10px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;z-index:5}
@@ -246,14 +250,14 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
     <section class="onglet cache" id="onglet-agenda">
       <div class="barre"><h2>Agenda <span class="compteur" id="cpt-agenda"></span></h2>
         <div><button class="btn second petit" type="button" data-ics>📅 Mettre dans mon calendrier</button> <span class="staff-seul"><button class="btn principal" type="button" data-ouvrir="match">Ajouter un match</button> <button class="btn second" type="button" data-ouvrir="entrainement">Ajouter un entraînement</button></span></div></div>
-      <div id="zone-agenda"></div>
+      <div id="meteo-stade"></div><div id="filtres-agenda" class="filtres"></div><div id="zone-agenda"></div>
     </section>
     <section class="onglet cache" id="onglet-infos">
-      <div class="barre"><h2>Infos du club</h2><div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="annonce">Publier une info</button> <button class="btn second" type="button" data-ouvrir="sondage">Créer un sondage</button> <button class="btn second" type="button" data-ouvrir="sponsor">Ajouter un partenaire</button> <button class="btn second" type="button" data-ouvrir="trophee">Ajouter un trophée</button> <button class="btn second bureau-seul" type="button" data-ouvrir="document">Déposer un document</button></div></div>
-      <div id="zone-sondages"></div><div id="zone-trophees"></div><div id="zone-infos"></div><div id="zone-avantages"></div><div id="zone-idees"></div><div id="zone-documents"></div>
+      <div class="barre"><h2>Infos du club</h2><div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="annonce">Publier une info</button> <button class="btn second" type="button" data-ouvrir="sondage">Créer un sondage</button> <button class="btn second" type="button" data-ouvrir="sponsor">Ajouter un partenaire</button> <button class="btn second" type="button" data-ouvrir="trophee">Ajouter un trophée</button> <button class="btn second" type="button" data-ouvrir="encadrant">Ajouter un encadrant</button> <button class="btn second bureau-seul" type="button" data-ouvrir="document">Déposer un document</button></div></div>
+      <div id="zone-sondages"></div><div id="zone-trophees"></div><div id="zone-infos"></div><div id="zone-trombi"></div><div id="zone-avantages"></div><div id="zone-idees"></div><div id="zone-documents"></div>
     </section>
     <section class="onglet cache" id="onglet-buvette">
-      <div class="barre"><h2>Buvette et événements</h2><div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="permanence">Ajouter un créneau</button> <button class="btn second" type="button" data-ouvrir="stock">Ajouter un produit</button></div></div>
+      <div class="barre"><h2>Bénévoles : buvette, fermeture, événements</h2><div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="permanence">Ajouter un créneau</button> <button class="btn second" type="button" data-ouvrir="stock">Ajouter un produit</button></div></div>
       <div id="zone-buvette"></div>
     </section>
     <section class="onglet cache" id="onglet-stages">
@@ -314,6 +318,7 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   <label for="r-lien">Lien de paiement Stripe (cotisation)</label><input id="r-lien" type="url" placeholder="https://buy.stripe.com/…">
   <p class="compteur">Stripe → Payment Links → New → produit « Licence » → copie le lien.</p>
   <div class="ligne"><div><label for="r-nom-urg">Contact d'urgence (nom)</label><input id="r-nom-urg" placeholder="Ex. Marc, président"></div><div><label for="r-tel-urg">Téléphone d'urgence</label><input id="r-tel-urg" type="tel" placeholder="06 …"></div></div>
+  <div class="ligne"><div><label for="r-stade">Ville ou adresse du stade (pour la météo)</label><input id="r-stade" placeholder="Ex. Stade municipal, 72440 Bouloire"></div><div><label for="r-tenue">Tenue par défaut en déplacement</label><input id="r-tenue" placeholder="Ex. Survêtement du club"></div></div>
   <label for="r-logo">Logo du club (PNG ou JPG, 2 Mo max)</label><input id="r-logo" type="file" accept="image/png,image/jpeg,image/webp">
   <p class="compteur" id="r-logo-info"></p>
   <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-reglages"></div></form></dialog>
@@ -354,6 +359,8 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   <div class="ligne"><div><label for="m-lieu">Lieu (stade, adresse ou ville)</label><input id="m-lieu" placeholder="Ex. Stade municipal, 72440 Tresson"></div>
   <div><label for="m-terrain">Terrain</label><select id="m-terrain"><option value="">—</option><option value="herbe">Herbe (crampons vissés/moulés)</option><option value="synthetique">Synthétique (moulés)</option><option value="stabilise">Stabilisé</option><option value="salle">Salle (futsal)</option></select></div></div>
   <div class="ligne"><div><label for="m-nous">Buts pour nous</label><input id="m-nous" type="number" min="0" placeholder="— si pas joué"></div><div><label for="m-eux">Buts pour eux</label><input id="m-eux" type="number" min="0"></div></div>
+  <div class="ligne"><div><label for="m-rdv-heure">🚌 Heure de rendez-vous pour le départ</label><input id="m-rdv-heure" type="time"></div><div><label for="m-rdv-lieu">Lieu de rendez-vous</label><input id="m-rdv-lieu" placeholder="Ex. Parking du stade, salle des fêtes"></div></div>
+  <label for="m-tenue">👕 Tenue exigée</label><input id="m-tenue" placeholder="Ex. Survêtement du club, polo blanc (par défaut : réglage du club)">
   <label for="m-lavage">Qui lave les maillots</label><select id="m-lavage"><option value="">—</option></select>
   <div class="ligne"><div><label for="m-arbitre">Arbitre bénévole (touche / centre)</label><input id="m-arbitre" placeholder="Ex. Papa de Léo (touche)"></div><div><label for="m-materiel">Matériel (ballons, chasubles)</label><input id="m-materiel" placeholder="Ex. Famille Martin"></div></div>
   <label>Joueurs convoqués (qui joue)</label><div id="m-convoques" class="tailles"></div>
@@ -398,7 +405,8 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-sante"></div></form></dialog>
 
 <dialog id="dlg-permanence"><form method="dialog" id="form-permanence"><h2 id="dlg-perm-titre">Créneau de permanence</h2><input type="hidden" id="pm-id">
-  <label for="pm-titre">Intitulé</label><input id="pm-titre" required placeholder="Ex. Buvette match U13, Tournoi de Pâques — stand crêpes">
+  <label for="pm-type">Type</label><select id="pm-type"><option value="buvette">Buvette / stand</option><option value="fermeture">Fermeture et nettoyage (vestiaires, club-house)</option><option value="autre">Autre (arbitrage, transport, montage…)</option></select>
+  <label for="pm-titre">Intitulé</label><input id="pm-titre" required placeholder="Ex. Buvette match U13, Fermeture après Seniors – dimanche soir">
   <div class="ligne"><div><label for="pm-date">Date</label><input id="pm-date" type="date" required></div><div><label for="pm-besoin">Bénévoles nécessaires</label><input id="pm-besoin" type="number" min="1" max="30" value="2"></div></div>
   <div class="ligne"><div><label for="pm-debut">Début</label><input id="pm-debut" type="time"></div><div><label for="pm-fin">Fin</label><input id="pm-fin" type="time"></div></div>
   <label for="pm-note">Consigne</label><input id="pm-note" placeholder="Ex. Apporter un gâteau, clé de la buvette chez Marc">
@@ -476,6 +484,12 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   <label for="rg-confirm">Pour confirmer, écris <b>SUPPRIMER</b></label><input id="rg-confirm" autocomplete="off">
   <div class="actions"><button class="btn non" value="ok">Supprimer tout</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-rgpd"></div></form></dialog>
 
+<dialog id="dlg-encadrant"><form method="dialog" id="form-encadrant"><h2 id="dlg-enc-titre">Membre de l'encadrement</h2><input type="hidden" id="en-id">
+  <div class="ligne"><div><label for="en-nom">Nom</label><input id="en-nom" required placeholder="Ex. Marc Dupont"></div><div><label for="en-role">Rôle</label><input id="en-role" required list="roles-idees" placeholder="Ex. Président"><datalist id="roles-idees"><option>Président</option><option>Vice-président</option><option>Trésorier</option><option>Secrétaire</option><option>Coach U7</option><option>Coach U9</option><option>Coach U11</option><option>Coach U13</option><option>Coach Seniors</option><option>Arbitre officiel</option><option>Responsable buvette</option><option>Responsable matériel</option><option>Référent parents</option></datalist></div></div>
+  <div class="ligne"><div><label for="en-tel">Téléphone (facultatif)</label><input id="en-tel" type="tel"></div><div><label for="en-email">Email (facultatif)</label><input id="en-email" type="email"></div></div>
+  <div class="ligne"><div><label for="en-ordre">Ordre d'affichage</label><input id="en-ordre" type="number" min="0" value="10"></div><div><label for="en-photo">Photo (JPG/PNG, 1 Mo max)</label><input id="en-photo" type="file" accept="image/png,image/jpeg,image/webp"></div></div>
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-encadrant"></div></form></dialog>
+
 <dialog id="dlg-covoit"><form method="dialog" id="form-covoit"><h2>Covoiturage</h2><input type="hidden" id="cv-match">
   <p class="compteur" id="cv-info"></p>
   <label for="cv-famille" id="lbl-cv-famille">Famille</label><select id="cv-famille"></select>
@@ -524,6 +538,7 @@ let familles = [], personnes = [], equipes = [], licences = [], membres = [], ma
 let sante = [], permanences = [], permInscr = [], stocks = [], stages = [], stageInscr = [], tombola = [], extrasOk = true;
 let sponsors = [], sondages = [], votes = [], idees = [], documents = [], extras2Ok = true;
 let bilans = [], trophees = [], tournois = [], extras3Ok = true;
+let encadrants = [], extras4Ok = true, filtreAgenda = 'toutes';
 const bureau = () => ['admin','bureau'].includes(role);
 const staff = () => ['admin','bureau','coach'].includes(role);
 const parent = () => role === 'parent';
@@ -559,7 +574,7 @@ $$('[data-changer-club]').forEach(b => b.addEventListener('click', () => { club 
 /* ─── Clubs et rôle ─── */
 async function chargerClubs(){
   try { await sb.rpc('rattacher_par_email'); } catch(e){}
-  const [c, m] = await Promise.all([ sb.from('clubs').select('id, nom, ville, lien_paiement, logo_url, nom_urgence, tel_urgence').order('nom'), sb.from('membres_club').select('club_id, role').eq('user_id', session.user.id) ]);
+  const [c, m] = await Promise.all([ sb.from('clubs').select('*').order('nom'), sb.from('membres_club').select('club_id, role').eq('user_id', session.user.id) ]);
   if(c.error){ montrer('#ecran-club'); msg('#msg-club', erreurLisible(c.error), 'erreur'); return; }
   clubs = (c.data || []).map(x => ({ ...x, role: (m.data || []).find(y => y.club_id === x.id)?.role || 'parent' }));
   const memo = localStorage.getItem('club_id');
@@ -628,13 +643,14 @@ async function toutRecharger(){
   [sponsors, sondages, votes, idees, documents] = z.map(y => y.data || []);
   const w = await Promise.all([ q('bilans','maj_le'), q('trophees'), staff() ? q('tournois','date_tournoi') : Promise.resolve({ data: [] }) ]);
   extras3Ok = !w.slice(0,2).some(y => y.error); [bilans, trophees, tournois] = w.map(y => y.data || []);
+  const v = await q('encadrants','ordre'); extras4Ok = !v.error && 'tenue_deplacement' in club; encadrants = v.data || [];
   rendreTout();
   } catch(e){ toast(navigator.onLine ? 'Erreur de chargement : ' + erreurLisible(e) : 'Pas de connexion', true); }
   finally { $('#chargement').classList.add('cache'); }
 }
 function majReseau(){ $('#hors-ligne').classList.toggle('cache', navigator.onLine); if(navigator.onLine && club) toutRecharger(); }
 window.addEventListener('online', majReseau); window.addEventListener('offline', majReseau);
-function rendreTout(){ rendreFoyer(); rendreFamilles(); rendreLicences(); rendreEquipes(); rendreAgenda(); rendreInfos(); rendreSondages(); rendreSponsors(); rendreIdees(); rendreDocuments(); rendreTrophees(); rendreTournois(); rendreBuvette(); rendreStages(); rendreBoutique(); rendreStats(); rendreAcces(); rendreNotifs(); }
+function rendreTout(){ rendreFoyer(); rendreFamilles(); rendreLicences(); rendreEquipes(); rendreAgenda(); rendreInfos(); rendreSondages(); rendreSponsors(); rendreIdees(); rendreDocuments(); rendreTrophees(); rendreTournois(); rendreTrombi(); meteoStade(); rendreBuvette(); rendreStages(); rendreBoutique(); rendreStats(); rendreAcces(); rendreNotifs(); }
 const msgExtras = '<div class="vide">Cette partie n\'est pas encore activée : lance le script <b>07_extras.sql</b> dans Supabase (SQL Editor).</div>';
 $('#saison').addEventListener('change', rendreTout); $('#saison-stats').addEventListener('change', rendreStats);
 
@@ -676,6 +692,12 @@ document.addEventListener('click', ev => {
   if(d.statutCmd) majCommande(d.statutCmd, d.commande);
   if(d.supprimerCommande) supprimer('commandes', d.supprimerCommande, 'Annuler cette commande ?');
   if(d.sante) ouvrirSante(personnes.find(p => p.id === d.sante));
+  if(d.filtre){ filtreAgenda = d.filtre; localStorage.setItem('filtre_agenda_' + club.id, filtreAgenda); rendreAgenda(); }
+  if(d.fermeture) creerFermeture(matchs.find(m => m.id === d.fermeture));
+  if(d.visuel) genererVisuel(matchs.find(m => m.id === d.visuel), d.genre);
+  if(d.ouvrir === 'encadrant') ouvrirEncadrant();
+  if(d.modifierEnc) ouvrirEncadrant(encadrants.find(x => x.id === d.modifierEnc));
+  if(d.supprimerEnc) supprimer('encadrants', d.supprimerEnc, 'Retirer cette personne du trombinoscope ?');
   if(d.bilan) ouvrirBilan(personnes.find(p => p.id === d.bilan));
   if(d.ouvrir === 'trophee') ouvrirTrophee();
   if(d.modifierTrophee) ouvrirTrophee(trophees.find(x => x.id === d.modifierTrophee));
@@ -719,7 +741,7 @@ document.addEventListener('click', ev => {
   if(d.ouvrir === 'tombola') ouvrirTombola();
   if(d.tombolaPlus) majTombola(d.tombolaPlus, d.champ, +d.delta);
   if(d.notifs !== undefined) $('#dlg-notifs').showModal();
-  if(d.reglages !== undefined){ $('#r-nom').value = club.nom; $('#r-lien').value = club.lien_paiement || ''; $('#r-nom-urg').value = club.nom_urgence || ''; $('#r-tel-urg').value = club.tel_urgence || ''; msg('#msg-reglages',''); $('#dlg-reglages').showModal(); }
+  if(d.reglages !== undefined){ $('#r-nom').value = club.nom; $('#r-lien').value = club.lien_paiement || ''; $('#r-nom-urg').value = club.nom_urgence || ''; $('#r-tel-urg').value = club.tel_urgence || ''; $('#r-stade').value = club.lieu_stade || ''; $('#r-tenue').value = club.tenue_deplacement || ''; msg('#msg-reglages',''); $('#dlg-reglages').showModal(); }
 });
 async function supprimer(table, id, q){ if(!confirm(q)) return; const { error } = await sb.from(table).delete().eq('id', id); if(error){ toast(erreurLisible(error), true); return; } toast('Supprimé'); await toutRecharger(); }
 function soumettre(formId, fn){ $(formId).addEventListener('submit', async ev => { if(ev.submitter?.value !== 'ok') return; ev.preventDefault(); const avant = $(formId).closest('dialog').open; await fn(ev); if(avant && !$(formId).closest('dialog').open) toast('Enregistré ✓'); }); }
@@ -729,6 +751,7 @@ soumettre('#form-reglages', async () => {
   const lien = $('#r-lien').value.trim();
   if(lien && !/^https:\/\/(buy\.stripe\.com|checkout\.stripe\.com|www\.helloasso\.com)\//.test(lien)){ msg('#msg-reglages', 'Le lien doit commencer par https://buy.stripe.com/', 'erreur'); return; }
   const maj = { nom: $('#r-nom').value.trim(), lien_paiement: lien || null, nom_urgence: $('#r-nom-urg').value.trim() || null, tel_urgence: $('#r-tel-urg').value.trim() || null };
+  if(extras4Ok){ maj.lieu_stade = $('#r-stade').value.trim() || null; maj.tenue_deplacement = $('#r-tenue').value.trim() || null; }
   const fichier = $('#r-logo').files[0];
   if(fichier){
     if(fichier.size > 2*1024*1024){ msg('#msg-reglages', 'Le logo dépasse 2 Mo.', 'erreur'); return; }
@@ -883,6 +906,7 @@ function ouvrirMatch(m){
   $('#m-equipe').innerHTML = optionsEquipes(m?.equipe_id); $('#m-date').value = m?.date_match || aujourdhui(); $('#m-heure').value = m?.heure || '';
   $('#m-adversaire').value = m?.adversaire || ''; $('#m-lieu-type').value = m ? String(m.domicile) : 'true'; $('#m-lieu').value = m?.lieu || ''; $('#m-terrain').value = m?.terrain || '';
   $('#m-nous').value = m?.score_nous ?? ''; $('#m-eux').value = m?.score_eux ?? ''; $('#m-comm').value = m?.commentaire || ''; $('#m-arbitre').value = m?.arbitre || ''; $('#m-materiel').value = m?.materiel || '';
+  $('#m-rdv-heure').value = m?.rdv_heure || ''; $('#m-rdv-lieu').value = m?.rdv_lieu || ''; $('#m-tenue').value = m?.tenue || '';
   const majLavage = () => { const e = equipes.find(x => x.id === $('#m-equipe').value), js = e ? joueursEquipe(e) : []; $('#m-lavage').innerHTML = '<option value="">—</option>' + js.map(p => `<option value="${p.id}" ${m?.lavage_personne_id===p.id?'selected':''}>${esc(nomP(p))}</option>`).join('');
     $('#m-convoques').innerHTML = js.length ? js.map(p => `<label style="display:inline-block;margin:0 10px 4px 0;font-weight:400${blessure(p) === 'indisponible' ? ';opacity:.6' : ''}"><input type="checkbox" value="${p.id}" style="width:auto;margin-right:4px" ${(m?.convoques||[]).includes(p.id)?'checked':''}>${esc(nomP(p))} ${puceBlessure(p)}</label>`).join('') : '<span class="compteur">Aucun joueur rattaché à cette équipe.</span>'; };
   $('#m-equipe').onchange = majLavage; majLavage(); msg('#msg-match',''); $('#dlg-match').showModal();
@@ -890,7 +914,7 @@ function ouvrirMatch(m){
 soumettre('#form-match', async () => {
   const n = $('#m-nous').value, x = $('#m-eux').value; if((n === '') !== (x === '')){ msg('#msg-match', 'Renseigne les deux scores, ou aucun.', 'erreur'); return; }
   const ligne = { club_id: club.id, equipe_id: $('#m-equipe').value, date_match: $('#m-date').value, heure: $('#m-heure').value || null, adversaire: $('#m-adversaire').value.trim(), domicile: $('#m-lieu-type').value === 'true',
-    lieu: $('#m-lieu').value.trim() || null, terrain: $('#m-terrain').value || null, arbitre: $('#m-arbitre').value.trim() || null, materiel: $('#m-materiel').value.trim() || null, convoques: [...document.querySelectorAll('#m-convoques input:checked')].map(i => i.value), score_nous: n === '' ? null : +n, score_eux: x === '' ? null : +x, lavage_personne_id: $('#m-lavage').value || null, commentaire: $('#m-comm').value.trim() || null }, id = $('#m-id').value;
+    lieu: $('#m-lieu').value.trim() || null, terrain: $('#m-terrain').value || null, arbitre: $('#m-arbitre').value.trim() || null, materiel: $('#m-materiel').value.trim() || null, convoques: [...document.querySelectorAll('#m-convoques input:checked')].map(i => i.value), score_nous: n === '' ? null : +n, score_eux: x === '' ? null : +x, lavage_personne_id: $('#m-lavage').value || null, ...(extras4Ok ? { rdv_heure: $('#m-rdv-heure').value || null, rdv_lieu: $('#m-rdv-lieu').value.trim() || null, tenue: $('#m-tenue').value.trim() || null } : {}), commentaire: $('#m-comm').value.trim() || null }, id = $('#m-id').value;
   const { error } = id ? await sb.from('matchs').update(ligne).eq('id', id) : await sb.from('matchs').insert(ligne);
   if(error){ msg('#msg-match', erreurLisible(error), 'erreur'); return; } $('#dlg-match').close(); await toutRecharger();
 });
@@ -980,13 +1004,14 @@ soumettre('#form-covoit', async () => {
 });
 function partagerMatch(m){
   const eq = equipes.find(e => e.id === m.equipe_id) || {}, cs = (m.convoques || []).map(id => personnes.find(p => p.id === id)).filter(Boolean);
-  const texte = `⚽ ${club.nom} — ${eq.nom}\n${dateFr(m.date_match)}${m.heure ? ' à ' + m.heure : ''}\n${m.domicile ? 'Domicile' : 'Extérieur'} contre ${m.adversaire}${m.lieu ? '\n📍 ' + m.lieu : ''}${cs.length ? '\n\n📋 Convoqués : ' + cs.map(p => p.prenom + ' ' + p.nom).join(', ') : ''}\n\nRéponds présent/absent dans l'appli : ${location.origin + location.pathname}`;
+  const texte = `⚽ ${club.nom} — ${eq.nom}\n${dateFr(m.date_match)}${m.heure ? ' à ' + m.heure : ''}\n${m.domicile ? 'Domicile' : 'Extérieur'} contre ${m.adversaire}${m.lieu ? '\n📍 ' + m.lieu : ''}${m.rdv_heure || m.rdv_lieu ? '\n🚌 Rendez-vous ' + (m.rdv_heure ? 'à ' + m.rdv_heure + ' ' : '') + (m.rdv_lieu || '') : ''}${(m.tenue || (!m.domicile && club.tenue_deplacement)) ? '\n👕 Tenue : ' + (m.tenue || club.tenue_deplacement) : ''}${cs.length ? '\n\n📋 Convoqués : ' + cs.map(p => p.prenom + ' ' + p.nom).join(', ') : ''}\n\nRéponds présent/absent dans l'appli : ${location.origin + location.pathname}`;
   if(navigator.share) navigator.share({ text: texte }).catch(()=>{}); else window.open('https://wa.me/?text=' + encodeURIComponent(texte), '_blank');
 }
 function resultat(m){ if(m.score_nous == null) return ''; const v = m.score_nous > m.score_eux, d = m.score_nous < m.score_eux; return `<span class="puce ${v?'victoire':d?'defaite':'nul'}">${v?'Victoire':d?'Défaite':'Nul'} ${m.score_nous}–${m.score_eux}</span>`; }
 function mesEquipesIds(){ if(staff()) return equipes.map(e => e.id); const ids = mesPersonnes().map(p => p.id); return equipes.filter(e => licences.some(l => l.equipe_id === e.id && ids.includes(l.personne_id))).map(e => e.id); }
+function equipesFiltre(){ const ids = mesEquipesIds(); return equipes.filter(e => ids.includes(e.id) && e.saison === saisonSel()).sort((a,b) => CATEGORIES.indexOf(a.categorie) - CATEGORIES.indexOf(b.categorie) || a.nom.localeCompare(b.nom)); }
 function evenements(){
-  const ok = mesEquipesIds();
+  let ok = mesEquipesIds(); if(filtreAgenda !== 'toutes') ok = ok.filter(id => id === filtreAgenda);
   const ev = matchs.filter(m => ok.includes(m.equipe_id)).map(m => ({ type:'match', id:m.id, date:m.date_match, heure:m.heure, o:m }))
     .concat(entrainements.filter(t => ok.includes(t.equipe_id)).map(t => ({ type:'entrainement', id:t.id, date:t.date_seance, heure:t.heure_debut, o:t })));
   return ev.sort((a,b) => a.date.localeCompare(b.date) || (a.heure||'').localeCompare(b.heure||''));
@@ -997,8 +1022,8 @@ function carteEvt(e){
     return `<div class="evt match"><div class="tete"><span class="quand">⚽ ${dateFr(m.date_match)}${m.heure ? ' · ' + esc(m.heure) : ''}</span>${resultat(m)}</div>
       <div><b>${esc(eq.nom)}</b> ${m.domicile ? 'reçoit' : 'se déplace chez'} <b>${esc(m.adversaire)}</b> ${btnWhatsapp(eq)}</div>
       <div class="detail">${m.lieu ? '📍 ' + (/^https?:/.test(m.lieu) ? `<a href="${esc(m.lieu)}" target="_blank">lieu</a>` : `<a href="https://www.google.com/maps/search/${encodeURIComponent(m.lieu)}" target="_blank" rel="noopener">${esc(m.lieu)}</a> · <a href="https://waze.com/ul?q=${encodeURIComponent(m.lieu)}&navigate=yes" target="_blank" rel="noopener">Waze</a>`) : (m.domicile ? '📍 À domicile' : '📍 Lieu à préciser')}${m.terrain ? ' · ' + ({herbe:'🌱 Herbe',synthetique:'🟩 Synthétique',stabilise:'🟫 Stabilisé',salle:'🏟️ Salle'})[m.terrain] : ''}${lav ? ' · 🧺 Maillots : ' + esc(nomP(lav)) : ''}${m.arbitre ? ' · 🟨 Arbitre : ' + esc(m.arbitre) : ''}${m.materiel ? ' · 🎒 Matériel : ' + esc(m.materiel) : ''}${m.commentaire ? ' · ' + esc(m.commentaire) : ''}<span id="meteo-${m.id}"></span></div>${blocConvoques(m)}
-      ${blocFil(m)}${blocPresences('match', m.id, eq)}${blocCovoit(m)}
-      <div class="actions"><button class="btn second petit" data-agenda="${m.id}" data-type="match">📅 Ajouter à mon agenda</button>${staff() ? `<button class="btn second petit" data-feuille="${m.id}">🖨️ Feuille de match</button><button class="btn second petit" data-partager-match="${m.id}">📤 Envoyer sur WhatsApp</button><button class="btn second petit" data-modifier-match="${m.id}">${m.score_nous == null ? 'Saisir le score / modifier' : 'Modifier'}</button><button class="btn second petit" data-supprimer-match="${m.id}">Supprimer</button>` : ''}</div></div>`; }
+      ${blocDeplacement(m)}${blocFil(m)}${blocPresences('match', m.id, eq)}${blocCovoit(m)}
+      <div class="actions"><button class="btn second petit" data-agenda="${m.id}" data-type="match">📅 Ajouter à mon agenda</button>${staff() ? `<button class="btn second petit" data-feuille="${m.id}">🖨️ Feuille de match</button><button class="btn second petit" data-partager-match="${m.id}">📤 Envoyer sur WhatsApp</button><button class="btn second petit" data-modifier-match="${m.id}">${m.score_nous == null ? 'Saisir le score / modifier' : 'Modifier'}</button>${m.domicile && extras4Ok && !permanences.some(p => p.type === 'fermeture' && p.date_perm === m.date_match) ? `<button class="btn second petit" data-fermeture="${m.id}">🔐 Fermeture : créer le créneau</button>` : ''}${m.score_nous != null ? `<button class="btn second petit" data-visuel="${m.id}" data-genre="score">🖼️ Visuel score</button>` : ''}${(m.convoques||[]).length ? `<button class="btn second petit" data-visuel="${m.id}" data-genre="compo">🖼️ Visuel compo</button>` : ''}<button class="btn second petit" data-supprimer-match="${m.id}">Supprimer</button>` : ''}</div></div>`; }
   const t = e.o;
   return `<div class="evt ${t.extra ? 'extra' : ''}"><div class="tete"><span class="quand">🏃 ${dateFr(t.date_seance)}${t.heure_debut ? ' · ' + esc(t.heure_debut) + (t.heure_fin ? '–' + esc(t.heure_fin) : '') : ''}</span>${t.extra ? '<span class="puce payee">Séance en plus</span>' : ''}</div>
     <div><b>${esc(eq.nom)}</b> — entraînement${t.lieu ? ' · 📍 ' + esc(t.lieu) : ''}</div>${t.note ? `<div class="detail">${esc(t.note)}</div>` : ''}
@@ -1022,7 +1047,14 @@ async function chargerMeteo(m){
     el.textContent = meteoCache[cle];
   } catch(e){}
 }
+function rendreFiltres(){
+  const eqs = equipesFiltre(), memo = localStorage.getItem('filtre_agenda_' + club.id);
+  if(role === 'joueur' && !memo && eqs.length) filtreAgenda = eqs[0].id; else if(memo && (memo === 'toutes' || eqs.some(e => e.id === memo))) filtreAgenda = memo;
+  if(filtreAgenda !== 'toutes' && !eqs.some(e => e.id === filtreAgenda)) filtreAgenda = 'toutes';
+  $('#filtres-agenda').innerHTML = eqs.length > 1 ? `<button type="button" data-filtre="toutes" aria-pressed="${filtreAgenda === 'toutes'}">Tout</button>` + eqs.map(e => `<button type="button" data-filtre="${e.id}" aria-pressed="${filtreAgenda === e.id}">${esc(e.nom)}</button>`).join('') : '';
+}
 function rendreAgenda(){
+  rendreFiltres();
   const ev = evenements(), auj = aujourdhui(), futurs = ev.filter(e => e.date >= auj), passes = ev.filter(e => e.date < auj).reverse().slice(0, 15);
   const joues = matchs.filter(m => m.score_nous != null), v = joues.filter(m => m.score_nous > m.score_eux).length, d = joues.filter(m => m.score_nous < m.score_eux).length;
   $('#cpt-agenda').textContent = joues.length ? `bilan ${v} V · ${joues.length-v-d} N · ${d} D` : '';
@@ -1073,10 +1105,10 @@ function blocSanteEquipe(e){
 /* ─── Buvette : permanences + stocks ─── */
 function ouvrirPermanence(p){
   $('#dlg-perm-titre').textContent = p ? 'Modifier le créneau' : 'Nouveau créneau'; $('#pm-id').value = p?.id || ''; $('#pm-titre').value = p?.titre || ''; $('#pm-date').value = p?.date_perm || aujourdhui();
-  $('#pm-besoin').value = p?.besoin ?? 2; $('#pm-debut').value = p?.heure_debut || ''; $('#pm-fin').value = p?.heure_fin || ''; $('#pm-note').value = p?.note || ''; msg('#msg-permanence',''); $('#dlg-permanence').showModal();
+  $('#pm-type').value = p?.type || 'buvette'; $('#pm-besoin').value = p?.besoin ?? 2; $('#pm-debut').value = p?.heure_debut || ''; $('#pm-fin').value = p?.heure_fin || ''; $('#pm-note').value = p?.note || ''; msg('#msg-permanence',''); $('#dlg-permanence').showModal();
 }
 soumettre('#form-permanence', async () => {
-  const ligne = { club_id: club.id, titre: $('#pm-titre').value.trim(), date_perm: $('#pm-date').value, besoin: +$('#pm-besoin').value || 1, heure_debut: $('#pm-debut').value || null, heure_fin: $('#pm-fin').value || null, note: $('#pm-note').value.trim() || null }, id = $('#pm-id').value;
+  const ligne = { club_id: club.id, titre: $('#pm-titre').value.trim(), date_perm: $('#pm-date').value, besoin: +$('#pm-besoin').value || 1, ...(extras4Ok ? { type: $('#pm-type').value } : {}), heure_debut: $('#pm-debut').value || null, heure_fin: $('#pm-fin').value || null, note: $('#pm-note').value.trim() || null }, id = $('#pm-id').value;
   const { error } = id ? await sb.from('permanences').update(ligne).eq('id', id) : await sb.from('permanences').insert(ligne);
   if(error){ msg('#msg-permanence', erreurLisible(error), 'erreur'); return; } $('#dlg-permanence').close(); await toutRecharger();
 });
@@ -1098,12 +1130,14 @@ function rendreBuvette(){
   if(!extrasOk){ $('#zone-buvette').innerHTML = msgExtras; return; }
   const auj = aujourdhui(), futures = permanences.filter(p => p.date_perm >= auj), passees = permanences.filter(p => p.date_perm < auj).reverse().slice(0, 5);
   const carte = p => { const ins = permInscr.filter(i => i.permanence_id === p.id), manque = Math.max(0, p.besoin - ins.length), mienne = ins.find(i => i.famille_id && mesFamillesIds.includes(i.famille_id));
-    return `<div class="perm ${manque ? 'manque' : 'complet'}"><div class="tete"><span class="quand" style="font-family:var(--display);font-size:1.15rem">🥤 ${dateFr(p.date_perm)}${p.heure_debut ? ' · ' + esc(p.heure_debut) + (p.heure_fin ? '–' + esc(p.heure_fin) : '') : ''}</span>${manque ? `<span class="puce demandee">il manque ${manque} bénévole${manque>1?'s':''}</span>` : '<span class="puce present">complet ✓</span>'}</div>
+    return `<div class="perm ${manque ? 'manque' : 'complet'} ${p.type || ''}"><div class="tete"><span class="quand" style="font-family:var(--display);font-size:1.15rem">${p.type === 'fermeture' ? '🔐' : p.type === 'autre' ? '🙋' : '🥤'} ${dateFr(p.date_perm)}${p.heure_debut ? ' · ' + esc(p.heure_debut) + (p.heure_fin ? '–' + esc(p.heure_fin) : '') : ''}</span>${manque ? `<span class="puce demandee">il manque ${manque} bénévole${manque>1?'s':''}</span>` : '<span class="puce present">complet ✓</span>'}</div>
       <div><b>${esc(p.titre)}</b>${p.note ? ` <span class="compteur">· ${esc(p.note)}</span>` : ''}</div>
       <div class="pres">${ins.length ? ins.map(i => `<span class="puce ${i.famille_id && mesFamillesIds.includes(i.famille_id) ? 'present' : ''}">${esc(i.nom)}${staff() || (i.famille_id && mesFamillesIds.includes(i.famille_id)) ? ` <button class="btn second petit" style="padding:0 5px;font-size:.75rem" data-retirer-perm="${i.id}">✕</button>` : ''}</span>`).join(' ') : '<span class="compteur">personne pour l\'instant</span>'}</div>
       <div class="actions" style="margin-top:8px">${p.date_perm >= auj && (staff() || (!mienne && manque)) ? `<button class="btn ${staff() ? 'second' : 'principal'} petit" data-inscrire-perm="${p.id}">${staff() ? '+ Ajouter un bénévole' : '🙋 Je m\'inscris'}</button>` : ''}${staff() ? ` <button class="btn second petit" data-modifier-perm="${p.id}">Modifier</button> <button class="btn second petit" data-supprimer-perm="${p.id}">Supprimer</button>` : ''}</div></div>`; };
   const aRacheter = stocks.filter(s => (s.quantite||0) <= (s.seuil||0));
-  let html = '<h3>Permanences à pourvoir</h3>' + (futures.length ? futures.map(carte).join('') : '<div class="vide">Aucun créneau prévu. ' + (staff() ? 'Ajoute un créneau pour que les parents s\'inscrivent.' : 'Le club n\'a pas encore ouvert d\'inscriptions.') + '</div>');
+  const fut = t => futures.filter(p => (p.type || 'buvette') === t || (t === 'buvette' && p.type === 'autre'));
+  let html = '<h3>🥤 Buvette, stands et coups de main</h3>' + (fut('buvette').length ? fut('buvette').map(carte).join('') : '<div class="vide">Aucun créneau prévu. ' + (staff() ? 'Ajoute un créneau pour que les parents s\'inscrivent.' : 'Le club n\'a pas encore ouvert d\'inscriptions.') + '</div>');
+  html += '<h3 style="margin-top:16px">🔐 Fermeture et nettoyage après les matchs</h3>' + (fut('fermeture').length ? fut('fermeture').map(carte).join('') : '<div class="vide">Personne de désigné pour l\'instant. ' + (staff() ? 'Depuis l\'Agenda, chaque match à domicile a un bouton « Fermeture » qui crée le créneau.' : '') + '</div>');
   if(passees.length && staff()) html += '<h3 style="margin-top:16px">Créneaux passés</h3>' + passees.map(carte).join('');
   html += `<h3 style="margin:18px 0 8px">Stock de la buvette ${aRacheter.length ? `<span class="puce demandee">${aRacheter.length} produit${aRacheter.length>1?'s':''} à racheter</span>` : '<span class="puce present">tout est en stock</span>'}</h3>`;
   if(!stocks.length) html += '<div class="vide">Aucun produit suivi. ' + (staff() ? 'Ajoute café, boissons, snacks…' : '') + '</div>';
@@ -1486,6 +1520,81 @@ soumettre('#form-rgpd', async () => {
   const { error } = await sb.rpc('supprimer_mon_compte'); if(error){ msg('#msg-rgpd', erreurLisible(error), 'erreur'); return; }
   $('#dlg-rgpd').close(); localStorage.clear(); await sb.auth.signOut().catch(()=>{}); club = null; montrer('#ecran-login'); alert('Tes données et ton compte ont été supprimés. Merci pour ces saisons au club !');
 });
+
+/* ─── Déplacements : rendez-vous et tenue ─── */
+function blocDeplacement(m){
+  const tenue = m.tenue || (!m.domicile ? club.tenue_deplacement : ''); if(!m.rdv_heure && !m.rdv_lieu && !tenue) return '';
+  return `<div class="bloc">${m.rdv_heure || m.rdv_lieu ? `🚌 <b>Rendez-vous${m.rdv_heure ? ' à ' + esc(m.rdv_heure) : ''}</b>${m.rdv_lieu ? ' — ' + esc(m.rdv_lieu) : ''}${m.heure ? ` <span class="compteur">(coup d'envoi ${esc(m.heure)})</span>` : ''}` : ''}${tenue ? `${m.rdv_heure || m.rdv_lieu ? '<br>' : ''}👕 <b>Tenue :</b> ${esc(tenue)}` : ''}</div>`;
+}
+async function creerFermeture(m){
+  const eq = equipes.find(e => e.id === m.equipe_id) || {};
+  const { error } = await sb.from('permanences').insert({ club_id: club.id, type: 'fermeture', titre: `Fermeture vestiaires et club-house après ${eq.nom || ''} – ${m.adversaire}`, date_perm: m.date_match, heure_debut: m.heure || null, besoin: 1, note: 'Éteindre, fermer à clé, sortir les poubelles' });
+  if(error){ toast(erreurLisible(error), true); return; } toast('Créneau de fermeture créé (onglet Bénévoles)'); await toutRecharger();
+}
+
+/* ─── Trombinoscope de l'encadrement ─── */
+function ouvrirEncadrant(x){ $('#dlg-enc-titre').textContent = x ? 'Modifier' : 'Nouvel encadrant'; $('#en-id').value = x?.id || ''; $('#en-nom').value = x?.nom || ''; $('#en-role').value = x?.role_libre || ''; $('#en-tel').value = x?.telephone || ''; $('#en-email').value = x?.email || ''; $('#en-ordre').value = x?.ordre ?? 10; $('#en-photo').value = ''; msg('#msg-encadrant',''); $('#dlg-encadrant').showModal(); }
+soumettre('#form-encadrant', async () => {
+  const ligne = { club_id: club.id, nom: $('#en-nom').value.trim(), role_libre: $('#en-role').value.trim(), telephone: $('#en-tel').value.trim() || null, email: $('#en-email').value.trim() || null, ordre: +$('#en-ordre').value || 0 }, id = $('#en-id').value;
+  const fichier = $('#en-photo').files[0];
+  if(fichier){ if(fichier.size > 1024*1024){ msg('#msg-encadrant', 'La photo dépasse 1 Mo.', 'erreur'); return; }
+    const ext = fichier.type === 'image/png' ? 'png' : fichier.type === 'image/webp' ? 'webp' : 'jpg', chemin = `${club.id}/${id || crypto.randomUUID()}.${ext}`;
+    const up = await sb.storage.from('encadrants').upload(chemin, fichier, { upsert: true, contentType: fichier.type });
+    if(up.error){ msg('#msg-encadrant', 'Photo refusée : ' + erreurLisible(up.error) + ' (le script 10_extras4.sql est-il passé ?)', 'erreur'); return; }
+    ligne.photo_url = sb.storage.from('encadrants').getPublicUrl(chemin).data.publicUrl + '?v=' + Date.now(); }
+  const { error } = id ? await sb.from('encadrants').update(ligne).eq('id', id) : await sb.from('encadrants').insert(ligne);
+  if(error){ msg('#msg-encadrant', erreurLisible(error), 'erreur'); return; } $('#dlg-encadrant').close(); await toutRecharger();
+});
+function rendreTrombi(){
+  const z = $('#zone-trombi'); if(!extras4Ok || (!encadrants.length && !staff())){ z.innerHTML = ''; return; }
+  z.innerHTML = `<h3 style="margin:18px 0 8px">👋 L'équipe qui fait vivre le club</h3>` + (encadrants.length ? `<div class="trombi">${encadrants.map(x => `<div>${x.photo_url ? `<img src="${esc(x.photo_url)}" alt="${esc(x.nom)}" loading="lazy">` : '<div class="sans">🙂</div>'}<b>${esc(x.nom)}</b><span class="r">${esc(x.role_libre)}</span>${x.telephone ? `<div style="margin-top:4px">${btnTel(x.nom, x.telephone, 'Appeler')}</div>` : ''}${x.email ? `<div class="compteur" style="overflow-wrap:anywhere"><a href="mailto:${esc(x.email)}">${esc(x.email)}</a></div>` : ''}${staff() ? `<div class="actions" style="margin-top:6px;justify-content:center"><button class="btn second petit" data-modifier-enc="${x.id}">Modifier</button><button class="btn second petit" data-supprimer-enc="${x.id}">Retirer</button></div>` : ''}</div>`).join('')}</div>` : '<div class="vide">Ajoute le président, le trésorier, les coachs… pour que les nouvelles familles mettent un visage sur chacun.</div>');
+}
+
+/* ─── Météo au stade (3 jours, alerte gel) ─── */
+let meteoStadeCache = { cle:'', html:'' };
+async function meteoStade(){
+  const el = $('#meteo-stade'); if(!el) return; const lieu = club.lieu_stade || club.ville; if(!lieu || !navigator.onLine){ el.innerHTML = ''; return; }
+  const cle = lieu + '|' + aujourdhui() + '|' + new Date().getHours(); if(meteoStadeCache.cle === cle){ el.innerHTML = meteoStadeCache.html; return; }
+  try {
+    const ville = lieu.match(/\d{5}\s*([^,]+)/)?.[1] || lieu.split(',').pop().trim();
+    const g = await (await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(ville)}&count=1&language=fr&countryCode=FR`)).json(); const loc = g.results?.[0]; if(!loc){ el.innerHTML = ''; return; }
+    const w = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=Europe%2FParis&forecast_days=3`)).json();
+    const ico = c => c == null ? '' : c <= 1 ? '☀️' : c <= 3 ? '⛅' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌦️' : '⛈️';
+    const jours = w.daily.time.map((d, i) => { const gel = w.daily.temperature_2m_min[i] <= 0; return `<div class="${gel ? 'gel' : ''}"><span class="compteur">${i === 0 ? 'Aujourd\'hui' : dateFr(d)}</span><span class="ico">${ico(w.daily.weather_code[i])}</span><b>${Math.round(w.daily.temperature_2m_max[i])}° <span class="compteur" style="font-size:.9rem">/ ${Math.round(w.daily.temperature_2m_min[i])}°</span></b><span class="compteur">💧 ${w.daily.precipitation_probability_max[i]} % · 💨 ${Math.round(w.daily.wind_speed_10m_max[i])} km/h</span>${gel ? '<div style="color:#7A1E1E;font-weight:600">⚠️ risque de gel</div>' : ''}</div>`; }).join('');
+    meteoStadeCache = { cle, html: `<div class="meteo">${jours}<div style="flex:0 0 auto;min-width:0"><span class="compteur">📍 ${esc(loc.name)}</span><br><a class="btn second petit" href="https://meteofrance.com/previsions-meteo-france/${encodeURIComponent(loc.name.toLowerCase())}/${loc.postcodes?.[0] || ''}" target="_blank" rel="noopener">Météo-France</a></div></div>` };
+    el.innerHTML = meteoStadeCache.html;
+  } catch(e){ el.innerHTML = ''; }
+}
+
+/* ─── Visuel réseaux sociaux (image carrée 1080×1080) ─── */
+async function genererVisuel(m, genre){
+  const eq = equipes.find(e => e.id === m.equipe_id) || {}, cv = document.createElement('canvas'); cv.width = cv.height = 1080; const c = cv.getContext('2d');
+  const g = c.createLinearGradient(0, 0, 1080, 1080); g.addColorStop(0, '#14213D'); g.addColorStop(1, '#0B1120'); c.fillStyle = g; c.fillRect(0, 0, 1080, 1080);
+  c.fillStyle = '#F26522'; c.fillRect(0, 0, 1080, 14); c.fillRect(0, 1066, 1080, 14);
+  const centre = (t, y, taille, couleur = '#fff', gras = true) => { c.font = `${gras ? '700' : '500'} ${taille}px "Barlow Condensed", Impact, "Arial Narrow", sans-serif`; c.fillStyle = couleur; c.textAlign = 'center'; c.fillText(t, 540, y, 1000); };
+  let yHaut = 150;
+  if(club.logo_url){ try { const img = new Image(); img.crossOrigin = 'anonymous'; await new Promise((ok, ko) => { img.onload = ok; img.onerror = ko; img.src = club.logo_url; }); c.drawImage(img, 465, 60, 150, 150); yHaut = 280; } catch(e){} }
+  centre(club.nom.toUpperCase(), yHaut, 54, '#C9D0DB');
+  centre(eq.nom || '', yHaut + 60, 44, '#F26522');
+  if(genre === 'score'){
+    const v = m.score_nous > m.score_eux, n = m.score_nous === m.score_eux;
+    centre(v ? 'VICTOIRE !' : n ? 'MATCH NUL' : 'DÉFAITE', 520, 110, v ? '#4ADE80' : n ? '#F5C97A' : '#F87171');
+    centre(`${m.score_nous} – ${m.score_eux}`, 680, 190);
+    centre(`${club.nom}  vs  ${m.adversaire}`.toUpperCase(), 780, 48, '#C9D0DB');
+    centre(`${dateFr(m.date_match)}${m.lieu ? ' · ' + m.lieu : m.domicile ? ' · à domicile' : ''}`, 850, 36, '#A9B3C4', false);
+    if(m.commentaire){ c.font = '500 34px Barlow, Arial, sans-serif'; c.fillStyle = '#EEF1F5'; c.textAlign = 'center'; c.fillText(m.commentaire.slice(0, 70), 540, 940, 980); }
+  } else {
+    const cs = (m.convoques || []).map(id => personnes.find(p => p.id === id)).filter(Boolean).sort((a,b) => (a.numero_maillot ?? 999) - (b.numero_maillot ?? 999));
+    centre('LA COMPO', yHaut + 150, 80, '#fff'); centre(`${dateFr(m.date_match)}${m.heure ? ' · ' + m.heure : ''} · vs ${m.adversaire}`.toUpperCase(), yHaut + 205, 40, '#C9D0DB');
+    const cols = cs.length > 12 ? 2 : 1, parCol = Math.ceil(cs.length / cols), taille = cs.length > 16 ? 36 : cs.length > 10 ? 42 : 52, pas = taille + 14, y0 = yHaut + 280;
+    cs.forEach((p, i) => { const col = Math.floor(i / parCol), x = cols === 1 ? 540 : 300 + col*480, y = y0 + (i % parCol)*pas; c.font = `700 ${taille}px "Barlow Condensed", Impact, sans-serif`; c.textAlign = cols === 1 ? 'center' : 'left'; c.fillStyle = '#F26522'; const num = p.numero_maillot != null ? '#' + p.numero_maillot + '  ' : ''; c.fillText(num + '', cols === 1 ? 540 - c.measureText(nomP(p)).width/2 - 10 : x, y); c.fillStyle = '#fff'; c.fillText(nomP(p), cols === 1 ? 540 + c.measureText(num).width/2 : x + c.measureText(num).width, y); });
+    if(cs.some(p => p.droit_image === false)) toast('Rappel : un joueur de la compo a refusé le droit à l\'image (ici, noms seulement, pas de photo)');
+  }
+  centre('Mon club foot', 1040, 26, '#4B5566', false);
+  cv.toBlob(async blob => { const f = new File([blob], `${genre}-${m.date_match}.png`, { type:'image/png' });
+    if(navigator.canShare && navigator.canShare({ files:[f] })){ try { await navigator.share({ files:[f], title: club.nom }); return; } catch(e){} }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = f.name; a.click(); toast('Image téléchargée : publie-la sur Facebook ou Instagram'); }, 'image/png');
+}
 
 /* ─── Boutique ─── */
 function ouvrirArticle(a){ $('#ar-id').value = a?.id || ''; $('#ar-nom').value = a?.nom || ''; $('#ar-prix').value = a?.prix ?? ''; $('#ar-tailles').value = a?.tailles || ''; $('#ar-photo').value = ''; $('#ar-photo-info').textContent = a?.photo_url ? 'Une photo est en place ; choisis un fichier pour la remplacer.' : ''; msg('#msg-article',''); $('#dlg-article').showModal(); }
