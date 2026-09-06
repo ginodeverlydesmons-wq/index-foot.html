@@ -20,9 +20,10 @@
   --r:6px; --display:'Barlow Condensed',Impact,'Arial Narrow',sans-serif;
   --texte:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
+@media (prefers-color-scheme:dark){:root{--fond:#0F1626;--surface:#182238;--encre:#EEF1F5;--encre-2:#A9B3C4;--ligne:#2B3A5C;--accent-2:#FF8A4C} header{background:#0B1120} .btn.second{background:#182238;color:#EEF1F5;border-color:#3B4A6B} .msg{background:#182238} .vide,.kpi div,.produit .sans{background:#182238} .titre-tableau{background:#131C30} .code{background:#2A2110;border-color:#7A5A1A} input,select,textarea{background:#0F1626;border-color:#3B4A6B} #menu-plus{background:#182238} #menu-plus button{background:#131C30;border-color:#3B4A6B} .puce{background:#182238} .evt,.annonce,.produit,.tableau{background:var(--surface)}}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--fond);color:var(--encre);font:16px/1.45 var(--texte);overflow-x:hidden;max-width:100vw}
-*{overflow-wrap:anywhere;min-width:0}
+p,td,.detail,.annonce,.evt,a{overflow-wrap:anywhere} *{min-width:0}
 img{max-width:100%}
 button,input,select,textarea{font:inherit;color:inherit}
 h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:.01em;margin:0}
@@ -101,12 +102,32 @@ tr:last-child td{border-bottom:0} td.act{white-space:nowrap;text-align:right}
 .pres{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
 dialog{border:0;border-radius:var(--r);padding:0;width:min(540px,94vw);max-height:92vh;overflow:auto}
 dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog h2{margin-bottom:4px}
+.titre-tableau{padding:10px 12px;border-bottom:1px solid var(--ligne);background:#F8FAFC;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
+.titre-tableau b{font-family:var(--display);font-size:1.15rem;text-transform:uppercase;letter-spacing:.03em}
+.titre-tableau .btn{margin:2px 2px 2px 0}
+@media (max-width:640px){
+  nav.onglets{position:fixed;bottom:0;left:0;right:0;background:var(--encre);margin:0;padding:4px 4px calc(4px + env(safe-area-inset-bottom));z-index:6;border-top:1px solid #2b3a5c;justify-content:space-around;overflow:visible}
+  nav.onglets button{padding:8px 6px;font-size:.95rem;border-bottom:0;border-top:3px solid transparent;flex:1;text-align:center}
+  nav.onglets button[aria-selected=true]{border-top-color:var(--accent);border-bottom:0;margin:0}
+  nav.onglets button.secondaire{display:none}
+  header{padding-bottom:10px} header .qui{font-size:.85rem} header h1{font-size:1.7rem} header h1 img{height:40px;width:40px}
+  main{padding:14px 10px 110px} #bandeau-install{bottom:56px}
+  .btn{padding:10px 14px} .btn.petit{padding:7px 10px}
+  dialog{width:100vw;max-height:100vh;border-radius:0}
+  .tableau{overflow:visible}
+  table,tbody,tr,td{display:block;width:100%} thead{display:none}
+  tr{padding:8px 10px;border-bottom:1px solid var(--ligne)} tr:last-child{border-bottom:0}
+  td{border:0;padding:2px 0} td.act{text-align:left;white-space:normal;padding-top:6px}
+  td .btn,td select{margin:2px 4px 2px 0}
+  .titre-tableau{padding:10px 10px 6px}
+}
 .compteur{color:var(--encre-2);font-size:.95rem}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;background:var(--encre);color:#fff;padding:10px 16px;border-radius:999px;z-index:9;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:92vw;opacity:0;transition:opacity .2s;pointer-events:none}
 #toast.visible{opacity:1} #toast.erreur{background:#8B2E0B}
 #menu-plus{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--ligne);padding:8px 8px calc(64px + env(safe-area-inset-bottom));z-index:7;display:grid;grid-template-columns:1fr 1fr;gap:6px}
 #menu-plus button{padding:12px;border:1px solid var(--ligne);background:#F8FAFC;border-radius:var(--r);font-family:var(--display);font-size:1.1rem;text-transform:uppercase}
 @media (min-width:641px){#menu-plus{display:none!important} nav.onglets .plus{display:none}}
+#bandeau-urgent{background:#B91C1C;color:#fff;padding:10px 16px;text-align:center;font-weight:600} #bandeau-urgent a{color:#fff}
 #bandeau-install{position:fixed;bottom:0;left:0;right:0;background:var(--encre);color:#fff;padding:10px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;z-index:5}
 </style>
 </head>
@@ -143,6 +164,7 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
 </div></div>
 
 <div id="app" class="cache">
+  <div id="bandeau-urgent" class="cache"></div>
   <header>
     <div class="club">
       <h1><img id="logo-club" class="cache" alt=""><span id="titre-club">Club</span></h1>
@@ -262,6 +284,7 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   <label for="a-titre">Titre</label><input id="a-titre" required placeholder="Ex. Tournoi de Pâques : inscriptions">
   <label for="a-equipe">Pour</label><select id="a-equipe"><option value="">Tout le club</option></select>
   <label for="a-texte">Message</label><textarea id="a-texte" required></textarea>
+  <label style="font-weight:400"><input type="checkbox" id="a-urgent" style="width:auto;margin-right:6px">Urgent (bannière rouge en haut de l'appli pendant 48 h — ex. entraînement annulé)</label>
   <div class="actions"><button class="btn principal" value="ok">Publier</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-annonce"></div></form></dialog>
 
 <dialog id="dlg-article"><form method="dialog" id="form-article"><h2>Article de la boutique</h2><input type="hidden" id="ar-id">
@@ -333,7 +356,7 @@ async function demarrer(){
   sb.auth.onAuthStateChange((ev, s) => { session = s; if(!s){ montrer('#ecran-login'); return; }
     if(ev === 'SIGNED_IN' && !club){ const c = sessionStorage.getItem('code_invite'); history.replaceState(null, '', location.pathname + (c ? '?code=' + c : '')); chargerClubs(); } });
   const c0 = new URLSearchParams(location.search).get('code'); if(c0) sessionStorage.setItem('code_invite', c0);
-  if(!session){ montrer('#ecran-login'); return; }
+  if(!session){ montrer('#ecran-login'); if(c0) $('#ecran-login .sous').textContent = `Tu as reçu une invitation (code ${c0.toUpperCase()}). Entre ton email pour recevoir ton lien de connexion.`; return; }
   await chargerClubs();
 }
 
@@ -361,8 +384,9 @@ async function chargerClubs(){
 }
 function afficherChoixClub(){
   montrer('#ecran-club');
-  const codeUrl = new URLSearchParams(location.search).get('code'); if(codeUrl) $('#code-famille').value = codeUrl.toUpperCase();
-  $('#club-sous').textContent = clubs.length ? 'Choisis le club à ouvrir.' : 'Ton email n\'est pas encore connu du club. Entre le code famille donné par ton club, ou demande au club d\'ajouter ton email sur ta fiche.';
+  const codeUrl = new URLSearchParams(location.search).get('code') || sessionStorage.getItem('code_invite');
+  if(codeUrl){ $('#code-famille').value = codeUrl.toUpperCase(); history.replaceState(null, '', location.pathname); }
+  $('#club-sous').textContent = codeUrl ? `Tu rejoins la famille liée au code ${codeUrl.toUpperCase()} : clique sur « Rejoindre mon club ».` : clubs.length ? 'Choisis le club à ouvrir.' : 'Ton email n\'est pas encore connu du club. Entre le code famille donné par ton club, ou demande au club d\'ajouter ton email sur ta fiche.';
   $('#liste-clubs').innerHTML = clubs.map(c => `<button class="btn second" type="button" style="display:block;width:100%;margin:6px 0;text-align:left" data-club="${c.id}">${c.logo_url ? `<img src="${esc(c.logo_url)}" alt="" style="height:28px;vertical-align:middle;margin-right:8px">` : ''}${esc(c.nom)} <span class="compteur">— ${esc(c.role)}</span></button>`).join('');
   $$('#liste-clubs [data-club]').forEach(b => b.addEventListener('click', () => ouvrirClub(clubs.find(c => c.id === b.dataset.club))));
 }
@@ -370,7 +394,7 @@ $('#form-code').addEventListener('submit', async ev => {
   ev.preventDefault(); msg('#msg-code',''); const code = $('#code-famille').value.trim(); if(!code) return;
   const { data, error } = await sb.rpc('rejoindre_famille', { p_code: code });
   if(error){ msg('#msg-code', erreurLisible(error), 'erreur'); return; }
-  localStorage.setItem('club_id', data); await chargerClubs();
+  sessionStorage.removeItem('code_invite'); localStorage.setItem('club_id', data); toast('Bienvenue dans le club ✓'); await chargerClubs();
 });
 $('#form-club').addEventListener('submit', async ev => {
   ev.preventDefault(); const nom = $('#nom-club').value.trim(); if(!nom) return; msg('#msg-club','');
@@ -434,6 +458,7 @@ document.addEventListener('click', ev => {
   if(d.supprimerEquipe) supprimer('equipes', d.supprimerEquipe, 'Supprimer cette équipe ?');
   if(d.ouvrir === 'match') ouvrirMatch();
   if(d.modifierMatch) ouvrirMatch(matchs.find(x => x.id === d.modifierMatch));
+  if(d.partagerMatch) partagerMatch(matchs.find(x => x.id === d.partagerMatch));
   if(d.supprimerMatch) supprimer('matchs', d.supprimerMatch, 'Supprimer ce match ?');
   if(d.ouvrir === 'entrainement') ouvrirEntrainement();
   if(d.modifierEntr) ouvrirEntrainement(entrainements.find(x => x.id === d.modifierEntr));
@@ -666,6 +691,11 @@ soumettre('#form-covoit', async () => {
   const { error } = await sb.from('covoiturages').upsert({ club_id: club.id, match_id: $('#cv-match').value, famille_id: mesFamillesIds[0], places: +$('#cv-places').value, note: $('#cv-note').value.trim() || null }, { onConflict: 'match_id,famille_id' });
   if(error){ msg('#msg-covoit', erreurLisible(error), 'erreur'); return; } $('#dlg-covoit').close(); await toutRecharger();
 });
+function partagerMatch(m){
+  const eq = equipes.find(e => e.id === m.equipe_id) || {}, cs = (m.convoques || []).map(id => personnes.find(p => p.id === id)).filter(Boolean);
+  const texte = `⚽ ${club.nom} — ${eq.nom}\n${dateFr(m.date_match)}${m.heure ? ' à ' + m.heure : ''}\n${m.domicile ? 'Domicile' : 'Extérieur'} contre ${m.adversaire}${m.lieu ? '\n📍 ' + m.lieu : ''}${cs.length ? '\n\n📋 Convoqués : ' + cs.map(p => p.prenom + ' ' + p.nom).join(', ') : ''}\n\nRéponds présent/absent dans l'appli : ${location.origin + location.pathname}`;
+  if(navigator.share) navigator.share({ text: texte }).catch(()=>{}); else window.open('https://wa.me/?text=' + encodeURIComponent(texte), '_blank');
+}
 function resultat(m){ if(m.score_nous == null) return ''; const v = m.score_nous > m.score_eux, d = m.score_nous < m.score_eux; return `<span class="puce ${v?'victoire':d?'defaite':'nul'}">${v?'Victoire':d?'Défaite':'Nul'} ${m.score_nous}–${m.score_eux}</span>`; }
 function mesEquipesIds(){ if(staff()) return equipes.map(e => e.id); const ids = mesPersonnes().map(p => p.id); return equipes.filter(e => licences.some(l => l.equipe_id === e.id && ids.includes(l.personne_id))).map(e => e.id); }
 function evenements(){
@@ -679,9 +709,9 @@ function carteEvt(e){
   if(e.type === 'match'){ const m = e.o, lav = personnes.find(p => p.id === m.lavage_personne_id);
     return `<div class="evt match"><div class="tete"><span class="quand">⚽ ${dateFr(m.date_match)}${m.heure ? ' · ' + esc(m.heure) : ''}</span>${resultat(m)}</div>
       <div><b>${esc(eq.nom)}</b> ${m.domicile ? 'reçoit' : 'se déplace chez'} <b>${esc(m.adversaire)}</b> ${btnWhatsapp(eq)}</div>
-      <div class="detail">${m.lieu ? '📍 ' + (/^https?:/.test(m.lieu) ? `<a href="${esc(m.lieu)}" target="_blank">lieu</a>` : `<a href="https://www.google.com/maps/search/${encodeURIComponent(m.lieu)}" target="_blank" rel="noopener">${esc(m.lieu)}</a>`) : (m.domicile ? '📍 À domicile' : '📍 Lieu à préciser')}${lav ? ' · 🧺 Maillots : ' + esc(nomP(lav)) : ''}${m.commentaire ? ' · ' + esc(m.commentaire) : ''}</div>${blocConvoques(m)}
+      <div class="detail">${m.lieu ? '📍 ' + (/^https?:/.test(m.lieu) ? `<a href="${esc(m.lieu)}" target="_blank">lieu</a>` : `<a href="https://www.google.com/maps/search/${encodeURIComponent(m.lieu)}" target="_blank" rel="noopener">${esc(m.lieu)}</a> · <a href="https://waze.com/ul?q=${encodeURIComponent(m.lieu)}&navigate=yes" target="_blank" rel="noopener">Waze</a>`) : (m.domicile ? '📍 À domicile' : '📍 Lieu à préciser')}${lav ? ' · 🧺 Maillots : ' + esc(nomP(lav)) : ''}${m.commentaire ? ' · ' + esc(m.commentaire) : ''}</div>${blocConvoques(m)}
       ${blocPresences('match', m.id, eq)}${blocCovoit(m)}
-      ${staff() ? `<div class="actions"><button class="btn second petit" data-modifier-match="${m.id}">${m.score_nous == null ? 'Saisir le score / modifier' : 'Modifier'}</button><button class="btn second petit" data-supprimer-match="${m.id}">Supprimer</button></div>` : ''}</div>`; }
+      ${staff() ? `<div class="actions"><button class="btn second petit" data-partager-match="${m.id}">📤 Envoyer sur WhatsApp</button><button class="btn second petit" data-modifier-match="${m.id}">${m.score_nous == null ? 'Saisir le score / modifier' : 'Modifier'}</button><button class="btn second petit" data-supprimer-match="${m.id}">Supprimer</button></div>` : ''}</div>`; }
   const t = e.o;
   return `<div class="evt ${t.extra ? 'extra' : ''}"><div class="tete"><span class="quand">🏃 ${dateFr(t.date_seance)}${t.heure_debut ? ' · ' + esc(t.heure_debut) + (t.heure_fin ? '–' + esc(t.heure_fin) : '') : ''}</span>${t.extra ? '<span class="puce payee">Séance en plus</span>' : ''}</div>
     <div><b>${esc(eq.nom)}</b> — entraînement${t.lieu ? ' · 📍 ' + esc(t.lieu) : ''}</div>${t.note ? `<div class="detail">${esc(t.note)}</div>` : ''}
@@ -697,15 +727,17 @@ function rendreAgenda(){
 }
 
 /* ─── Infos ─── */
-function ouvrirAnnonce(){ $('#a-titre').value = ''; $('#a-texte').value = ''; $('#a-equipe').innerHTML = '<option value="">Tout le club</option>' + optionsEquipes(); msg('#msg-annonce',''); $('#dlg-annonce').showModal(); }
+function ouvrirAnnonce(){ $('#a-titre').value = ''; $('#a-texte').value = ''; $('#a-urgent').checked = false; $('#a-equipe').innerHTML = '<option value="">Tout le club</option>' + optionsEquipes(); msg('#msg-annonce',''); $('#dlg-annonce').showModal(); }
 soumettre('#form-annonce', async () => {
-  const { error } = await sb.from('annonces').insert({ club_id: club.id, equipe_id: $('#a-equipe').value || null, titre: $('#a-titre').value.trim(), texte: $('#a-texte').value.trim(), auteur: session.user.email });
+  const { error } = await sb.from('annonces').insert({ club_id: club.id, equipe_id: $('#a-equipe').value || null, titre: $('#a-titre').value.trim(), texte: $('#a-texte').value.trim(), auteur: session.user.email, urgent: $('#a-urgent').checked });
   if(error){ msg('#msg-annonce', erreurLisible(error), 'erreur'); return; } $('#dlg-annonce').close(); await toutRecharger();
 });
 function rendreInfos(){
   const ok = mesEquipesIds(), as = annonces.filter(a => !a.equipe_id || ok.includes(a.equipe_id)).sort((a,b) => b.cree_le.localeCompare(a.cree_le));
+  const lim = new Date(Date.now() - 48*3600000).toISOString(), urg = as.filter(a => a.urgent && a.cree_le > lim);
+  $('#bandeau-urgent').classList.toggle('cache', !urg.length); $('#bandeau-urgent').innerHTML = urg.map(a => `🚨 ${esc(a.titre)} — ${esc(a.texte)}`).join('<br>');
   $('#zone-infos').innerHTML = as.length ? as.map(a => { const eq = equipes.find(e => e.id === a.equipe_id);
-    return `<div class="annonce"><div class="meta">${new Date(a.cree_le).toLocaleDateString('fr-FR')} · ${eq ? esc(eq.nom) : 'Tout le club'}${a.auteur ? ' · ' + esc(a.auteur) : ''}</div><h3>${esc(a.titre)}</h3><p>${esc(a.texte)}</p>${staff() ? `<div class="actions"><button class="btn second petit" data-supprimer-annonce="${a.id}">Supprimer</button></div>` : ''}</div>`; }).join('') : '<div class="vide">Aucune info pour l\'instant.</div>';
+    return `<div class="annonce"${a.urgent ? ' style="border-left:5px solid #B91C1C"' : ''}><div class="meta">${a.urgent ? '🚨 URGENT · ' : ''}${new Date(a.cree_le).toLocaleDateString('fr-FR')} · ${eq ? esc(eq.nom) : 'Tout le club'}${a.auteur ? ' · ' + esc(a.auteur) : ''}</div><h3>${esc(a.titre)}</h3><p>${esc(a.texte)}</p>${staff() ? `<div class="actions"><button class="btn second petit" data-supprimer-annonce="${a.id}">Supprimer</button></div>` : ''}</div>`; }).join('') : '<div class="vide">Aucune info pour l\'instant.</div>';
 }
 
 /* ─── Boutique ─── */
@@ -807,6 +839,7 @@ window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); instal
 $('#btn-install').addEventListener('click', async () => { if(!installEvt) return; installEvt.prompt(); await installEvt.userChoice; installEvt = null; $('#bandeau-install').classList.add('cache'); });
 $('#btn-install-non').addEventListener('click', () => { localStorage.setItem('install_non', '1'); $('#bandeau-install').classList.add('cache'); });
 
+$$('dialog').forEach(d => d.addEventListener('click', ev => { if(ev.target === d) d.close(); }));
 demarrer();
 </script>
 </body>
