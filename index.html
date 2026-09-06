@@ -21,7 +21,9 @@
   --texte:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--fond);color:var(--encre);font:16px/1.45 var(--texte)}
+html,body{margin:0;background:var(--fond);color:var(--encre);font:16px/1.45 var(--texte);overflow-x:hidden;max-width:100vw}
+*{overflow-wrap:anywhere;min-width:0}
+img{max-width:100%}
 button,input,select,textarea{font:inherit;color:inherit}
 h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:.01em;margin:0}
 h1{font-size:2.4rem;line-height:1} h2{font-size:1.5rem} h3{font-size:1.2rem;color:var(--encre-2);text-transform:uppercase;letter-spacing:.03em}
@@ -70,6 +72,7 @@ tr:last-child td{border-bottom:0} td.act{white-space:nowrap;text-align:right}
 .puce.demandee{color:var(--alerte);border-color:#F1D3A8;background:#FFF8EC}
 .puce.payee,.puce.nul{color:#1D4ED8;border-color:#BFD3FB;background:#EEF4FF}
 .puce.validee,.puce.present,.puce.victoire,.puce.recuperee{color:var(--ok);border-color:#B7E0C8;background:#EEF9F2}
+.puce.blesse{color:#6D28D9;border-color:#D8CCF5;background:#F3EEFF}
 .puce.refusee,.puce.absent,.puce.defaite,.puce.annulee{color:#7A1E1E;border-color:#F3B7B7;background:#FFF0F0}
 .puce.nouvelle{color:var(--alerte);border-color:#F1D3A8;background:#FFF8EC}
 .cat{font-family:var(--display);font-weight:700;font-size:1.1rem;color:var(--accent-2)}
@@ -99,6 +102,11 @@ tr:last-child td{border-bottom:0} td.act{white-space:nowrap;text-align:right}
 dialog{border:0;border-radius:var(--r);padding:0;width:min(540px,94vw);max-height:92vh;overflow:auto}
 dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog h2{margin-bottom:4px}
 .compteur{color:var(--encre-2);font-size:.95rem}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;background:var(--encre);color:#fff;padding:10px 16px;border-radius:999px;z-index:9;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:92vw;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.visible{opacity:1} #toast.erreur{background:#8B2E0B}
+#menu-plus{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--ligne);padding:8px 8px calc(64px + env(safe-area-inset-bottom));z-index:7;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#menu-plus button{padding:12px;border:1px solid var(--ligne);background:#F8FAFC;border-radius:var(--r);font-family:var(--display);font-size:1.1rem;text-transform:uppercase}
+@media (min-width:641px){#menu-plus{display:none!important} nav.onglets .plus{display:none}}
 #bandeau-install{position:fixed;bottom:0;left:0;right:0;background:var(--encre);color:#fff;padding:10px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;z-index:5}
 </style>
 </head>
@@ -155,7 +163,7 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
       <div id="zone-familles"></div>
     </section>
     <section class="onglet cache" id="onglet-licences">
-      <div class="barre"><h2>Licences <span class="compteur" id="cpt-licences"></span></h2><select id="saison" style="width:auto"></select></div>
+      <div class="barre"><h2>Licences <span class="compteur" id="cpt-licences"></span></h2><div><select id="saison" style="width:auto"></select> <button class="btn second petit" type="button" data-export-csv>Export CSV</button></div></div>
       <div id="zone-licences"></div>
     </section>
     <section class="onglet cache" id="onglet-equipes">
@@ -190,6 +198,7 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
     </section>
   </main>
 </div>
+<div id="toast"></div><div id="menu-plus" class="cache"></div>
 <div id="bandeau-install" class="cache"><span>📱 Installe l'appli sur ton téléphone</span><button class="btn principal petit" id="btn-install">Installer</button><button class="btn second petit" id="btn-install-non">Plus tard</button></div>
 
 <!-- ═══════ Fenêtres ═══════ -->
@@ -291,6 +300,7 @@ function categorieProposee(dn, sexe, saison){
 /* ─── Utilitaires ─── */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let toastT; function toast(t, erreur){ const el = $('#toast'); el.textContent = t; el.className = 'visible' + (erreur ? ' erreur' : ''); clearTimeout(toastT); toastT = setTimeout(() => el.className = '', 2600); }
 function msg(id, t, type=''){ const el = $(id); el.textContent = t || ''; el.className = 'msg ' + type; }
 function montrer(id){ ['#ecran-config','#ecran-login','#ecran-club','#app'].forEach(s => $(s).classList.toggle('cache', s !== id)); }
 function dateFr(d){ return d ? new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short' }) : ''; }
@@ -321,7 +331,8 @@ async function demarrer(){
   sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const { data } = await sb.auth.getSession(); session = data.session;
   sb.auth.onAuthStateChange((ev, s) => { session = s; if(!s){ montrer('#ecran-login'); return; }
-    if(ev === 'SIGNED_IN' && !club){ history.replaceState(null, '', location.pathname); chargerClubs(); } });
+    if(ev === 'SIGNED_IN' && !club){ const c = sessionStorage.getItem('code_invite'); history.replaceState(null, '', location.pathname + (c ? '?code=' + c : '')); chargerClubs(); } });
+  const c0 = new URLSearchParams(location.search).get('code'); if(c0) sessionStorage.setItem('code_invite', c0);
   if(!session){ montrer('#ecran-login'); return; }
   await chargerClubs();
 }
@@ -332,7 +343,7 @@ $('#form-email').addEventListener('submit', async ev => {
   const btn = ev.target.querySelector('button'); btn.disabled = true; msg('#msg-email','');
   const { error } = await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:true, emailRedirectTo: location.origin + location.pathname } });
   btn.disabled = false; if(error){ msg('#msg-email', erreurLisible(error), 'erreur'); return; }
-  $('#email-rappel').textContent = email; $('#form-email').classList.add('cache'); $('#bloc-lien').classList.remove('cache');
+  toast('Mail envoyé ✓'); $('#email-rappel').textContent = email; $('#form-email').classList.add('cache'); $('#bloc-lien').classList.remove('cache');
 });
 $('#btn-autre-email').addEventListener('click', () => { $('#bloc-lien').classList.add('cache'); $('#form-email').classList.remove('cache'); });
 $$('[data-deconnexion]').forEach(b => b.addEventListener('click', async () => { await sb.auth.signOut(); club = null; montrer('#ecran-login'); }));
@@ -350,6 +361,7 @@ async function chargerClubs(){
 }
 function afficherChoixClub(){
   montrer('#ecran-club');
+  const codeUrl = new URLSearchParams(location.search).get('code'); if(codeUrl) $('#code-famille').value = codeUrl.toUpperCase();
   $('#club-sous').textContent = clubs.length ? 'Choisis le club à ouvrir.' : 'Ton email n\'est pas encore connu du club. Entre le code famille donné par ton club, ou demande au club d\'ajouter ton email sur ta fiche.';
   $('#liste-clubs').innerHTML = clubs.map(c => `<button class="btn second" type="button" style="display:block;width:100%;margin:6px 0;text-align:left" data-club="${c.id}">${c.logo_url ? `<img src="${esc(c.logo_url)}" alt="" style="height:28px;vertical-align:middle;margin-right:8px">` : ''}${esc(c.nom)} <span class="compteur">— ${esc(c.role)}</span></button>`).join('');
   $$('#liste-clubs [data-club]').forEach(b => b.addEventListener('click', () => ouvrirClub(clubs.find(c => c.id === b.dataset.club))));
@@ -375,12 +387,15 @@ async function ouvrirClub(c){
   $$('.staff-seul').forEach(el => el.classList.toggle('cache', !staff()));
   const onglets = staff() ? [['familles','Familles'],['licences','Licences'],['equipes','Équipes'],['agenda','Agenda'],['infos','Infos'],['boutique','Boutique'],['stats','Stats'],['acces','Accès']]
                           : [['foyer', role === 'joueur' ? 'Ma fiche' : 'Mon foyer'],['agenda','Agenda'],['infos','Infos'],['boutique','Boutique']];
-  $('#nav').innerHTML = onglets.map(([k,l],i) => `<button role="tab" aria-selected="${i===0}" data-onglet="${k}">${l}</button>`).join('');
-  $$('#nav [data-onglet]').forEach(b => b.addEventListener('click', () => allerOnglet(b.dataset.onglet)));
+  const principaux = staff() ? ['familles','licences','agenda','infos'] : onglets.map(o => o[0]);
+  $('#nav').innerHTML = onglets.map(([k,l],i) => `<button role="tab" aria-selected="${i===0}" data-onglet="${k}" class="${principaux.includes(k) ? '' : 'secondaire'}">${l}</button>`).join('') + (onglets.length > 5 ? '<button type="button" class="plus" data-plus>Plus ☰</button>' : '');
+  $('#menu-plus').innerHTML = onglets.filter(o => !principaux.includes(o[0])).map(([k,l]) => `<button type="button" data-onglet="${k}">${l}</button>`).join('');
+  $$('#nav [data-onglet], #menu-plus [data-onglet]').forEach(b => b.addEventListener('click', () => { allerOnglet(b.dataset.onglet); $('#menu-plus').classList.add('cache'); }));
+  const p = $('#nav [data-plus]'); if(p) p.addEventListener('click', () => $('#menu-plus').classList.toggle('cache'));
   allerOnglet(onglets[0][0]); montrer('#app'); await toutRecharger();
 }
 function allerOnglet(k){
-  $$('#nav [data-onglet]').forEach(x => x.setAttribute('aria-selected', x.dataset.onglet === k));
+  $$('#nav [data-onglet]').forEach(x => x.setAttribute('aria-selected', x.dataset.onglet === k)); const pl = $('#nav [data-plus]'); if(pl) pl.setAttribute('aria-selected', !!$(`#menu-plus [data-onglet="${k}"]`));
   $$('section.onglet').forEach(s => s.classList.toggle('cache', s.id !== 'onglet-' + k));
 }
 
@@ -403,7 +418,9 @@ $('#saison').addEventListener('change', rendreTout); $('#saison-stats').addEvent
 /* ─── Clics délégués ─── */
 document.addEventListener('click', ev => {
   const b = ev.target.closest('button'); if(!b) return; const d = b.dataset;
+  if(d.exportCsv !== undefined) exportCsv();
   if(d.ouvrir === 'famille') ouvrirFamille();
+  if(d.inviter){ const f = familles.find(x => x.id === d.inviter); const lien = location.origin + location.pathname + '?code=' + encodeURIComponent(f.code_acces || ''); navigator.clipboard?.writeText(lien).then(() => toast('Lien copié : envoie-le à la famille')).catch(() => prompt('Copie ce lien :', lien)); }
   if(d.modifierFamille) ouvrirFamille(familles.find(f => f.id === d.modifierFamille));
   if(d.supprimerFamille) supprimer('familles', d.supprimerFamille, 'Supprimer cette famille et tous ses joueurs ?');
   if(d.ouvrir === 'personne') ouvrirPersonne(null, d.famille);
@@ -435,8 +452,8 @@ document.addEventListener('click', ev => {
   if(d.notifs !== undefined) $('#dlg-notifs').showModal();
   if(d.reglages !== undefined){ $('#r-nom').value = club.nom; $('#r-lien').value = club.lien_paiement || ''; msg('#msg-reglages',''); $('#dlg-reglages').showModal(); }
 });
-async function supprimer(table, id, q){ if(!confirm(q)) return; const { error } = await sb.from(table).delete().eq('id', id); if(error){ alert(erreurLisible(error)); return; } await toutRecharger(); }
-function soumettre(formId, fn){ $(formId).addEventListener('submit', async ev => { if(ev.submitter?.value !== 'ok') return; ev.preventDefault(); await fn(ev); }); }
+async function supprimer(table, id, q){ if(!confirm(q)) return; const { error } = await sb.from(table).delete().eq('id', id); if(error){ toast(erreurLisible(error), true); return; } toast('Supprimé'); await toutRecharger(); }
+function soumettre(formId, fn){ $(formId).addEventListener('submit', async ev => { if(ev.submitter?.value !== 'ok') return; ev.preventDefault(); const avant = $(formId).closest('dialog').open; await fn(ev); if(avant && !$(formId).closest('dialog').open) toast('Enregistré ✓'); }); }
 
 /* ─── Réglages ─── */
 soumettre('#form-reglages', async () => {
@@ -477,7 +494,7 @@ function carteJoueur(p, f){
 }
 function tableFamille(f){
   const ps = personnes.filter(p => p.famille_id === f.id && (role !== 'joueur' || mesPersonnesIds.includes(p.id))), peutModifier = staff() || role === 'parent';
-  return `<div class="tableau"><div class="titre-tableau"><div><b>${esc(f.nom)}</b> <span class="compteur">${esc(f.email||'')} ${esc(f.telephone||'')}</span>${staff() ? ` &nbsp;code <span class="code">${esc(f.code_acces||'')}</span>` : ''}</div>
+  return `<div class="tableau"><div class="titre-tableau"><div><b>${esc(f.nom)}</b> <span class="compteur">${esc(f.email||'')} ${esc(f.telephone||'')}</span>${staff() ? ` &nbsp;code <span class="code">${esc(f.code_acces||'')}</span> <button class="btn second petit" data-inviter="${f.id}">Copier le lien d'invitation</button>` : ''}</div>
     <div>${peutModifier ? `<button class="btn second petit" data-ouvrir="personne" data-famille="${f.id}">Ajouter un joueur</button> <button class="btn second petit" data-modifier-famille="${f.id}">Modifier</button>` : ''}${staff() ? ` <button class="btn second petit" data-supprimer-famille="${f.id}">Supprimer</button>` : ''}</div></div>
     <table><thead><tr><th>Joueur</th><th>Né le</th><th>Catégorie</th><th>Licence</th><th></th></tr></thead>
     <tbody>${ps.length ? ps.map(p => carteJoueur(p, f)).join('') : '<tr><td colspan="5" class="compteur">Aucun joueur.</td></tr>'}</tbody></table></div>`;
@@ -528,7 +545,7 @@ soumettre('#form-licence', async () => {
   const { error } = await sb.from('licences').insert({ club_id: club.id, personne_id: $('#l-personne').value, saison: $('#l-saison').textContent, categorie: $('#l-cat').value, montant: $('#l-montant').value ? parseFloat($('#l-montant').value) : null });
   if(error){ msg('#msg-licence', erreurLisible(error), 'erreur'); return; } $('#dlg-licence').close(); await toutRecharger();
 });
-async function changerStatut(statut, id){ const { error } = await sb.from('licences').update({ statut }).eq('id', id); if(error) alert(erreurLisible(error)); else await toutRecharger(); }
+async function changerStatut(statut, id){ const { error } = await sb.from('licences').update({ statut }).eq('id', id); if(error) toast(erreurLisible(error), true); else { toast('Licence : ' + statut); await toutRecharger(); } }
 function rendreLicences(){
   if(!staff()) return; const saison = saisonSel(), ls = licences.filter(l => l.saison === saison);
   const nb = ls.filter(l => l.statut === 'validee').length; $('#cpt-licences').textContent = ls.length ? `${ls.length} licence${ls.length>1?'s':''}, ${nb} validée${nb>1?'s':''}` : '';
@@ -545,6 +562,15 @@ function rendreLicences(){
         ${['demandee','payee'].includes(l.statut) ? `<button class="btn second petit" data-statut="refusee" data-licence="${l.id}">Refuser</button>` : `<button class="btn second petit" data-statut="demandee" data-licence="${l.id}">Rouvrir</button>`}
         <button class="btn second petit" data-supprimer-licence="${l.id}">Supprimer</button></td></tr>`; }).join('') + '</tbody></table></div>';
   $$('[data-equipe-licence]').forEach(s => s.addEventListener('change', async () => { const { error } = await sb.from('licences').update({ equipe_id: s.value || null }).eq('id', s.dataset.equipeLicence); if(error) alert(erreurLisible(error)); else await toutRecharger(); }));
+}
+
+function exportCsv(){
+  const saison = saisonSel(), ls = licences.filter(l => l.saison === saison), q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const lignes = [['Nom','Prénom','Date de naissance','Sexe','Catégorie','Équipe','N° licence FFF','N° maillot','Statut','Montant','Famille','Email famille','Téléphone']];
+  ls.forEach(l => { const p = personnes.find(x => x.id === l.personne_id) || {}, f = familles.find(x => x.id === p.famille_id) || {}, e = equipes.find(x => x.id === l.equipe_id) || {};
+    lignes.push([p.nom, p.prenom, p.date_naissance, p.sexe, l.categorie, e.nom, p.num_licence, p.numero_maillot, l.statut, l.montant, f.nom, f.email, f.telephone]); });
+  const csv = '\ufeff' + lignes.map(r => r.map(q).join(';')).join('\r\n'), a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' })); a.download = `licences-${saison}.csv`; a.click(); toast('Fichier CSV téléchargé');
 }
 
 /* ─── Équipes ─── */
@@ -606,17 +632,17 @@ soumettre('#form-entrainement', async () => {
 });
 async function presence(statut, type, ref, personneId){
   const { error } = await sb.from('presences').upsert({ club_id: club.id, personne_id: personneId, type, ref_id: ref, statut, maj_le: new Date().toISOString() }, { onConflict: 'personne_id,type,ref_id' });
-  if(error) alert(erreurLisible(error)); else await toutRecharger();
+  if(error) toast(erreurLisible(error), true); else { toast(statut === 'present' ? 'Présence confirmée ✓' : statut === 'absent' ? 'Absence notée' : 'Blessé noté'); await toutRecharger(); }
 }
 function blocPresences(type, ref, equipe){
   const js = joueursEquipe(equipe), miens = mesPersonnes().filter(p => js.some(j => j.id === p.id));
   const pr = presences.filter(x => x.type === type && x.ref_id === ref);
   const etat = p => pr.find(x => x.personne_id === p.id)?.statut;
   const boutons = p => `<div class="pres"><b>${esc(p.prenom)}</b> ${etat(p) ? `<span class="puce ${etat(p)}">${etat(p)}</span>` : '<span class="compteur">pas répondu</span>'}
-    <button class="btn ok petit" data-presence="present" data-type="${type}" data-ref="${ref}" data-personne="${p.id}">Présent</button><button class="btn non petit" data-presence="absent" data-type="${type}" data-ref="${ref}" data-personne="${p.id}">Absent</button></div>`;
+    <button class="btn ok petit" data-presence="present" data-type="${type}" data-ref="${ref}" data-personne="${p.id}">Présent</button><button class="btn non petit" data-presence="absent" data-type="${type}" data-ref="${ref}" data-personne="${p.id}">Absent</button><button class="btn second petit" data-presence="blesse" data-type="${type}" data-ref="${ref}" data-personne="${p.id}">Blessé</button></div>`;
   if(staff()){
-    const pres = js.filter(p => etat(p) === 'present'), abs = js.filter(p => etat(p) === 'absent'), sans = js.filter(p => !etat(p));
-    return `<div class="bloc"><b>Présences :</b> <span class="puce present">${pres.length} présent${pres.length>1?'s':''}</span> <span class="puce absent">${abs.length} absent${abs.length>1?'s':''}</span> <span class="puce">${sans.length} sans réponse</span>
+    const pres = js.filter(p => etat(p) === 'present'), abs = js.filter(p => etat(p) === 'absent'), bl = js.filter(p => etat(p) === 'blesse'), sans = js.filter(p => !etat(p));
+    return `<div class="bloc"><b>Présences :</b> <span class="puce present">${pres.length} présent${pres.length>1?'s':''}</span> <span class="puce absent">${abs.length} absent${abs.length>1?'s':''}</span>${bl.length ? ` <span class="puce blesse">${bl.length} blessé${bl.length>1?'s':''}</span>` : ''} <span class="puce">${sans.length} sans réponse</span>
       <details><summary class="compteur" style="cursor:pointer">Détail</summary>${js.length ? js.map(boutons).join('') : '<span class="compteur">Aucun joueur rattaché à cette équipe.</span>'}</details></div>`;
   }
   return miens.length ? `<div class="bloc">${miens.map(boutons).join('')}</div>` : '';
