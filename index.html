@@ -163,6 +163,16 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
 #resultats button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--ligne);padding:9px 12px;cursor:pointer;color:var(--encre)} #resultats button:hover{background:rgba(29,78,216,.08)}
 #resultats .type{font-size:.75rem;color:var(--encre-2);text-transform:uppercase;letter-spacing:.05em}
 @media (max-width:640px){#recherche{max-width:100%;width:100%} #resultats{left:8px;right:8px;width:auto}}
+.trophee{background:linear-gradient(135deg,#FFF8EC,#FFEFD0);border:1px solid #F1D3A8;border-radius:var(--r);padding:12px 14px;margin-bottom:10px;color:#14213D}
+.trophee b{font-family:var(--display);font-size:1.3rem} .trophee .qui{font-size:1.05rem;margin-top:2px}
+@media (prefers-color-scheme:dark){.trophee{background:linear-gradient(135deg,#3A2A10,#2A1E0A);border-color:#7A5A1A;color:#F5C97A}}
+.bilan{background:var(--surface);border:1px solid var(--ligne);border-left:5px solid var(--ok);border-radius:var(--r);padding:12px 14px;margin:8px 0}
+.bilan h4{font-family:var(--display);font-size:1.05rem;margin:8px 0 2px;color:var(--encre-2);text-transform:uppercase}
+.planning td input{width:52px;text-align:center;padding:5px}
+#ecran-public{min-height:100vh;background:var(--fond);padding:14px}
+#ecran-public h1{font-size:2rem;text-align:center;margin:8px 0} #ecran-public .compteur{text-align:center;display:block}
+#ecran-public .kpi div{text-align:center}
+.qr{text-align:center;padding:12px;background:#fff;border-radius:var(--r);display:inline-block}
 #hors-ligne{background:#B45309;color:#fff;text-align:center;padding:8px 12px;font-weight:600}
 #bandeau-urgent{background:#B91C1C;color:#fff;padding:10px 16px;text-align:center;font-weight:600} #bandeau-urgent a{color:#fff}
 #bandeau-install{position:fixed;bottom:0;left:0;right:0;background:var(--encre);color:#fff;padding:10px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;z-index:5}
@@ -200,6 +210,7 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   </form>
 </div></div>
 
+<div id="ecran-public" class="cache"></div>
 <div id="chargement" class="cache"></div>
 <div id="app" class="cache">
   <div id="hors-ligne" class="cache">📴 Pas de connexion : tu vois les dernières données chargées. Les actions seront possibles au retour du réseau.</div>
@@ -238,8 +249,8 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
       <div id="zone-agenda"></div>
     </section>
     <section class="onglet cache" id="onglet-infos">
-      <div class="barre"><h2>Infos du club</h2><div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="annonce">Publier une info</button> <button class="btn second" type="button" data-ouvrir="sondage">Créer un sondage</button> <button class="btn second" type="button" data-ouvrir="sponsor">Ajouter un partenaire</button> <button class="btn second bureau-seul" type="button" data-ouvrir="document">Déposer un document</button></div></div>
-      <div id="zone-sondages"></div><div id="zone-infos"></div><div id="zone-avantages"></div><div id="zone-idees"></div><div id="zone-documents"></div>
+      <div class="barre"><h2>Infos du club</h2><div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="annonce">Publier une info</button> <button class="btn second" type="button" data-ouvrir="sondage">Créer un sondage</button> <button class="btn second" type="button" data-ouvrir="sponsor">Ajouter un partenaire</button> <button class="btn second" type="button" data-ouvrir="trophee">Ajouter un trophée</button> <button class="btn second bureau-seul" type="button" data-ouvrir="document">Déposer un document</button></div></div>
+      <div id="zone-sondages"></div><div id="zone-trophees"></div><div id="zone-infos"></div><div id="zone-avantages"></div><div id="zone-idees"></div><div id="zone-documents"></div>
     </section>
     <section class="onglet cache" id="onglet-buvette">
       <div class="barre"><h2>Buvette et événements</h2><div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="permanence">Ajouter un créneau</button> <button class="btn second" type="button" data-ouvrir="stock">Ajouter un produit</button></div></div>
@@ -248,6 +259,10 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
     <section class="onglet cache" id="onglet-stages">
       <div class="barre"><h2>Stages et tombola</h2><div class="staff-seul"><button class="btn principal" type="button" data-ouvrir="stage">Ajouter un stage</button> <button class="btn second" type="button" data-ouvrir="tombola">Tombola</button></div></div>
       <div id="zone-stages"></div>
+    </section>
+    <section class="onglet cache" id="onglet-tournois">
+      <div class="barre"><h2>Plateaux et tournois</h2><button class="btn principal" type="button" data-ouvrir="tournoi">Créer un plateau</button></div>
+      <div id="zone-tournois"></div>
     </section>
     <section class="onglet cache" id="onglet-coach">
       <div class="barre"><h2>Outils du coach</h2></div>
@@ -314,6 +329,7 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
     <div><label for="p-sexe">Sexe</label><select id="p-sexe"><option value="">—</option><option value="F">Fille / femme</option><option value="M">Garçon / homme</option></select></div></div>
   <div class="ligne"><div><label for="p-licence">N° de licence FFF (si connu)</label><input id="p-licence"></div><div><label for="p-maillot">Numéro de maillot</label><input id="p-maillot" type="number" min="0" max="99"></div></div>
   <label for="p-email">Email du joueur (pour qu'il se connecte à l'appli, en lecture seule)</label><input id="p-email" type="email" placeholder="prenom@exemple.fr">
+  <label for="p-image">📷 Droit à l'image</label><select id="p-image"><option value="">Non renseigné</option><option value="true">Oui, le club peut publier des photos du joueur</option><option value="false">Non, pas de photo publiée</option></select>
   <div class="staff-seul" style="margin-top:12px;border-top:1px solid var(--ligne);padding-top:4px"><div class="ligne"><div><label for="p-blessure">Blessure / disponibilité</label><select id="p-blessure"><option value="">Disponible</option><option value="indisponible">Indisponible (blessé)</option><option value="reprise">En reprise (ménager)</option></select></div><div><label for="p-jusqu">Jusqu'au</label><input id="p-jusqu" type="date"></div></div>
   <label for="p-blessure-note">Précision</label><input id="p-blessure-note" placeholder="Ex. entorse cheville, pas de match avant le 15"></div>
   <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-personne"></div></form></dialog>
@@ -431,6 +447,35 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   <label for="do-fichier">Fichier (PDF, Word, Excel, image — 10 Mo max)</label><input id="do-fichier" type="file" required>
   <div class="actions"><button class="btn principal" value="ok">Déposer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-document"></div></form></dialog>
 
+<dialog id="dlg-bilan"><form method="dialog" id="form-bilan"><h2>Bilan de saison <span id="b-qui"></span></h2><input type="hidden" id="b-personne">
+  <p class="compteur">Saison <b id="b-saison"></b> — rempli par le coach, visible par la famille.</p>
+  <label for="b-forts">Points forts</label><textarea id="b-forts" placeholder="Ex. Très bon état d'esprit, progrès nets en conduite de balle, écoute en séance…"></textarea>
+  <label for="b-axes">Axes de progression pour la saison prochaine</label><textarea id="b-axes" placeholder="Ex. Jouer plus vite vers l'avant, travailler le pied gauche, oser tirer…"></textarea>
+  <label for="b-mot">Mot du coach</label><input id="b-mot" placeholder="Ex. Continue comme ça, tu vas régaler l'an prochain !">
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-bilan"></div></form></dialog>
+
+<dialog id="dlg-trophee"><form method="dialog" id="form-trophee"><h2>Trophée de la saison <span id="tr-saison"></span></h2><input type="hidden" id="tr-id">
+  <label for="tr-titre">Trophée</label><input id="tr-titre" required list="trophees-idees" placeholder="Ex. Plus belle progression"><datalist id="trophees-idees"><option>Plus belle progression</option><option>Assiduité parfaite</option><option>Ambianceur du vestiaire</option><option>Meilleur buteur</option><option>Fair-play</option><option>Gardien de l'année</option><option>Esprit d'équipe</option><option>Parent bénévole de l'année</option></datalist>
+  <div class="ligne"><div><label for="tr-personne">Joueur (ou personne)</label><select id="tr-personne"><option value="">— texte libre —</option></select></div><div><label for="tr-nom">Nom libre si pas un joueur</label><input id="tr-nom" placeholder="Ex. Toute l'équipe U11, Marc (buvette)"></div></div>
+  <label for="tr-texte">Pourquoi</label><input id="tr-texte" placeholder="Ex. 100 % de présence aux entraînements, jamais un mot plus haut que l'autre">
+  <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-trophee"></div></form></dialog>
+
+<dialog id="dlg-tournoi"><form method="dialog" id="form-tournoi"><h2 id="dlg-tournoi-titre">Plateau à domicile</h2><input type="hidden" id="tn-id">
+  <label for="tn-titre">Nom</label><input id="tn-titre" required placeholder="Ex. Plateau U9 du 12 octobre">
+  <div class="ligne"><div><label for="tn-date">Date</label><input id="tn-date" type="date" required></div><div><label for="tn-debut">Premier coup d'envoi</label><input id="tn-debut" type="time" value="10:00" required></div></div>
+  <div class="ligne"><div><label for="tn-duree">Durée d'un match (min)</label><input id="tn-duree" type="number" min="5" max="90" value="12"></div><div><label for="tn-pause">Battement entre matchs (min)</label><input id="tn-pause" type="number" min="0" max="30" value="3"></div></div>
+  <div class="ligne"><div><label for="tn-terrains">Nombre de terrains</label><input id="tn-terrains" type="number" min="1" max="8" value="2"></div><div><label for="tn-poules">Nombre de poules</label><select id="tn-poules"><option value="1">1 (tout le monde se rencontre)</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div></div>
+  <label for="tn-equipes">Équipes (une par ligne, la nôtre en premier)</label><textarea id="tn-equipes" required placeholder="US Bouloire U9&#10;ES Tresson&#10;FC Saint-Calais&#10;AS Le Grand-Lucé"></textarea>
+  <label for="tn-vestiaires">Vestiaires disponibles (un par ligne, facultatif)</label><textarea id="tn-vestiaires" style="min-height:50px" placeholder="Vestiaire 1&#10;Vestiaire 2&#10;Vestiaire 3"></textarea>
+  <p class="compteur">Le planning est régénéré à chaque enregistrement ; les scores déjà saisis sont conservés si les matchs sont identiques.</p>
+  <div class="actions"><button class="btn principal" value="ok">Générer le planning</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-tournoi"></div></form></dialog>
+
+<dialog id="dlg-rgpd"><form method="dialog" id="form-rgpd"><h2>Quitter le club et supprimer mes données</h2>
+  <p>Cette action supprime <b>définitivement</b> : ta famille, tes enfants, leurs licences, présences, fiches d'urgence, bilans, commandes et inscriptions, ainsi que ton compte de connexion. Le club n'y aura plus accès.</p>
+  <p class="compteur">Pense à télécharger tes données avant (bouton « Télécharger mes données »).</p>
+  <label for="rg-confirm">Pour confirmer, écris <b>SUPPRIMER</b></label><input id="rg-confirm" autocomplete="off">
+  <div class="actions"><button class="btn non" value="ok">Supprimer tout</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-rgpd"></div></form></dialog>
+
 <dialog id="dlg-covoit"><form method="dialog" id="form-covoit"><h2>Covoiturage</h2><input type="hidden" id="cv-match">
   <p class="compteur" id="cv-info"></p>
   <label for="cv-famille" id="lbl-cv-famille">Famille</label><select id="cv-famille"></select>
@@ -478,6 +523,7 @@ let sb, session = null, club = null, clubs = [], role = 'parent';
 let familles = [], personnes = [], equipes = [], licences = [], membres = [], matchs = [], entrainements = [], presences = [], covoits = [], annonces = [], articles = [], commandes = [], fil = [], mesFamillesIds = [], mesPersonnesIds = [];
 let sante = [], permanences = [], permInscr = [], stocks = [], stages = [], stageInscr = [], tombola = [], extrasOk = true;
 let sponsors = [], sondages = [], votes = [], idees = [], documents = [], extras2Ok = true;
+let bilans = [], trophees = [], tournois = [], extras3Ok = true;
 const bureau = () => ['admin','bureau'].includes(role);
 const staff = () => ['admin','bureau','coach'].includes(role);
 const parent = () => role === 'parent';
@@ -489,6 +535,7 @@ async function demarrer(){
   if(!SUPABASE_URL.startsWith('https://') || SUPABASE_ANON_KEY.length < 20 || SUPABASE_ANON_KEY.startsWith('COLLE')){ montrer('#ecran-config'); return; }
   if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
   sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const codeT = new URLSearchParams(location.search).get('tournoi'); if(codeT){ await pagePublique(codeT); return; }
   const { data } = await sb.auth.getSession(); session = data.session;
   sb.auth.onAuthStateChange((ev, s) => { session = s; if(!s){ montrer('#ecran-login'); return; }
     if(ev === 'SIGNED_IN' && !club){ const c = sessionStorage.getItem('code_invite'); history.replaceState(null, '', location.pathname + (c ? '?code=' + c : '')); chargerClubs(); } });
@@ -546,7 +593,7 @@ async function ouvrirClub(c){
   const s = saisonCourante(), opts = [s, `${+s.slice(0,4)-1}-${+s.slice(0,4)}`, `${+s.slice(0,4)+1}-${+s.slice(0,4)+2}`];
   ['#saison','#saison-stats'].forEach(id => $(id).innerHTML = opts.map(x => `<option ${x===s?'selected':''}>${x}</option>`).join(''));
   $$('.staff-seul').forEach(el => el.classList.toggle('cache', !staff())); $$('.bureau-seul').forEach(el => el.classList.toggle('cache', !bureau()));
-  const onglets = staff() ? [['familles','Familles'],['licences','Licences'],['equipes','Équipes'],['agenda','Agenda'],['infos','Infos'],['buvette','Buvette'],['stages','Stages'],['coach','Coach'],['boutique','Boutique'],['stats','Stats'],['acces','Accès']]
+  const onglets = staff() ? [['familles','Familles'],['licences','Licences'],['equipes','Équipes'],['agenda','Agenda'],['infos','Infos'],['buvette','Buvette'],['stages','Stages'],['tournois','Plateaux'],['coach','Coach'],['boutique','Boutique'],['stats','Stats'],['acces','Accès']]
                           : [['foyer', role === 'joueur' ? 'Ma fiche' : 'Mon foyer'],['agenda','Agenda'],['infos','Infos'],['buvette','Buvette'],['stages','Stages'],['boutique','Boutique']];
   const principaux = staff() ? ['familles','licences','agenda','infos'] : ['foyer','agenda','infos','buvette'];
   $('#nav').innerHTML = onglets.map(([k,l],i) => `<button role="tab" aria-selected="${i===0}" data-onglet="${k}" class="${principaux.includes(k) ? '' : 'secondaire'}">${l}</button>`).join('') + (onglets.length > 5 ? '<button type="button" class="plus" data-plus>Plus ☰</button>' : '');
@@ -579,13 +626,15 @@ async function toutRecharger(){
   const z = await Promise.all([ q('sponsors','nom'), q('sondages'), q('sondage_votes'), q('idees'), bureau() ? q('documents') : Promise.resolve({ data: [] }) ]);
   extras2Ok = !z.slice(0,4).some(y => y.error);
   [sponsors, sondages, votes, idees, documents] = z.map(y => y.data || []);
+  const w = await Promise.all([ q('bilans','maj_le'), q('trophees'), staff() ? q('tournois','date_tournoi') : Promise.resolve({ data: [] }) ]);
+  extras3Ok = !w.slice(0,2).some(y => y.error); [bilans, trophees, tournois] = w.map(y => y.data || []);
   rendreTout();
   } catch(e){ toast(navigator.onLine ? 'Erreur de chargement : ' + erreurLisible(e) : 'Pas de connexion', true); }
   finally { $('#chargement').classList.add('cache'); }
 }
 function majReseau(){ $('#hors-ligne').classList.toggle('cache', navigator.onLine); if(navigator.onLine && club) toutRecharger(); }
 window.addEventListener('online', majReseau); window.addEventListener('offline', majReseau);
-function rendreTout(){ rendreFoyer(); rendreFamilles(); rendreLicences(); rendreEquipes(); rendreAgenda(); rendreInfos(); rendreSondages(); rendreSponsors(); rendreIdees(); rendreDocuments(); rendreBuvette(); rendreStages(); rendreBoutique(); rendreStats(); rendreAcces(); rendreNotifs(); }
+function rendreTout(){ rendreFoyer(); rendreFamilles(); rendreLicences(); rendreEquipes(); rendreAgenda(); rendreInfos(); rendreSondages(); rendreSponsors(); rendreIdees(); rendreDocuments(); rendreTrophees(); rendreTournois(); rendreBuvette(); rendreStages(); rendreBoutique(); rendreStats(); rendreAcces(); rendreNotifs(); }
 const msgExtras = '<div class="vide">Cette partie n\'est pas encore activée : lance le script <b>07_extras.sql</b> dans Supabase (SQL Editor).</div>';
 $('#saison').addEventListener('change', rendreTout); $('#saison-stats').addEventListener('change', rendreStats);
 
@@ -627,6 +676,17 @@ document.addEventListener('click', ev => {
   if(d.statutCmd) majCommande(d.statutCmd, d.commande);
   if(d.supprimerCommande) supprimer('commandes', d.supprimerCommande, 'Annuler cette commande ?');
   if(d.sante) ouvrirSante(personnes.find(p => p.id === d.sante));
+  if(d.bilan) ouvrirBilan(personnes.find(p => p.id === d.bilan));
+  if(d.ouvrir === 'trophee') ouvrirTrophee();
+  if(d.modifierTrophee) ouvrirTrophee(trophees.find(x => x.id === d.modifierTrophee));
+  if(d.supprimerTrophee) supprimer('trophees', d.supprimerTrophee, 'Supprimer ce trophée ?');
+  if(d.ouvrir === 'tournoi') ouvrirTournoi();
+  if(d.modifierTournoi) ouvrirTournoi(tournois.find(x => x.id === d.modifierTournoi));
+  if(d.supprimerTournoi) supprimer('tournois', d.supprimerTournoi, 'Supprimer ce plateau ?');
+  if(d.qr) montrerQr(tournois.find(x => x.id === d.qr));
+  if(d.imprimerTournoi) imprimerTournoi(tournois.find(x => x.id === d.imprimerTournoi));
+  if(d.exportRgpd !== undefined) exporterMesDonnees();
+  if(d.rgpd !== undefined){ $('#rg-confirm').value = ''; msg('#msg-rgpd',''); $('#dlg-rgpd').showModal(); }
   if(d.ics !== undefined) exporterIcs();
   if(d.agenda) lienAgenda(d.agenda, d.type);
   if(d.ouvrir === 'sponsor') ouvrirSponsor();
@@ -695,7 +755,7 @@ function lienPaiement(l, email){
 function carteJoueur(p, f){
   const saison = saisonSel(), lic = licences.find(l => l.personne_id === p.id && l.saison === saison);
   const eq = lic && equipes.find(e => e.id === lic.equipe_id);
-  return `<tr><td>${esc(p.prenom)} <b>${esc(p.nom)}</b>${p.numero_maillot != null ? ` <span class="cat">#${p.numero_maillot}</span>` : ''} ${puceBlessure(p)}</td>
+  return `<tr><td>${esc(p.prenom)} <b>${esc(p.nom)}</b>${p.numero_maillot != null ? ` <span class="cat">#${p.numero_maillot}</span>` : ''} ${puceBlessure(p)} ${puceImage(p)}${bilans.some(b => b.personne_id === p.id && b.saison === saisonSel()) ? ` <button class="btn second petit" data-bilan="${p.id}">📈 Bilan ${saisonSel()}</button>` : ''}</td>
     <td>${p.date_naissance ? new Date(p.date_naissance).toLocaleDateString('fr-FR') : ''}</td>
     <td><span class="cat">${categorieProposee(p.date_naissance, p.sexe, saison)}</span> ${eq ? '<span class="compteur">' + esc(eq.nom) + '</span>' : ''}</td>
     <td>${lic ? `<span class="puce ${lic.statut}">${lic.statut}</span> ${lic.statut==='demandee' && role !== 'joueur' ? lienPaiement(lic, f.email) : ''}` : (role === 'joueur' ? '<span class="compteur">pas de licence (demande à tes parents)</span>' : `<button class="btn second petit" data-licencier="${p.id}">Licencier ${saison}</button>`)}</td>
@@ -718,6 +778,7 @@ function rendreFoyer(){
   const mf = familles.filter(f => mesFamillesIds.includes(f.id));
   const mesEq = equipes.filter(e => mesEquipesIds().includes(e.id) && (e.lien_whatsapp || e.coach_tel));
   $('#zone-foyer').innerHTML = ((mesEq.length || club.tel_urgence) ? `<div class="annonce"><b>Contacts :</b> ${btnTel(club.nom_urgence, club.tel_urgence, 'Urgence club' + (club.nom_urgence ? ' · ' + club.nom_urgence : ''))} ${mesEq.map(e => `<div class="pres">${esc(e.nom)} ${btnWhatsapp(e)} ${btnTel(e.coach_nom, e.coach_tel, 'Coach ' + (e.coach_nom || ''))}</div>`).join('')}</div>` : '') + (mf.length ? mf.map(tableFamille).join('') + `<p class="compteur">Saison affichée : <select id="saison-foyer" style="width:auto">${$('#saison').innerHTML}</select></p>` : '<div class="vide">Aucune famille rattachée à ton compte.</div>');
+  if(role === 'parent' && mesFamillesIds.length) $('#zone-foyer').innerHTML += `<details class="annonce" style="margin-top:14px"><summary style="cursor:pointer;font-weight:600">🔐 Mes données (RGPD)</summary><p class="compteur">Tu peux télécharger tout ce que le club a enregistré sur ta famille, et supprimer ta famille et ton compte si tu quittes le club.</p><div class="actions"><button class="btn second petit" type="button" data-export-rgpd>⬇️ Télécharger mes données</button><button class="btn non petit" type="button" data-rgpd>Quitter le club et tout supprimer</button></div></details>`;
   const sf = $('#saison-foyer'); if(sf){ sf.value = $('#saison').value; sf.addEventListener('change', () => { $('#saison').value = sf.value; rendreTout(); }); }
 }
 function ouvrirFamille(f){
@@ -736,11 +797,13 @@ function ouvrirPersonne(p, familleId){
   $('#p-prenom').value = p?.prenom || ''; $('#p-nom').value = p?.nom || (familles.find(f => f.id === familleId)?.nom || '');
   $('#p-naissance').value = p?.date_naissance || ''; $('#p-sexe').value = p?.sexe || ''; $('#p-licence').value = p?.num_licence || ''; $('#p-maillot').value = p?.numero_maillot ?? ''; $('#p-email').value = p?.email || '';
   $('#p-blessure').value = p?.blessure_statut || ''; $('#p-jusqu').value = p?.blessure_jusqu_au || ''; $('#p-blessure-note').value = p?.blessure_note || '';
+  $('#p-image').value = p?.droit_image == null ? '' : String(p.droit_image);
   msg('#msg-personne',''); $('#dlg-personne').showModal();
 }
 soumettre('#form-personne', async () => {
   const ligne = { club_id: club.id, famille_id: $('#p-famille').value || null, prenom: $('#p-prenom').value.trim(), nom: $('#p-nom').value.trim(), date_naissance: $('#p-naissance').value || null,
     sexe: $('#p-sexe').value || null, num_licence: $('#p-licence').value.trim() || null, email: $('#p-email').value.trim().toLowerCase() || null, numero_maillot: $('#p-maillot').value === '' ? null : parseInt($('#p-maillot').value,10) }, id = $('#p-id').value;
+  if(extras3Ok) ligne.droit_image = $('#p-image').value === '' ? null : $('#p-image').value === 'true';
   if(staff() && extrasOk){ ligne.blessure_statut = $('#p-blessure').value || null; ligne.blessure_jusqu_au = $('#p-blessure').value ? ($('#p-jusqu').value || null) : null; ligne.blessure_note = $('#p-blessure').value ? ($('#p-blessure-note').value.trim() || null) : null; }
   const { error } = id ? await sb.from('personnes').update(ligne).eq('id', id) : await sb.from('personnes').insert(ligne);
   if(error){ msg('#msg-personne', erreurLisible(error), 'erreur'); return; } $('#dlg-personne').close(); await toutRecharger();
@@ -777,9 +840,9 @@ function rendreLicences(){
 
 function exportCsv(){
   const saison = saisonSel(), ls = licences.filter(l => l.saison === saison), q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
-  const lignes = [['Nom','Prénom','Date de naissance','Sexe','Catégorie','Équipe','N° licence FFF','N° maillot','Statut','Montant','Famille','Email famille','Téléphone']];
+  const lignes = [['Nom','Prénom','Date de naissance','Sexe','Catégorie','Équipe','N° licence FFF','N° maillot','Statut','Montant','Famille','Email famille','Téléphone','Droit à l\'image']];
   ls.forEach(l => { const p = personnes.find(x => x.id === l.personne_id) || {}, f = familles.find(x => x.id === p.famille_id) || {}, e = equipes.find(x => x.id === l.equipe_id) || {};
-    lignes.push([p.nom, p.prenom, p.date_naissance, p.sexe, l.categorie, e.nom, p.num_licence, p.numero_maillot, l.statut, l.montant, f.nom, f.email, f.telephone]); });
+    lignes.push([p.nom, p.prenom, p.date_naissance, p.sexe, l.categorie, e.nom, p.num_licence, p.numero_maillot, l.statut, l.montant, f.nom, f.email, f.telephone, p.droit_image == null ? '' : p.droit_image ? 'oui' : 'non']); });
   const csv = '\ufeff' + lignes.map(r => r.map(q).join(';')).join('\r\n'), a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' })); a.download = `licences-${saison}.csv`; a.click(); toast('Fichier CSV téléchargé');
 }
@@ -807,7 +870,7 @@ function rendreEquipes(){
   $('#zone-equipes').innerHTML = equipes.map(e => { const js = joueursEquipe(e);
     return `<div class="tableau"><div class="titre-tableau"><div><b>${esc(e.nom)}</b> <span class="cat">${esc(e.categorie)}</span> <span class="compteur">${esc(e.saison)} · ${js.length} joueur${js.length>1?'s':''}${e.coach_nom ? ' · coach ' + esc(e.coach_nom) : ''}</span> ${btnWhatsapp(e)} ${btnTel(e.coach_nom, e.coach_tel, 'Appeler le coach')}</div><div><button class="btn second petit" data-modifier-equipe="${e.id}">Modifier</button> <button class="btn second petit" data-supprimer-equipe="${e.id}">Supprimer</button></div></div>
       <table><thead><tr><th>N°</th><th>Joueur</th><th>G/F</th><th></th></tr></thead>
-      <tbody>${js.length ? js.map(p => { const st = assiduite(p, e); return `<tr><td style="width:60px"><span class="cat">${p.numero_maillot != null ? '#' + p.numero_maillot : '—'}</span></td><td>${esc(nomP(p))} ${puceBlessure(p)}</td><td>${p.sexe === 'F' ? 'F' : p.sexe === 'M' ? 'G' : ''} <span class="compteur">· entraînements ${st.ePres}/${st.eTot} · matchs joués ${st.conv}</span></td><td class="act"><button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button></td></tr>`; }).join('') : '<tr><td colspan="4" class="compteur">Aucun joueur rattaché (onglet Licences → colonne Équipe).</td></tr>'}</tbody></table>${blocSanteEquipe(e)}</div>`; }).join('');
+      <tbody>${js.length ? js.map(p => { const st = assiduite(p, e); return `<tr><td style="width:60px"><span class="cat">${p.numero_maillot != null ? '#' + p.numero_maillot : '—'}</span></td><td>${esc(nomP(p))} ${puceBlessure(p)} ${puceImage(p)} <button class="btn second petit" data-bilan="${p.id}">📈 Bilan${bilans.some(b => b.personne_id === p.id && b.saison === e.saison) ? ' ✓' : ''}</button></td><td>${p.sexe === 'F' ? 'F' : p.sexe === 'M' ? 'G' : ''} <span class="compteur">· entraînements ${st.ePres}/${st.eTot} · matchs joués ${st.conv}</span></td><td class="act"><button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button></td></tr>`; }).join('') : '<tr><td colspan="4" class="compteur">Aucun joueur rattaché (onglet Licences → colonne Équipe).</td></tr>'}</tbody></table>${blocSanteEquipe(e)}</div>`; }).join('');
 }
 
 /* ─── Agenda : matchs + entraînements + présences + covoiturage ─── */
@@ -1300,6 +1363,129 @@ function rechercher(q){
 $('#recherche').addEventListener('input', ev => rechercher(ev.target.value));
 $('#recherche').addEventListener('keydown', ev => { if(ev.key === 'Escape'){ ev.target.value = ''; $('#resultats').classList.add('cache'); } });
 document.addEventListener('click', ev => { if(!ev.target.closest('#resultats') && !ev.target.closest('#recherche')) $('#resultats').classList.add('cache'); });
+
+/* ─── Bilans de progression ─── */
+function ouvrirBilan(p){
+  if(!extras3Ok){ toast('Lance d\'abord le script 09_extras3.sql', true); return; }
+  const saison = saisonSel(), b = bilans.find(x => x.personne_id === p.id && x.saison === saison);
+  if(!staff()){ if(!b) return; $('#b-forts').readOnly = $('#b-axes').readOnly = $('#b-mot').readOnly = true; $('#form-bilan button[value=ok]').classList.add('cache'); } else { $('#b-forts').readOnly = $('#b-axes').readOnly = $('#b-mot').readOnly = false; $('#form-bilan button[value=ok]').classList.remove('cache'); }
+  $('#b-qui').textContent = nomP(p); $('#b-personne').value = p.id; $('#b-saison').textContent = saison;
+  $('#b-forts').value = b?.points_forts || ''; $('#b-axes').value = b?.axes || ''; $('#b-mot').value = b?.mot_coach || ''; msg('#msg-bilan',''); $('#dlg-bilan').showModal();
+}
+soumettre('#form-bilan', async () => {
+  const { error } = await sb.from('bilans').upsert({ club_id: club.id, personne_id: $('#b-personne').value, saison: $('#b-saison').textContent, points_forts: $('#b-forts').value.trim() || null, axes: $('#b-axes').value.trim() || null, mot_coach: $('#b-mot').value.trim() || null, auteur: session.user.email, maj_le: new Date().toISOString() }, { onConflict: 'personne_id,saison' });
+  if(error){ msg('#msg-bilan', erreurLisible(error), 'erreur'); return; } $('#dlg-bilan').close(); await toutRecharger();
+});
+function puceImage(p){ return p.droit_image == null ? '' : p.droit_image ? '<span class="puce present" title="Photos autorisées">📷 ok</span>' : '<span class="puce refusee" title="Pas de photo publiée">📷 non</span>'; }
+
+/* ─── Trophées de fin de saison ─── */
+function ouvrirTrophee(t){
+  const s = saisonSel(); $('#tr-saison').textContent = s; $('#tr-id').value = t?.id || ''; $('#tr-titre').value = t?.titre || ''; $('#tr-nom').value = t?.nom_libre || ''; $('#tr-texte').value = t?.texte || '';
+  $('#tr-personne').innerHTML = '<option value="">— texte libre —</option>' + personnes.slice().sort((a,b) => a.nom.localeCompare(b.nom)).map(p => `<option value="${p.id}" ${t?.personne_id === p.id ? 'selected' : ''}>${esc(nomP(p))}</option>`).join('');
+  msg('#msg-trophee',''); $('#dlg-trophee').showModal();
+}
+soumettre('#form-trophee', async () => {
+  const ligne = { club_id: club.id, saison: $('#tr-saison').textContent, titre: $('#tr-titre').value.trim(), personne_id: $('#tr-personne').value || null, nom_libre: $('#tr-nom').value.trim() || null, texte: $('#tr-texte').value.trim() || null }, id = $('#tr-id').value;
+  if(!ligne.personne_id && !ligne.nom_libre){ msg('#msg-trophee', 'Choisis un joueur ou écris un nom.', 'erreur'); return; }
+  const { error } = id ? await sb.from('trophees').update(ligne).eq('id', id) : await sb.from('trophees').insert(ligne);
+  if(error){ msg('#msg-trophee', erreurLisible(error), 'erreur'); return; } $('#dlg-trophee').close(); await toutRecharger();
+});
+function rendreTrophees(){
+  const z = $('#zone-trophees'); if(!extras3Ok){ z.innerHTML = ''; return; }
+  const s = saisonSel(), ts = trophees.filter(t => t.saison === s);
+  if(!ts.length){ z.innerHTML = ''; return; }
+  z.innerHTML = `<h3 style="margin-bottom:8px">🏆 Trophées de la saison ${s}</h3>` + ts.map(t => { const p = personnes.find(x => x.id === t.personne_id);
+    return `<div class="trophee"><b>🏆 ${esc(t.titre)}</b><div class="qui">${p ? esc(nomP(p)) : esc(t.nom_libre || '')}</div>${t.texte ? `<div class="compteur">${esc(t.texte)}</div>` : ''}${staff() ? `<div class="actions" style="margin-top:6px"><button class="btn second petit" data-modifier-trophee="${t.id}">Modifier</button><button class="btn second petit" data-supprimer-trophee="${t.id}">Supprimer</button></div>` : ''}</div>`; }).join('');
+}
+
+/* ─── Plateaux et tournois : générateur de poules et planning ─── */
+function genererPlanning(t){
+  const eqs = t.equipes, nbP = Math.min(t.nb_poules, eqs.length), poules = Array.from({ length: nbP }, () => []);
+  eqs.forEach((e, i) => poules[i % nbP].push(e));           // répartition en serpentin simple
+  const rondes = [];                                        // rondes = tours de jeu ; chaque tour contient un match par poule au maximum
+  poules.forEach((p, pi) => { const l = p.slice(); if(l.length % 2) l.push(null); const n = l.length, tours = [];
+    for(let r = 0; r < n - 1; r++){ const tour = []; for(let i = 0; i < n/2; i++){ const a = l[i], b = l[n-1-i]; if(a && b) tour.push({ poule: pi, a, b }); } tours.push(tour); l.splice(1, 0, l.pop()); }
+    tours.forEach((tour, r) => { rondes[r] = (rondes[r] || []).concat(tour); }); });
+  const liste = rondes.flat();                              // ordre : tour 1 de toutes les poules, puis tour 2…
+  const [h0, m0] = t.heure_debut.split(':').map(Number), pas = (+t.duree_match || 12) + (+t.pause || 0), nbT = Math.max(1, +t.nb_terrains || 1);
+  return liste.map((m, i) => { const slot = Math.floor(i / nbT), mn = h0*60 + m0 + slot*pas; return { ...m, terrain: (i % nbT) + 1, heure: String(Math.floor(mn/60)).padStart(2,'0') + ':' + String(mn%60).padStart(2,'0'), sa: null, sb: null }; });
+}
+function classement(t){
+  const res = {}; t.equipes.forEach((e, i) => res[e] = { e, poule: i % Math.min(t.nb_poules, t.equipes.length), j:0, pts:0, bp:0, bc:0 });
+  (t.planning || []).forEach(m => { if(m.sa == null || m.sb == null) return; const A = res[m.a], B = res[m.b]; if(!A || !B) return; A.j++; B.j++; A.bp += m.sa; A.bc += m.sb; B.bp += m.sb; B.bc += m.sa;
+    if(m.sa > m.sb){ A.pts += 3; } else if(m.sa < m.sb){ B.pts += 3; } else { A.pts++; B.pts++; } });
+  return Object.values(res).sort((x,y) => x.poule - y.poule || y.pts - x.pts || (y.bp - y.bc) - (x.bp - x.bc) || y.bp - x.bp);
+}
+function ouvrirTournoi(t){
+  $('#dlg-tournoi-titre').textContent = t ? 'Modifier le plateau' : 'Nouveau plateau'; $('#tn-id').value = t?.id || ''; $('#tn-titre').value = t?.titre || ''; $('#tn-date').value = t?.date_tournoi || aujourdhui(); $('#tn-debut').value = t?.heure_debut || '10:00';
+  $('#tn-duree').value = t?.duree_match ?? 12; $('#tn-pause').value = t?.pause ?? 3; $('#tn-terrains').value = t?.nb_terrains ?? 2; $('#tn-poules').value = t?.nb_poules ?? 1; $('#tn-equipes').value = (t?.equipes || []).join('\n'); $('#tn-vestiaires').value = (t?.vestiaires || []).join('\n');
+  msg('#msg-tournoi',''); $('#dlg-tournoi').showModal();
+}
+soumettre('#form-tournoi', async () => {
+  const equipes2 = $('#tn-equipes').value.split('\n').map(x => x.trim()).filter(Boolean); if(equipes2.length < 2){ msg('#msg-tournoi', 'Il faut au moins 2 équipes.', 'erreur'); return; }
+  if(new Set(equipes2).size !== equipes2.length){ msg('#msg-tournoi', 'Deux équipes ont le même nom.', 'erreur'); return; }
+  const id = $('#tn-id').value, ancien = id ? tournois.find(x => x.id === id) : null;
+  const ligne = { club_id: club.id, titre: $('#tn-titre').value.trim(), date_tournoi: $('#tn-date').value, heure_debut: $('#tn-debut').value, duree_match: +$('#tn-duree').value || 12, pause: +$('#tn-pause').value || 0, nb_terrains: +$('#tn-terrains').value || 1, nb_poules: +$('#tn-poules').value || 1, equipes: equipes2, vestiaires: $('#tn-vestiaires').value.split('\n').map(x => x.trim()).filter(Boolean) };
+  ligne.planning = genererPlanning(ligne);
+  if(ancien?.planning) ligne.planning.forEach(m => { const v = ancien.planning.find(x => x.a === m.a && x.b === m.b); if(v){ m.sa = v.sa; m.sb = v.sb; } });
+  if(!id) ligne.code_public = Math.random().toString(36).slice(2, 8).toUpperCase();
+  const { error } = id ? await sb.from('tournois').update(ligne).eq('id', id) : await sb.from('tournois').insert(ligne);
+  if(error){ msg('#msg-tournoi', erreurLisible(error), 'erreur'); return; } $('#dlg-tournoi').close(); await toutRecharger();
+});
+async function majScoreTournoi(id, idx, champ, val){
+  const t = tournois.find(x => x.id === id); if(!t) return; const pl = t.planning.map(m => ({ ...m })); pl[idx][champ] = val === '' ? null : Math.max(0, +val);
+  const { error } = await sb.from('tournois').update({ planning: pl, maj_le: new Date().toISOString() }).eq('id', id); if(error){ toast(erreurLisible(error), true); return; } t.planning = pl; rendreTournois(true);
+}
+function htmlTournoi(t, lectureSeule){
+  const nbP = Math.min(t.nb_poules, t.equipes.length), nomPoule = i => nbP > 1 ? 'Poule ' + String.fromCharCode(65 + i) : '';
+  const cl = classement(t), joue = (t.planning || []).filter(m => m.sa != null).length, total = (t.planning || []).length;
+  const vest = t.vestiaires?.length ? `<div class="detail">🚿 Vestiaires : ${t.equipes.map((e, i) => `<span class="puce">${esc(e)} → ${esc(t.vestiaires[i % t.vestiaires.length])}</span>`).join(' ')}</div>` : '';
+  const slots = {}; (t.planning || []).forEach((m, i) => (slots[m.heure] = slots[m.heure] || []).push({ ...m, i }));
+  const planning = `<div class="tableau planning"><div class="titre-tableau"><b>Planning</b><span class="compteur">${joue} / ${total} matchs joués · ${t.duree_match} min + ${t.pause} min · ${t.nb_terrains} terrain${t.nb_terrains>1?'s':''}</span></div><table><thead><tr><th>Heure</th><th>Terrain</th><th>Match</th><th>Score</th></tr></thead><tbody>${Object.entries(slots).map(([h, ms]) => ms.map((m, k) => `<tr>${k === 0 ? `<td rowspan="${ms.length}"><b>${esc(h)}</b></td>` : ''}<td>T${m.terrain}</td><td>${nbP > 1 ? `<span class="compteur">${nomPoule(m.poule)} · </span>` : ''}<b>${esc(m.a)}</b> – <b>${esc(m.b)}</b></td><td>${lectureSeule ? (m.sa != null ? `<b>${m.sa} – ${m.sb}</b>` : '<span class="compteur">à jouer</span>') : `<input type="number" min="0" value="${m.sa ?? ''}" data-score="${t.id}" data-idx="${m.i}" data-champ="sa"> – <input type="number" min="0" value="${m.sb ?? ''}" data-score="${t.id}" data-idx="${m.i}" data-champ="sb">`}</td></tr>`).join('')).join('')}</tbody></table></div>`;
+  const tableau = Array.from({ length: nbP }, (_, pi) => `<div class="tableau"><div class="titre-tableau"><b>Classement ${nomPoule(pi) || ''}</b></div><table><thead><tr><th>#</th><th>Équipe</th><th>J</th><th>Pts</th><th>Buts</th><th>Diff</th></tr></thead><tbody>${cl.filter(x => x.poule === pi).map((x, i) => `<tr><td>${i+1}</td><td><b>${esc(x.e)}</b></td><td>${x.j}</td><td><b>${x.pts}</b></td><td>${x.bp}–${x.bc}</td><td>${x.bp - x.bc > 0 ? '+' : ''}${x.bp - x.bc}</td></tr>`).join('')}</tbody></table></div>`).join('');
+  return vest + tableau + planning;
+}
+function rendreTournois(garderScroll){
+  if(!staff()) return; const z = $('#zone-tournois'); if(!extras3Ok){ z.innerHTML = msgExtras.replace('07_extras.sql','09_extras3.sql'); return; }
+  const y = window.scrollY;
+  z.innerHTML = tournois.length ? tournois.slice().sort((a,b) => b.date_tournoi.localeCompare(a.date_tournoi)).map(t => `<div class="evt match"><div class="tete"><span class="quand">🏟️ ${dateFr(t.date_tournoi)} · ${esc(t.heure_debut)}</span><span class="puce payee">code public ${esc(t.code_public || '')}</span></div><div><b>${esc(t.titre)}</b> <span class="compteur">· ${t.equipes.length} équipes${t.nb_poules > 1 ? ' · ' + t.nb_poules + ' poules' : ''}</span></div>
+    <div class="actions" style="margin:8px 0"><button class="btn principal petit" data-qr="${t.id}">📱 QR code d'affichage public</button><button class="btn second petit" data-imprimer-tournoi="${t.id}">🖨️ Imprimer</button><button class="btn second petit" data-modifier-tournoi="${t.id}">Modifier</button><button class="btn second petit" data-supprimer-tournoi="${t.id}">Supprimer</button></div>
+    <details ${t.date_tournoi >= aujourdhui() ? 'open' : ''}><summary style="cursor:pointer;font-weight:600">Planning et classement</summary>${htmlTournoi(t, false)}</details></div>`).join('') : '<div class="vide">Aucun plateau. Crée-en un : équipes, durée des matchs, terrains, et le planning se génère tout seul.</div>';
+  $$('[data-score]').forEach(i => i.addEventListener('change', () => majScoreTournoi(i.dataset.score, +i.dataset.idx, i.dataset.champ, i.value)));
+  if(garderScroll) window.scrollTo(0, y);
+}
+function urlPublique(t){ return location.origin + location.pathname + '?tournoi=' + t.code_public; }
+function montrerQr(t){
+  const url = urlPublique(t), w = window.open('', '_blank'); if(!w){ prompt('Lien public à partager :', url); return; }
+  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>${esc(t.titre)} — affichage public</title><style>body{font-family:Arial,sans-serif;text-align:center;padding:30px}h1{margin:0 0 6px}p{color:#444}img{width:min(70vw,360px)}</style></head><body><h1>${esc(club.nom)}</h1><h2>${esc(t.titre)} — ${dateFr(t.date_tournoi)}</h2><p>Scannez pour suivre les scores et le classement en direct</p><img src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${encodeURIComponent(url)}" alt="QR code"><p style="font-size:.9rem;word-break:break-all">${esc(url)}</p><script>window.print()<\/script></body></html>`); w.document.close();
+}
+function imprimerTournoi(t){
+  const w = window.open('', '_blank'); if(!w){ toast('Autorise les fenêtres pop-up', true); return; }
+  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>${esc(t.titre)}</title><style>body{font-family:Arial,sans-serif;padding:20px;color:#000}h1{margin:0 0 4px}table{border-collapse:collapse;width:100%;margin-bottom:14px}th,td{border:1px solid #000;padding:5px 8px;text-align:left}th{background:#eee}.titre-tableau{font-weight:bold;margin:12px 0 4px}.compteur,.detail{color:#444;font-size:.9rem}.puce{border:1px solid #999;border-radius:8px;padding:0 5px;margin:2px}input{border:0;width:30px;text-align:center}</style></head><body><h1>${esc(club.nom)} — ${esc(t.titre)}</h1><div>${dateFr(t.date_tournoi)} · premier match ${esc(t.heure_debut)}</div>${htmlTournoi(t, true)}<script>window.print()<\/script></body></html>`); w.document.close();
+}
+async function pagePublique(code){
+  const el = $('#ecran-public'); ['#ecran-config','#ecran-login','#ecran-club','#app'].forEach(s => $(s).classList.add('cache')); el.classList.remove('cache');
+  const charger = async () => {
+    const { data, error } = await sb.rpc('tournoi_public', { p_code: code });
+    if(error || !data || !data.length){ el.innerHTML = `<div class="vide">Tournoi introuvable${error ? ' : ' + esc(erreurLisible(error)) : ''}.</div>`; return; }
+    const t = data[0], joue = (t.planning || []).filter(m => m.sa != null).length;
+    el.innerHTML = `<h1>${esc(t.club_nom)}</h1><div class="compteur" style="font-size:1.1rem"><b>${esc(t.titre)}</b> · ${dateFr(t.date_tournoi)}</div><div class="compteur">${joue} / ${(t.planning||[]).length} matchs joués · mise à jour ${new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' })}</div><div style="max-width:900px;margin:12px auto">${htmlTournoi(t, true)}</div><p class="compteur">Affichage public — ${esc(t.club_nom)} · Mon club foot</p>`;
+  };
+  await charger(); setInterval(charger, 20000);
+}
+
+/* ─── RGPD : export et suppression ─── */
+async function exporterMesDonnees(){
+  const mf = familles.filter(f => mesFamillesIds.includes(f.id)), mp = personnes.filter(p => mesFamillesIds.includes(p.famille_id)), ids = mp.map(p => p.id);
+  const donnees = { exporte_le: new Date().toISOString(), club: club.nom, compte: session.user.email, familles: mf, joueurs: mp, licences: licences.filter(l => ids.includes(l.personne_id)), presences: presences.filter(x => ids.includes(x.personne_id)),
+    fiches_urgence: sante.filter(x => ids.includes(x.personne_id)), bilans: bilans.filter(x => ids.includes(x.personne_id)), tombola: tombola.filter(x => ids.includes(x.personne_id)), commandes: commandes.filter(c => mesFamillesIds.includes(c.famille_id)), covoiturages: covoits.filter(c => mesFamillesIds.includes(c.famille_id)), inscriptions_stages: stageInscr.filter(i => ids.includes(i.personne_id)), permanences: permInscr.filter(i => mesFamillesIds.includes(i.famille_id)), votes: votes.filter(v => v.user_id === session.user.id), idees: idees.filter(i => i.user_id === session.user.id) };
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(donnees, null, 2)], { type:'application/json' })); a.download = `mes-donnees-${club.nom.replace(/[^\w-]+/g,'_')}.json`; a.click(); toast('Fichier téléchargé');
+}
+soumettre('#form-rgpd', async () => {
+  if($('#rg-confirm').value.trim().toUpperCase() !== 'SUPPRIMER'){ msg('#msg-rgpd', 'Écris SUPPRIMER pour confirmer.', 'erreur'); return; }
+  const { error } = await sb.rpc('supprimer_mon_compte'); if(error){ msg('#msg-rgpd', erreurLisible(error), 'erreur'); return; }
+  $('#dlg-rgpd').close(); localStorage.clear(); await sb.auth.signOut().catch(()=>{}); club = null; montrer('#ecran-login'); alert('Tes données et ton compte ont été supprimés. Merci pour ces saisons au club !');
+});
 
 /* ─── Boutique ─── */
 function ouvrirArticle(a){ $('#ar-id').value = a?.id || ''; $('#ar-nom').value = a?.nom || ''; $('#ar-prix').value = a?.prix ?? ''; $('#ar-tailles').value = a?.tailles || ''; $('#ar-photo').value = ''; $('#ar-photo-info').textContent = a?.photo_url ? 'Une photo est en place ; choisis un fichier pour la remplacer.' : ''; msg('#msg-article',''); $('#dlg-article').showModal(); }
