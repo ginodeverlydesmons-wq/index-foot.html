@@ -62,7 +62,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px soli
 .msg:empty{display:none}
 .vide{padding:24px;text-align:center;color:var(--encre-2);border:1px dashed var(--ligne);border-radius:var(--r);background:#fff}
 .tableau{overflow-x:auto;background:var(--surface);border:1px solid var(--ligne);border-radius:var(--r);margin-bottom:12px}
-table{width:100%;border-collapse:collapse;min-width:520px}
+table{width:100%;border-collapse:collapse}
 th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--ligne);vertical-align:middle}
 th{font-family:var(--display);font-size:1.05rem;text-transform:uppercase;letter-spacing:.03em;color:var(--encre-2);font-weight:600}
 tr:last-child td{border-bottom:0} td.act{white-space:nowrap;text-align:right}
@@ -84,6 +84,13 @@ tr:last-child td{border-bottom:0} td.act{white-space:nowrap;text-align:right}
 .kpi div{background:#fff;border:1px solid var(--ligne);border-radius:var(--r);padding:12px}
 .kpi b{display:block;font-family:var(--display);font-size:2rem;line-height:1}
 .kpi span{color:var(--encre-2);font-size:.9rem}
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.produit{background:#fff;border:1px solid var(--ligne);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.produit img{width:100%;aspect-ratio:1;object-fit:cover;background:#F8FAFC}
+.produit .sans{width:100%;aspect-ratio:1;display:grid;place-items:center;color:var(--encre-2);background:#F8FAFC;font-size:2.5rem}
+.produit .corps{padding:10px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.produit .prix{font-family:var(--display);font-size:1.4rem;color:var(--accent-2)}
+.tailles span{display:inline-block;border:1px solid var(--ligne);border-radius:999px;padding:1px 8px;font-size:.85rem;margin:2px 2px 0 0}
 .annonce{background:#fff;border:1px solid var(--ligne);border-radius:var(--r);padding:14px;margin-bottom:10px}
 .annonce h3{color:var(--encre);text-transform:none;letter-spacing:0;font-size:1.25rem}
 .annonce .meta{color:var(--encre-2);font-size:.85rem;margin-bottom:6px}
@@ -141,7 +148,7 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   </header>
   <main>
     <section class="onglet cache" id="onglet-foyer">
-      <div class="barre"><h2>Mon foyer</h2></div><div id="zone-foyer"></div>
+      <div class="barre"><h2 id="titre-foyer">Mon foyer</h2></div><div id="zone-foyer"></div>
     </section>
     <section class="onglet cache" id="onglet-familles">
       <div class="barre"><h2>Familles et joueurs <span class="compteur" id="cpt-familles"></span></h2><button class="btn principal" type="button" data-ouvrir="famille">Ajouter une famille</button></div>
@@ -207,6 +214,7 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   <div class="ligne"><div><label for="p-naissance">Date de naissance</label><input id="p-naissance" type="date"></div>
     <div><label for="p-sexe">Sexe</label><select id="p-sexe"><option value="">—</option><option value="F">Fille / femme</option><option value="M">Garçon / homme</option></select></div></div>
   <div class="ligne"><div><label for="p-licence">N° de licence FFF (si connu)</label><input id="p-licence"></div><div><label for="p-maillot">Numéro de maillot</label><input id="p-maillot" type="number" min="0" max="99"></div></div>
+  <label for="p-email">Email du joueur (pour qu'il se connecte à l'appli, en lecture seule)</label><input id="p-email" type="email" placeholder="prenom@exemple.fr">
   <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-personne"></div></form></dialog>
 
 <dialog id="dlg-licence"><form method="dialog" id="form-licence"><h2>Licence <span id="l-qui"></span></h2><input type="hidden" id="l-personne">
@@ -246,7 +254,9 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
 
 <dialog id="dlg-article"><form method="dialog" id="form-article"><h2>Article de la boutique</h2><input type="hidden" id="ar-id">
   <label for="ar-nom">Nom</label><input id="ar-nom" required placeholder="Ex. T-shirt du club">
-  <div class="ligne"><div><label for="ar-prix">Prix (€)</label><input id="ar-prix" type="number" step="0.01" min="0" required></div><div><label for="ar-tailles">Tailles (séparées par des virgules)</label><input id="ar-tailles" placeholder="8 ans, 10 ans, S, M, L"></div></div>
+  <div class="ligne"><div><label for="ar-prix">Prix (€)</label><input id="ar-prix" type="number" step="0.01" min="0" required></div><div><label for="ar-tailles">Tailles proposées (séparées par des virgules)</label><input id="ar-tailles" placeholder="6 ans, 8 ans, 10 ans, S, M, L, XL"></div></div>
+  <label for="ar-photo">Photo (PNG ou JPG, 3 Mo max)</label><input id="ar-photo" type="file" accept="image/png,image/jpeg,image/webp">
+  <p class="compteur" id="ar-photo-info"></p>
   <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-article"></div></form></dialog>
 
 <dialog id="dlg-commande"><form method="dialog" id="form-commande"><h2>Commander <span id="c-nom"></span></h2><input type="hidden" id="c-article">
@@ -295,9 +305,10 @@ const nomP = p => p ? `${p.prenom} ${p.nom}` : '?';
 
 /* ─── État ─── */
 let sb, session = null, club = null, clubs = [], role = 'parent';
-let familles = [], personnes = [], equipes = [], licences = [], membres = [], matchs = [], entrainements = [], presences = [], covoits = [], annonces = [], articles = [], commandes = [], mesFamillesIds = [];
+let familles = [], personnes = [], equipes = [], licences = [], membres = [], matchs = [], entrainements = [], presences = [], covoits = [], annonces = [], articles = [], commandes = [], mesFamillesIds = [], mesPersonnesIds = [];
 const staff = () => ['admin','bureau','coach'].includes(role);
-const mesPersonnes = () => staff() ? personnes : personnes.filter(p => mesFamillesIds.includes(p.famille_id));
+const parent = () => role === 'parent';
+const mesPersonnes = () => staff() ? personnes : role === 'joueur' ? personnes.filter(p => mesPersonnesIds.includes(p.id)) : personnes.filter(p => mesFamillesIds.includes(p.famille_id));
 const saisonSel = () => $('#saison').value || saisonCourante();
 
 /* ─── Démarrage ─── */
@@ -326,6 +337,7 @@ $$('[data-changer-club]').forEach(b => b.addEventListener('click', () => { club 
 
 /* ─── Clubs et rôle ─── */
 async function chargerClubs(){
+  try { await sb.rpc('rattacher_par_email'); } catch(e){}
   const [c, m] = await Promise.all([ sb.from('clubs').select('id, nom, ville, lien_paiement, logo_url').order('nom'), sb.from('membres_club').select('club_id, role').eq('user_id', session.user.id) ]);
   if(c.error){ montrer('#ecran-club'); msg('#msg-club', erreurLisible(c.error), 'erreur'); return; }
   clubs = (c.data || []).map(x => ({ ...x, role: (m.data || []).find(y => y.club_id === x.id)?.role || 'parent' }));
@@ -335,7 +347,7 @@ async function chargerClubs(){
 }
 function afficherChoixClub(){
   montrer('#ecran-club');
-  $('#club-sous').textContent = clubs.length ? 'Choisis le club à ouvrir.' : 'Entre le code famille donné par ton club, ou crée un club si tu le gères.';
+  $('#club-sous').textContent = clubs.length ? 'Choisis le club à ouvrir.' : 'Ton email n\'est pas encore connu du club. Entre le code famille donné par ton club, ou demande au club d\'ajouter ton email sur ta fiche.';
   $('#liste-clubs').innerHTML = clubs.map(c => `<button class="btn second" type="button" style="display:block;width:100%;margin:6px 0;text-align:left" data-club="${c.id}">${c.logo_url ? `<img src="${esc(c.logo_url)}" alt="" style="height:28px;vertical-align:middle;margin-right:8px">` : ''}${esc(c.nom)} <span class="compteur">— ${esc(c.role)}</span></button>`).join('');
   $$('#liste-clubs [data-club]').forEach(b => b.addEventListener('click', () => ouvrirClub(clubs.find(c => c.id === b.dataset.club))));
 }
@@ -354,12 +366,12 @@ $('#form-club').addEventListener('submit', async ev => {
 async function ouvrirClub(c){
   club = c; role = c.role; localStorage.setItem('club_id', c.id);
   $('#titre-club').textContent = c.nom; document.title = c.nom; afficherLogo();
-  $('#qui-email').textContent = `${session.user.email} · ${role}`;
+  $('#qui-email').textContent = `${session.user.email} · ${({admin:'admin',bureau:'bureau',coach:'coach',parent:'parent',joueur:'joueur'})[role] || role}`;
   const s = saisonCourante(), opts = [s, `${+s.slice(0,4)-1}-${+s.slice(0,4)}`, `${+s.slice(0,4)+1}-${+s.slice(0,4)+2}`];
   ['#saison','#saison-stats'].forEach(id => $(id).innerHTML = opts.map(x => `<option ${x===s?'selected':''}>${x}</option>`).join(''));
   $$('.staff-seul').forEach(el => el.classList.toggle('cache', !staff()));
   const onglets = staff() ? [['familles','Familles'],['licences','Licences'],['equipes','Équipes'],['agenda','Agenda'],['infos','Infos'],['boutique','Boutique'],['stats','Stats'],['acces','Accès']]
-                          : [['foyer','Mon foyer'],['agenda','Agenda'],['infos','Infos'],['boutique','Boutique']];
+                          : [['foyer', role === 'joueur' ? 'Ma fiche' : 'Mon foyer'],['agenda','Agenda'],['infos','Infos'],['boutique','Boutique']];
   $('#nav').innerHTML = onglets.map(([k,l],i) => `<button role="tab" aria-selected="${i===0}" data-onglet="${k}">${l}</button>`).join('');
   $$('#nav [data-onglet]').forEach(b => b.addEventListener('click', () => allerOnglet(b.dataset.onglet)));
   allerOnglet(onglets[0][0]); montrer('#app'); await toutRecharger();
@@ -374,11 +386,11 @@ async function toutRecharger(){
   const q = (t, o='') => sb.from(t).select('*').eq('club_id', club.id).order(o || 'cree_le');
   const r = await Promise.all([ q('familles','nom'), q('personnes','nom'), q('equipes','nom'), q('licences'), sb.from('membres_club').select('user_id, role').eq('club_id', club.id),
     q('matchs','date_match'), q('entrainements','date_seance'), q('presences','maj_le'), q('covoiturages'), q('annonces'), q('articles','nom'), q('commandes'),
-    sb.from('acces_famille').select('famille_id').eq('user_id', session.user.id) ]);
+    sb.from('acces_famille').select('famille_id, personne_id').eq('user_id', session.user.id) ]);
   const fatal = r.slice(0,4).find(x => x.error); if(fatal){ alert('Chargement impossible : ' + erreurLisible(fatal.error)); return; }
   [familles, personnes, equipes, licences] = r.slice(0,4).map(x => x.data || []); membres = r[4].data || [];
   [matchs, entrainements, presences, covoits, annonces, articles, commandes] = r.slice(5,12).map(x => x.data || []);
-  mesFamillesIds = (r[12].data || []).map(x => x.famille_id);
+  mesFamillesIds = (r[12].data || []).map(x => x.famille_id); mesPersonnesIds = (r[12].data || []).map(x => x.personne_id).filter(Boolean);
   const manque = r.slice(5).find(x => x.error); if(manque) $('#zone-agenda').innerHTML = `<div class="vide">${erreurLisible(manque.error)}</div>`;
   rendreTout();
 }
@@ -456,15 +468,14 @@ function carteJoueur(p, f){
   return `<tr><td>${esc(p.prenom)} <b>${esc(p.nom)}</b>${p.numero_maillot != null ? ` <span class="cat">#${p.numero_maillot}</span>` : ''}</td>
     <td>${p.date_naissance ? new Date(p.date_naissance).toLocaleDateString('fr-FR') : ''}</td>
     <td><span class="cat">${categorieProposee(p.date_naissance, p.sexe, saison)}</span> ${eq ? '<span class="compteur">' + esc(eq.nom) + '</span>' : ''}</td>
-    <td>${lic ? `<span class="puce ${lic.statut}">${lic.statut}</span> ${lic.statut==='demandee' ? lienPaiement(lic, f.email) : ''}` : `<button class="btn second petit" data-licencier="${p.id}">Licencier ${saison}</button>`}</td>
-    <td class="act"><button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button>${staff() ? ` <button class="btn second petit" data-supprimer-personne="${p.id}">Supprimer</button>` : ''}</td></tr>`;
+    <td>${lic ? `<span class="puce ${lic.statut}">${lic.statut}</span> ${lic.statut==='demandee' && role !== 'joueur' ? lienPaiement(lic, f.email) : ''}` : (role === 'joueur' ? '<span class="compteur">pas de licence (demande à tes parents)</span>' : `<button class="btn second petit" data-licencier="${p.id}">Licencier ${saison}</button>`)}</td>
+    <td class="act">${role !== 'joueur' ? `<button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button>` : ''}${staff() ? ` <button class="btn second petit" data-supprimer-personne="${p.id}">Supprimer</button>` : ''}</td></tr>`;
 }
 function tableFamille(f){
-  const ps = personnes.filter(p => p.famille_id === f.id);
-  return `<div class="tableau"><table><thead><tr>
-    <th colspan="4">${esc(f.nom)} <span class="compteur">${esc(f.email||'')} ${esc(f.telephone||'')}</span> ${staff() ? `&nbsp; code famille <span class="code">${esc(f.code_acces||'')}</span>` : ''}</th>
-    <th class="act"><button class="btn second petit" data-ouvrir="personne" data-famille="${f.id}">Ajouter un joueur</button>
-      ${staff() ? `<button class="btn second petit" data-modifier-famille="${f.id}">Modifier</button> <button class="btn second petit" data-supprimer-famille="${f.id}">Supprimer</button>` : ''}</th></tr></thead>
+  const ps = personnes.filter(p => p.famille_id === f.id && (role !== 'joueur' || mesPersonnesIds.includes(p.id))), peutModifier = staff() || role === 'parent';
+  return `<div class="tableau"><div class="titre-tableau"><div><b>${esc(f.nom)}</b> <span class="compteur">${esc(f.email||'')} ${esc(f.telephone||'')}</span>${staff() ? ` &nbsp;code <span class="code">${esc(f.code_acces||'')}</span>` : ''}</div>
+    <div>${peutModifier ? `<button class="btn second petit" data-ouvrir="personne" data-famille="${f.id}">Ajouter un joueur</button> <button class="btn second petit" data-modifier-famille="${f.id}">Modifier</button>` : ''}${staff() ? ` <button class="btn second petit" data-supprimer-famille="${f.id}">Supprimer</button>` : ''}</div></div>
+    <table><thead><tr><th>Joueur</th><th>Né le</th><th>Catégorie</th><th>Licence</th><th></th></tr></thead>
     <tbody>${ps.length ? ps.map(p => carteJoueur(p, f)).join('') : '<tr><td colspan="5" class="compteur">Aucun joueur.</td></tr>'}</tbody></table></div>`;
 }
 function rendreFamilles(){
@@ -473,7 +484,7 @@ function rendreFamilles(){
   $('#zone-familles').innerHTML = familles.length ? familles.map(tableFamille).join('') : '<div class="vide">Aucune famille. Ajoute la première.</div>';
 }
 function rendreFoyer(){
-  if(staff()) return;
+  if(staff()) return; $('#titre-foyer').textContent = role === 'joueur' ? 'Ma fiche' : 'Mon foyer';
   const mf = familles.filter(f => mesFamillesIds.includes(f.id));
   $('#zone-foyer').innerHTML = mf.length ? mf.map(tableFamille).join('') + `<p class="compteur">Saison affichée : <select id="saison-foyer" style="width:auto">${$('#saison').innerHTML}</select></p>` : '<div class="vide">Aucune famille rattachée à ton compte.</div>';
   const sf = $('#saison-foyer'); if(sf){ sf.value = $('#saison').value; sf.addEventListener('change', () => { $('#saison').value = sf.value; rendreTout(); }); }
@@ -492,12 +503,12 @@ function ouvrirPersonne(p, familleId){
   $('#dlg-personne-titre').textContent = p ? 'Modifier le joueur' : 'Nouveau joueur';
   $('#p-id').value = p?.id || ''; $('#p-famille').value = p?.famille_id || familleId || '';
   $('#p-prenom').value = p?.prenom || ''; $('#p-nom').value = p?.nom || (familles.find(f => f.id === familleId)?.nom || '');
-  $('#p-naissance').value = p?.date_naissance || ''; $('#p-sexe').value = p?.sexe || ''; $('#p-licence').value = p?.num_licence || ''; $('#p-maillot').value = p?.numero_maillot ?? '';
+  $('#p-naissance').value = p?.date_naissance || ''; $('#p-sexe').value = p?.sexe || ''; $('#p-licence').value = p?.num_licence || ''; $('#p-maillot').value = p?.numero_maillot ?? ''; $('#p-email').value = p?.email || '';
   msg('#msg-personne',''); $('#dlg-personne').showModal();
 }
 soumettre('#form-personne', async () => {
   const ligne = { club_id: club.id, famille_id: $('#p-famille').value || null, prenom: $('#p-prenom').value.trim(), nom: $('#p-nom').value.trim(), date_naissance: $('#p-naissance').value || null,
-    sexe: $('#p-sexe').value || null, num_licence: $('#p-licence').value.trim() || null, numero_maillot: $('#p-maillot').value === '' ? null : parseInt($('#p-maillot').value,10) }, id = $('#p-id').value;
+    sexe: $('#p-sexe').value || null, num_licence: $('#p-licence').value.trim() || null, email: $('#p-email').value.trim().toLowerCase() || null, numero_maillot: $('#p-maillot').value === '' ? null : parseInt($('#p-maillot').value,10) }, id = $('#p-id').value;
   const { error } = id ? await sb.from('personnes').update(ligne).eq('id', id) : await sb.from('personnes').insert(ligne);
   if(error){ msg('#msg-personne', erreurLisible(error), 'erreur'); return; } $('#dlg-personne').close(); await toutRecharger();
 });
@@ -542,8 +553,8 @@ function rendreEquipes(){
   if(!staff()) return; $('#cpt-equipes').textContent = equipes.length || '';
   if(!equipes.length){ $('#zone-equipes').innerHTML = '<div class="vide">Aucune équipe. Crée-les, puis rattache les licences depuis l\'onglet Licences.</div>'; return; }
   $('#zone-equipes').innerHTML = equipes.map(e => { const js = joueursEquipe(e);
-    return `<div class="tableau"><table><thead><tr><th colspan="3">${esc(e.nom)} <span class="cat">${esc(e.categorie)}</span> <span class="compteur">${esc(e.saison)} · ${js.length} joueur${js.length>1?'s':''}</span></th>
-      <th class="act"><button class="btn second petit" data-supprimer-equipe="${e.id}">Supprimer</button></th></tr></thead>
+    return `<div class="tableau"><div class="titre-tableau"><div><b>${esc(e.nom)}</b> <span class="cat">${esc(e.categorie)}</span> <span class="compteur">${esc(e.saison)} · ${js.length} joueur${js.length>1?'s':''}</span></div><button class="btn second petit" data-supprimer-equipe="${e.id}">Supprimer</button></div>
+      <table><thead><tr><th>N°</th><th>Joueur</th><th>G/F</th><th></th></tr></thead>
       <tbody>${js.length ? js.map(p => `<tr><td style="width:60px"><span class="cat">${p.numero_maillot != null ? '#' + p.numero_maillot : '—'}</span></td><td>${esc(nomP(p))}</td><td>${p.sexe === 'F' ? 'F' : p.sexe === 'M' ? 'G' : ''}</td><td class="act"><button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button></td></tr>`).join('') : '<tr><td colspan="4" class="compteur">Aucun joueur rattaché (onglet Licences → colonne Équipe).</td></tr>'}</tbody></table></div>`; }).join('');
 }
 
@@ -603,7 +614,7 @@ function blocCovoit(m){
   const cs = covoits.filter(c => c.match_id === m.id), total = cs.reduce((s,c) => s + c.places, 0);
   const mien = cs.find(c => mesFamillesIds.includes(c.famille_id));
   return `<div class="bloc"><b>🚗 Covoiturage :</b> ${cs.length ? `${total} place${total>1?'s':''} proposée${total>1?'s':''} — ` + cs.map(c => { const f = familles.find(x => x.id === c.famille_id) || {}; return `${esc(f.nom || 'Famille')} (${c.places})${c.note ? ' <span class="compteur">' + esc(c.note) + '</span>' : ''}`; }).join(', ') : '<span class="compteur">personne pour l\'instant</span>'}
-    ${!staff() && mesFamillesIds.length ? ` <button class="btn second petit" data-covoit="${m.id}">${mien ? 'Modifier ma proposition' : 'Proposer des places'}</button>${mien ? ` <button class="btn second petit" data-supprimer-covoit="${mien.id}">Retirer</button>` : ''}` : ''}</div>`;
+    ${parent() && mesFamillesIds.length ? ` <button class="btn second petit" data-covoit="${m.id}">${mien ? 'Modifier ma proposition' : 'Proposer des places'}</button>${mien ? ` <button class="btn second petit" data-supprimer-covoit="${mien.id}">Retirer</button>` : ''}` : ''}</div>`;
 }
 function ouvrirCovoit(matchId){
   const m = matchs.find(x => x.id === matchId), mien = covoits.find(c => c.match_id === matchId && mesFamillesIds.includes(c.famille_id));
@@ -656,9 +667,17 @@ function rendreInfos(){
 }
 
 /* ─── Boutique ─── */
-function ouvrirArticle(a){ $('#ar-id').value = a?.id || ''; $('#ar-nom').value = a?.nom || ''; $('#ar-prix').value = a?.prix ?? ''; $('#ar-tailles').value = a?.tailles || ''; msg('#msg-article',''); $('#dlg-article').showModal(); }
+function ouvrirArticle(a){ $('#ar-id').value = a?.id || ''; $('#ar-nom').value = a?.nom || ''; $('#ar-prix').value = a?.prix ?? ''; $('#ar-tailles').value = a?.tailles || ''; $('#ar-photo').value = ''; $('#ar-photo-info').textContent = a?.photo_url ? 'Une photo est en place ; choisis un fichier pour la remplacer.' : ''; msg('#msg-article',''); $('#dlg-article').showModal(); }
 soumettre('#form-article', async () => {
   const ligne = { club_id: club.id, nom: $('#ar-nom').value.trim(), prix: parseFloat($('#ar-prix').value), tailles: $('#ar-tailles').value.trim() || null }, id = $('#ar-id').value;
+  const fichier = $('#ar-photo').files[0];
+  if(fichier){
+    if(fichier.size > 3*1024*1024){ msg('#msg-article', 'La photo dépasse 3 Mo.', 'erreur'); return; }
+    const ext = fichier.type === 'image/png' ? 'png' : fichier.type === 'image/webp' ? 'webp' : 'jpg', chemin = `${club.id}/${id || crypto.randomUUID()}.${ext}`;
+    const up = await sb.storage.from('boutique').upload(chemin, fichier, { upsert: true, contentType: fichier.type });
+    if(up.error){ msg('#msg-article', 'Photo refusée : ' + erreurLisible(up.error) + ' (le script 06_photos_boutique.sql est-il passé ?)', 'erreur'); return; }
+    ligne.photo_url = sb.storage.from('boutique').getPublicUrl(chemin).data.publicUrl + '?v=' + Date.now();
+  }
   const { error } = id ? await sb.from('articles').update(ligne).eq('id', id) : await sb.from('articles').insert(ligne);
   if(error){ msg('#msg-article', erreurLisible(error), 'erreur'); return; } $('#dlg-article').close(); await toutRecharger();
 });
@@ -676,8 +695,11 @@ soumettre('#form-commande', async () => {
 async function majCommande(statut, id){ const { error } = await sb.from('commandes').update({ statut }).eq('id', id); if(error) alert(erreurLisible(error)); else await toutRecharger(); }
 function rendreBoutique(){
   const prix = a => (+a.prix).toFixed(2).replace('.', ',') + ' €';
-  let html = articles.length ? `<div class="tableau"><table><thead><tr><th>Article</th><th>Prix</th><th>Tailles</th><th class="act"></th></tr></thead><tbody>` + articles.map(a => `<tr><td><b>${esc(a.nom)}</b></td><td>${prix(a)}</td><td>${esc(a.tailles || 'unique')}</td>
-    <td class="act"><button class="btn principal petit" data-commander="${a.id}">Commander</button>${staff() ? ` <button class="btn second petit" data-modifier-article="${a.id}">Modifier</button> <button class="btn second petit" data-supprimer-article="${a.id}">Supprimer</button>` : ''}</td></tr>`).join('') + '</tbody></table></div>' : '<div class="vide">Aucun article dans la boutique.</div>';
+  const tailles = a => (a.tailles || '').split(',').map(s => s.trim()).filter(Boolean);
+  let html = articles.length ? '<div class="grille">' + articles.map(a => `<div class="produit">${a.photo_url ? `<img src="${esc(a.photo_url)}" alt="${esc(a.nom)}" loading="lazy">` : '<div class="sans">👕</div>'}
+    <div class="corps"><b>${esc(a.nom)}</b><span class="prix">${prix(a)}</span>
+      <div class="tailles">${tailles(a).length ? tailles(a).map(t => `<span>${esc(t)}</span>`).join('') : '<span>Taille unique</span>'}</div>
+      <div class="actions" style="margin-top:auto">${role !== 'joueur' ? `<button class="btn principal petit" data-commander="${a.id}">Commander</button>` : ''}${staff() ? ` <button class="btn second petit" data-modifier-article="${a.id}">Modifier</button> <button class="btn second petit" data-supprimer-article="${a.id}">Supprimer</button>` : ''}</div></div></div>`).join('') + '</div>' : '<div class="vide">Aucun article dans la boutique.</div>';
   const cs = commandes.filter(c => staff() || mesFamillesIds.includes(c.famille_id)).sort((a,b) => b.cree_le.localeCompare(a.cree_le));
   if(cs.length) html += `<h3 style="margin:16px 0 8px">${staff() ? 'Commandes' : 'Mes commandes'}</h3><div class="tableau"><table><thead><tr><th>Date</th><th>Famille</th><th>Article</th><th>Qté</th><th>Total</th><th>Statut</th><th class="act"></th></tr></thead><tbody>` + cs.map(c => {
     const a = articles.find(x => x.id === c.article_id) || {}, f = familles.find(x => x.id === c.famille_id) || {};
