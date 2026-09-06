@@ -127,6 +127,9 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
 #menu-plus{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--ligne);padding:8px 8px calc(64px + env(safe-area-inset-bottom));z-index:7;display:grid;grid-template-columns:1fr 1fr;gap:6px}
 #menu-plus button{padding:12px;border:1px solid var(--ligne);background:#F8FAFC;border-radius:var(--r);font-family:var(--display);font-size:1.1rem;text-transform:uppercase}
 @media (min-width:641px){#menu-plus{display:none!important} nav.onglets .plus{display:none}}
+#chargement{position:fixed;top:0;left:0;right:0;height:3px;background:var(--accent);z-index:20;animation:barre 1s linear infinite;background:linear-gradient(90deg,transparent,var(--accent),transparent);background-size:50% 100%}
+@keyframes barre{from{background-position:-50% 0}to{background-position:150% 0}}
+#hors-ligne{background:#B45309;color:#fff;text-align:center;padding:8px 12px;font-weight:600}
 #bandeau-urgent{background:#B91C1C;color:#fff;padding:10px 16px;text-align:center;font-weight:600} #bandeau-urgent a{color:#fff}
 #bandeau-install{position:fixed;bottom:0;left:0;right:0;background:var(--encre);color:#fff;padding:10px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;z-index:5}
 </style>
@@ -163,7 +166,9 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   </form>
 </div></div>
 
+<div id="chargement" class="cache"></div>
 <div id="app" class="cache">
+  <div id="hors-ligne" class="cache">📴 Pas de connexion : tu vois les dernières données chargées. Les actions seront possibles au retour du réseau.</div>
   <div id="bandeau-urgent" class="cache"></div>
   <header>
     <div class="club">
@@ -264,7 +269,8 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
   <label for="m-equipe">Équipe</label><select id="m-equipe" required></select>
   <div class="ligne"><div><label for="m-date">Date</label><input id="m-date" type="date" required></div><div><label for="m-heure">Heure</label><input id="m-heure" type="time"></div></div>
   <div class="ligne"><div><label for="m-adversaire">Adversaire</label><input id="m-adversaire" required></div><div><label for="m-lieu-type">Domicile / extérieur</label><select id="m-lieu-type"><option value="true">Domicile</option><option value="false">Extérieur</option></select></div></div>
-  <label for="m-lieu">Lieu (stade, adresse)</label><input id="m-lieu" placeholder="Ex. Stade municipal, rue du Stade, 72440 Tresson">
+  <div class="ligne"><div><label for="m-lieu">Lieu (stade, adresse ou ville)</label><input id="m-lieu" placeholder="Ex. Stade municipal, 72440 Tresson"></div>
+  <div><label for="m-terrain">Terrain</label><select id="m-terrain"><option value="">—</option><option value="herbe">Herbe (crampons vissés/moulés)</option><option value="synthetique">Synthétique (moulés)</option><option value="stabilise">Stabilisé</option><option value="salle">Salle (futsal)</option></select></div></div>
   <div class="ligne"><div><label for="m-nous">Buts pour nous</label><input id="m-nous" type="number" min="0" placeholder="— si pas joué"></div><div><label for="m-eux">Buts pour eux</label><input id="m-eux" type="number" min="0"></div></div>
   <label for="m-lavage">Qui lave les maillots</label><select id="m-lavage"><option value="">—</option></select>
   <label>Joueurs convoqués (qui joue)</label><div id="m-convoques" class="tailles"></div>
@@ -301,7 +307,9 @@ dialog::backdrop{background:rgba(20,33,61,.55)} dialog form{padding:22px} dialog
 
 <dialog id="dlg-covoit"><form method="dialog" id="form-covoit"><h2>Covoiturage</h2><input type="hidden" id="cv-match">
   <p class="compteur" id="cv-info"></p>
-  <label for="cv-places">Je peux emmener des joueurs : nombre de places (en plus de mes enfants)</label><input id="cv-places" type="number" min="0" max="8" value="0">
+  <label for="cv-famille" id="lbl-cv-famille">Famille</label><select id="cv-famille"></select>
+  <label for="cv-conducteur">Qui conduit</label><input id="cv-conducteur" placeholder="Ex. Papa de Gino, Mme Dupont">
+  <label for="cv-places">Nombre de places dans la voiture (en plus des enfants du conducteur)</label><input id="cv-places" type="number" min="0" max="8" value="0">
   <label for="cv-note">Note</label><input id="cv-note" placeholder="Ex. Départ 13h de la salle des fêtes">
   <div class="actions"><button class="btn principal" value="ok">Enregistrer</button><button class="btn second" value="annuler" formnovalidate>Annuler</button></div><div class="msg" id="msg-covoit"></div></form></dialog>
 
@@ -425,17 +433,23 @@ function allerOnglet(k){
 
 /* ─── Chargement ─── */
 async function toutRecharger(){
+  $('#chargement').classList.remove('cache');
+  try {
   const q = (t, o='') => sb.from(t).select('*').eq('club_id', club.id).order(o || 'cree_le');
   const r = await Promise.all([ q('familles','nom'), q('personnes','nom'), q('equipes','nom'), q('licences'), sb.from('membres_club').select('user_id, role').eq('club_id', club.id),
     q('matchs','date_match'), q('entrainements','date_seance'), q('presences','maj_le'), q('covoiturages'), q('annonces'), q('articles','nom'), q('commandes'),
     sb.from('acces_famille').select('famille_id, personne_id').eq('user_id', session.user.id) ]);
-  const fatal = r.slice(0,4).find(x => x.error); if(fatal){ alert('Chargement impossible : ' + erreurLisible(fatal.error)); return; }
+  const fatal = r.slice(0,4).find(x => x.error); if(fatal){ toast('Chargement impossible : ' + erreurLisible(fatal.error), true); return; }
   [familles, personnes, equipes, licences] = r.slice(0,4).map(x => x.data || []); membres = r[4].data || [];
   [matchs, entrainements, presences, covoits, annonces, articles, commandes] = r.slice(5,12).map(x => x.data || []);
   mesFamillesIds = (r[12].data || []).map(x => x.famille_id); mesPersonnesIds = (r[12].data || []).map(x => x.personne_id).filter(Boolean);
   const manque = r.slice(5).find(x => x.error); if(manque) $('#zone-agenda').innerHTML = `<div class="vide">${erreurLisible(manque.error)}</div>`;
   rendreTout();
+  } catch(e){ toast(navigator.onLine ? 'Erreur de chargement : ' + erreurLisible(e) : 'Pas de connexion', true); }
+  finally { $('#chargement').classList.add('cache'); }
 }
+function majReseau(){ $('#hors-ligne').classList.toggle('cache', navigator.onLine); if(navigator.onLine && club) toutRecharger(); }
+window.addEventListener('online', majReseau); window.addEventListener('offline', majReseau);
 function rendreTout(){ rendreFoyer(); rendreFamilles(); rendreLicences(); rendreEquipes(); rendreAgenda(); rendreInfos(); rendreBoutique(); rendreStats(); rendreAcces(); rendreNotifs(); }
 $('#saison').addEventListener('change', rendreTout); $('#saison-stats').addEventListener('change', rendreStats);
 
@@ -464,7 +478,7 @@ document.addEventListener('click', ev => {
   if(d.modifierEntr) ouvrirEntrainement(entrainements.find(x => x.id === d.modifierEntr));
   if(d.supprimerEntr) supprimer('entrainements', d.supprimerEntr, 'Supprimer cet entraînement ?');
   if(d.presence) presence(d.presence, d.type, d.ref, d.personne);
-  if(d.covoit) ouvrirCovoit(d.covoit);
+  if(d.covoit) ouvrirCovoit(d.covoit, d.covoitId);
   if(d.supprimerCovoit) supprimer('covoiturages', d.supprimerCovoit, 'Retirer ta proposition de covoiturage ?');
   if(d.ouvrir === 'annonce') ouvrirAnnonce();
   if(d.supprimerAnnonce) supprimer('annonces', d.supprimerAnnonce, 'Supprimer cette info ?');
@@ -599,6 +613,12 @@ function exportCsv(){
 }
 
 /* ─── Équipes ─── */
+function assiduite(p, e){
+  const auj = aujourdhui(), ents = entrainements.filter(t => t.equipe_id === e.id && t.date_seance < auj);
+  const ePres = ents.filter(t => presences.some(x => x.type === 'entrainement' && x.ref_id === t.id && x.personne_id === p.id && x.statut === 'present')).length;
+  const conv = matchs.filter(m => m.equipe_id === e.id && m.date_match < auj && (m.convoques || []).includes(p.id)).length;
+  return { ePres, eTot: ents.length, conv };
+}
 const joueursEquipe = e => licences.filter(l => l.equipe_id === e.id).map(l => personnes.find(p => p.id === l.personne_id)).filter(Boolean).sort((a,b) => (a.numero_maillot ?? 999) - (b.numero_maillot ?? 999));
 function ouvrirEquipe(e){ $('#dlg-equipe-titre').textContent = e ? 'Modifier l\'équipe' : 'Nouvelle équipe'; $('#e-id').value = e?.id || ''; $('#e-nom').value = e?.nom || ''; $('#e-whatsapp').value = e?.lien_whatsapp || ''; $('#e-saison').value = e?.saison || saisonSel(); $('#e-cat').innerHTML = CATEGORIES.map(c => `<option ${e?.categorie===c?'selected':''}>${c}</option>`).join(''); msg('#msg-equipe',''); $('#dlg-equipe').showModal(); }
 soumettre('#form-equipe', async () => {
@@ -615,7 +635,7 @@ function rendreEquipes(){
   $('#zone-equipes').innerHTML = equipes.map(e => { const js = joueursEquipe(e);
     return `<div class="tableau"><div class="titre-tableau"><div><b>${esc(e.nom)}</b> <span class="cat">${esc(e.categorie)}</span> <span class="compteur">${esc(e.saison)} · ${js.length} joueur${js.length>1?'s':''}</span> ${btnWhatsapp(e)}</div><div><button class="btn second petit" data-modifier-equipe="${e.id}">Modifier</button> <button class="btn second petit" data-supprimer-equipe="${e.id}">Supprimer</button></div></div>
       <table><thead><tr><th>N°</th><th>Joueur</th><th>G/F</th><th></th></tr></thead>
-      <tbody>${js.length ? js.map(p => `<tr><td style="width:60px"><span class="cat">${p.numero_maillot != null ? '#' + p.numero_maillot : '—'}</span></td><td>${esc(nomP(p))}</td><td>${p.sexe === 'F' ? 'F' : p.sexe === 'M' ? 'G' : ''}</td><td class="act"><button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button></td></tr>`).join('') : '<tr><td colspan="4" class="compteur">Aucun joueur rattaché (onglet Licences → colonne Équipe).</td></tr>'}</tbody></table></div>`; }).join('');
+      <tbody>${js.length ? js.map(p => { const st = assiduite(p, e); return `<tr><td style="width:60px"><span class="cat">${p.numero_maillot != null ? '#' + p.numero_maillot : '—'}</span></td><td>${esc(nomP(p))}</td><td>${p.sexe === 'F' ? 'F' : p.sexe === 'M' ? 'G' : ''} <span class="compteur">· entraînements ${st.ePres}/${st.eTot} · matchs joués ${st.conv}</span></td><td class="act"><button class="btn second petit" data-modifier-personne="${p.id}">Modifier</button></td></tr>`; }).join('') : '<tr><td colspan="4" class="compteur">Aucun joueur rattaché (onglet Licences → colonne Équipe).</td></tr>'}</tbody></table></div>`; }).join('');
 }
 
 /* ─── Agenda : matchs + entraînements + présences + covoiturage ─── */
@@ -625,7 +645,7 @@ function ouvrirMatch(m){
   if(!equipes.length){ alert('Crée d\'abord une équipe.'); return; }
   $('#dlg-match-titre').textContent = m ? 'Modifier le match' : 'Nouveau match'; $('#m-id').value = m?.id || '';
   $('#m-equipe').innerHTML = optionsEquipes(m?.equipe_id); $('#m-date').value = m?.date_match || aujourdhui(); $('#m-heure').value = m?.heure || '';
-  $('#m-adversaire').value = m?.adversaire || ''; $('#m-lieu-type').value = m ? String(m.domicile) : 'true'; $('#m-lieu').value = m?.lieu || '';
+  $('#m-adversaire').value = m?.adversaire || ''; $('#m-lieu-type').value = m ? String(m.domicile) : 'true'; $('#m-lieu').value = m?.lieu || ''; $('#m-terrain').value = m?.terrain || '';
   $('#m-nous').value = m?.score_nous ?? ''; $('#m-eux').value = m?.score_eux ?? ''; $('#m-comm').value = m?.commentaire || '';
   const majLavage = () => { const e = equipes.find(x => x.id === $('#m-equipe').value), js = e ? joueursEquipe(e) : []; $('#m-lavage').innerHTML = '<option value="">—</option>' + js.map(p => `<option value="${p.id}" ${m?.lavage_personne_id===p.id?'selected':''}>${esc(nomP(p))}</option>`).join('');
     $('#m-convoques').innerHTML = js.length ? js.map(p => `<label style="display:inline-block;margin:0 10px 4px 0;font-weight:400"><input type="checkbox" value="${p.id}" style="width:auto;margin-right:4px" ${(m?.convoques||[]).includes(p.id)?'checked':''}>${esc(nomP(p))}</label>`).join('') : '<span class="compteur">Aucun joueur rattaché à cette équipe.</span>'; };
@@ -634,7 +654,7 @@ function ouvrirMatch(m){
 soumettre('#form-match', async () => {
   const n = $('#m-nous').value, x = $('#m-eux').value; if((n === '') !== (x === '')){ msg('#msg-match', 'Renseigne les deux scores, ou aucun.', 'erreur'); return; }
   const ligne = { club_id: club.id, equipe_id: $('#m-equipe').value, date_match: $('#m-date').value, heure: $('#m-heure').value || null, adversaire: $('#m-adversaire').value.trim(), domicile: $('#m-lieu-type').value === 'true',
-    lieu: $('#m-lieu').value.trim() || null, convoques: [...document.querySelectorAll('#m-convoques input:checked')].map(i => i.value), score_nous: n === '' ? null : +n, score_eux: x === '' ? null : +x, lavage_personne_id: $('#m-lavage').value || null, commentaire: $('#m-comm').value.trim() || null }, id = $('#m-id').value;
+    lieu: $('#m-lieu').value.trim() || null, terrain: $('#m-terrain').value || null, convoques: [...document.querySelectorAll('#m-convoques input:checked')].map(i => i.value), score_nous: n === '' ? null : +n, score_eux: x === '' ? null : +x, lavage_personne_id: $('#m-lavage').value || null, commentaire: $('#m-comm').value.trim() || null }, id = $('#m-id').value;
   const { error } = id ? await sb.from('matchs').update(ligne).eq('id', id) : await sb.from('matchs').insert(ligne);
   if(error){ msg('#msg-match', erreurLisible(error), 'erreur'); return; } $('#dlg-match').close(); await toutRecharger();
 });
@@ -680,15 +700,24 @@ function blocConvoques(m){
 function blocCovoit(m){
   const cs = covoits.filter(c => c.match_id === m.id), total = cs.reduce((s,c) => s + c.places, 0);
   const mien = cs.find(c => mesFamillesIds.includes(c.famille_id));
-  return `<div class="bloc"><b>🚗 Covoiturage :</b> ${cs.length ? `${total} place${total>1?'s':''} proposée${total>1?'s':''} — ` + cs.map(c => { const f = familles.find(x => x.id === c.famille_id) || {}; return `${esc(f.nom || 'Famille')} (${c.places})${c.note ? ' <span class="compteur">' + esc(c.note) + '</span>' : ''}`; }).join(', ') : '<span class="compteur">personne pour l\'instant</span>'}
-    ${parent() && mesFamillesIds.length ? ` <button class="btn second petit" data-covoit="${m.id}">${mien ? 'Modifier mes places' : '🚗 Je peux emmener'}</button>${mien ? ` <button class="btn second petit" data-supprimer-covoit="${mien.id}">Retirer</button>` : ''}` : ''}</div>`;
+  const ligne = c => { const f = familles.find(x => x.id === c.famille_id) || {};
+    return `<div class="pres">🚗 <b>${esc(c.conducteur || f.nom || 'Conducteur')}</b> — ${c.places} place${c.places>1?'s':''}${c.note ? ' <span class="compteur">' + esc(c.note) + '</span>' : ''}${staff() ? ` <button class="btn second petit" data-covoit="${m.id}" data-covoit-id="${c.id}">Modifier</button> <button class="btn second petit" data-supprimer-covoit="${c.id}">Retirer</button>` : ''}</div>`; };
+  return `<div class="bloc"><b>Covoiturage</b> ${cs.length ? `<span class="puce present">${total} place${total>1?'s':''} au total</span>` : '<span class="compteur">personne pour l\'instant</span>'}
+    ${staff() ? ` <button class="btn second petit" data-covoit="${m.id}">+ Ajouter une voiture</button>` : ''}
+    ${parent() && mesFamillesIds.length ? ` <button class="btn second petit" data-covoit="${m.id}">${mien ? 'Modifier ma voiture' : '🚗 Je peux emmener'}</button>${mien ? ` <button class="btn second petit" data-supprimer-covoit="${mien.id}">Retirer</button>` : ''}` : ''}
+    ${cs.map(ligne).join('')}</div>`;
 }
-function ouvrirCovoit(matchId){
-  const m = matchs.find(x => x.id === matchId), mien = covoits.find(c => c.match_id === matchId && mesFamillesIds.includes(c.famille_id));
-  $('#cv-match').value = matchId; $('#cv-info').textContent = `${dateFr(m.date_match)} · ${m.adversaire}`; $('#cv-places').value = mien?.places ?? 0; $('#cv-note').value = mien?.note || ''; msg('#msg-covoit',''); $('#dlg-covoit').showModal();
+function ouvrirCovoit(matchId, covoitId){
+  const m = matchs.find(x => x.id === matchId), existant = covoitId ? covoits.find(c => c.id === covoitId) : covoits.find(c => c.match_id === matchId && mesFamillesIds.includes(c.famille_id));
+  const fams = staff() ? familles : familles.filter(f => mesFamillesIds.includes(f.id));
+  $('#cv-famille').innerHTML = fams.map(f => `<option value="${f.id}" ${existant?.famille_id===f.id?'selected':''}>${esc(f.nom)}</option>`).join('');
+  $('#cv-famille').classList.toggle('cache', !staff()); $('#lbl-cv-famille').classList.toggle('cache', !staff());
+  $('#cv-match').value = matchId; $('#cv-info').textContent = `${dateFr(m.date_match)} · ${m.adversaire}`;
+  $('#cv-conducteur').value = existant?.conducteur || ''; $('#cv-places').value = existant?.places ?? 0; $('#cv-note').value = existant?.note || ''; msg('#msg-covoit',''); $('#dlg-covoit').showModal();
 }
 soumettre('#form-covoit', async () => {
-  const { error } = await sb.from('covoiturages').upsert({ club_id: club.id, match_id: $('#cv-match').value, famille_id: mesFamillesIds[0], places: +$('#cv-places').value, note: $('#cv-note').value.trim() || null }, { onConflict: 'match_id,famille_id' });
+  if(!$('#cv-conducteur').value.trim()){ msg('#msg-covoit', 'Indique qui conduit.', 'erreur'); return; }
+  const { error } = await sb.from('covoiturages').upsert({ club_id: club.id, match_id: $('#cv-match').value, famille_id: $('#cv-famille').value || mesFamillesIds[0], conducteur: $('#cv-conducteur').value.trim(), places: +$('#cv-places').value, note: $('#cv-note').value.trim() || null }, { onConflict: 'match_id,famille_id' });
   if(error){ msg('#msg-covoit', erreurLisible(error), 'erreur'); return; } $('#dlg-covoit').close(); await toutRecharger();
 });
 function partagerMatch(m){
@@ -709,7 +738,7 @@ function carteEvt(e){
   if(e.type === 'match'){ const m = e.o, lav = personnes.find(p => p.id === m.lavage_personne_id);
     return `<div class="evt match"><div class="tete"><span class="quand">⚽ ${dateFr(m.date_match)}${m.heure ? ' · ' + esc(m.heure) : ''}</span>${resultat(m)}</div>
       <div><b>${esc(eq.nom)}</b> ${m.domicile ? 'reçoit' : 'se déplace chez'} <b>${esc(m.adversaire)}</b> ${btnWhatsapp(eq)}</div>
-      <div class="detail">${m.lieu ? '📍 ' + (/^https?:/.test(m.lieu) ? `<a href="${esc(m.lieu)}" target="_blank">lieu</a>` : `<a href="https://www.google.com/maps/search/${encodeURIComponent(m.lieu)}" target="_blank" rel="noopener">${esc(m.lieu)}</a> · <a href="https://waze.com/ul?q=${encodeURIComponent(m.lieu)}&navigate=yes" target="_blank" rel="noopener">Waze</a>`) : (m.domicile ? '📍 À domicile' : '📍 Lieu à préciser')}${lav ? ' · 🧺 Maillots : ' + esc(nomP(lav)) : ''}${m.commentaire ? ' · ' + esc(m.commentaire) : ''}</div>${blocConvoques(m)}
+      <div class="detail">${m.lieu ? '📍 ' + (/^https?:/.test(m.lieu) ? `<a href="${esc(m.lieu)}" target="_blank">lieu</a>` : `<a href="https://www.google.com/maps/search/${encodeURIComponent(m.lieu)}" target="_blank" rel="noopener">${esc(m.lieu)}</a> · <a href="https://waze.com/ul?q=${encodeURIComponent(m.lieu)}&navigate=yes" target="_blank" rel="noopener">Waze</a>`) : (m.domicile ? '📍 À domicile' : '📍 Lieu à préciser')}${m.terrain ? ' · ' + ({herbe:'🌱 Herbe',synthetique:'🟩 Synthétique',stabilise:'🟫 Stabilisé',salle:'🏟️ Salle'})[m.terrain] : ''}${lav ? ' · 🧺 Maillots : ' + esc(nomP(lav)) : ''}${m.commentaire ? ' · ' + esc(m.commentaire) : ''}<span id="meteo-${m.id}"></span></div>${blocConvoques(m)}
       ${blocPresences('match', m.id, eq)}${blocCovoit(m)}
       ${staff() ? `<div class="actions"><button class="btn second petit" data-partager-match="${m.id}">📤 Envoyer sur WhatsApp</button><button class="btn second petit" data-modifier-match="${m.id}">${m.score_nous == null ? 'Saisir le score / modifier' : 'Modifier'}</button><button class="btn second petit" data-supprimer-match="${m.id}">Supprimer</button></div>` : ''}</div>`; }
   const t = e.o;
@@ -718,12 +747,30 @@ function carteEvt(e){
     ${blocPresences('entrainement', t.id, eq)}
     ${staff() ? `<div class="actions"><button class="btn second petit" data-modifier-entr="${t.id}">Modifier</button><button class="btn second petit" data-supprimer-entr="${t.id}">Supprimer</button></div>` : ''}</div>`;
 }
+const meteoCache = {};
+async function chargerMeteo(m){
+  const el = $('#meteo-' + m.id); if(!el || !m.lieu || /^https?:/.test(m.lieu)) return;
+  const auj = aujourdhui(), lim = new Date(Date.now() + 7*86400000).toISOString().slice(0,10); if(m.date_match < auj || m.date_match > lim) return;
+  const cle = m.lieu + '|' + m.date_match;
+  try {
+    if(!meteoCache[cle]){
+      const ville = m.lieu.match(/\d{5}\s*([^,]+)/)?.[1] || m.lieu.split(',').pop().trim();
+      const g = await (await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(ville)}&count=1&language=fr&countryCode=FR`)).json();
+      const loc = g.results?.[0]; if(!loc) return;
+      const w = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&daily=weather_code,temperature_2m_max,precipitation_probability_max&timezone=Europe%2FParis&start_date=${m.date_match}&end_date=${m.date_match}`)).json();
+      const code = w.daily?.weather_code?.[0], ico = code == null ? '' : code <= 1 ? '☀️' : code <= 3 ? '⛅' : code <= 48 ? '🌫️' : code <= 67 ? '🌧️' : code <= 77 ? '❄️' : code <= 82 ? '🌦️' : '⛈️';
+      meteoCache[cle] = code == null ? '' : ` · ${ico} ${Math.round(w.daily.temperature_2m_max[0])}°C, pluie ${w.daily.precipitation_probability_max[0]} %`;
+    }
+    el.textContent = meteoCache[cle];
+  } catch(e){}
+}
 function rendreAgenda(){
   const ev = evenements(), auj = aujourdhui(), futurs = ev.filter(e => e.date >= auj), passes = ev.filter(e => e.date < auj).reverse().slice(0, 15);
   const joues = matchs.filter(m => m.score_nous != null), v = joues.filter(m => m.score_nous > m.score_eux).length, d = joues.filter(m => m.score_nous < m.score_eux).length;
   $('#cpt-agenda').textContent = joues.length ? `bilan ${v} V · ${joues.length-v-d} N · ${d} D` : '';
   if(!ev.length){ $('#zone-agenda').innerHTML = '<div class="vide">Rien de prévu pour l\'instant.</div>'; return; }
   $('#zone-agenda').innerHTML = (futurs.length ? '<h3>À venir</h3>' + futurs.map(carteEvt).join('') : '<div class="vide">Rien de prévu prochainement.</div>') + (passes.length ? '<h3 style="margin-top:18px">Derniers résultats et séances passées</h3>' + passes.map(carteEvt).join('') : '');
+  if(navigator.onLine) futurs.filter(e => e.type === 'match').forEach(e => chargerMeteo(e.o));
 }
 
 /* ─── Infos ─── */
